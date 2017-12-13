@@ -1,39 +1,61 @@
 (defconst emacs-start-time (current-time))
 
-(unless noninteractive
-  (message "Loading %s..." load-file-name))
+(setq message-log-max 16384
+      load-prefer-newer t)
 
-(setq message-log-max 16384)
+;;; Functions
 
 (eval-and-compile
+  (defsubst emacs-path (path)
+    (expand-file-name path user-emacs-directory))
+
+  (defsubst add-load-path (path)
+    (add-to-list 'load-path (emacs-path path)))
+
+  (defsubst lookup-password (host user port)
+    (require 'auth-source)
+    (funcall (plist-get (car (auth-source-search :host host :user user
+                                                 :type 'netrc :port port))
+                        :secret)))
+
+  (defun get-jobhours-string ()
+    (with-current-buffer (get-buffer-create "*scratch*")
+      (let ((str (shell-command-to-string "jobhours")))
+        (require 'ansi-color)
+        (ansi-color-apply (substring str 0 (1- (length str))))))))
+
+(defun save-all ()
+  (interactive)
+  (save-some-buffers t))
+
+;; (add-hook 'focus-out-hook 'save-all)
+
+;;; Environment
+
+(eval-when-compile
+  (require 'cl))
+
+(eval-and-compile
+  (require 'seq)
+
   (defconst emacs-environment (getenv "NIX_MYENV_NAME"))
 
-  (mapc #'(lambda (path)
-            (add-to-list 'load-path
-                         (expand-file-name path user-emacs-directory)))
-        '("site-lisp" "lisp/use-package" "lisp" ""))
-
-  (mapc #'(lambda (path) (add-to-list 'load-path path))
-        (directory-files (expand-file-name "site-lisp" user-emacs-directory)
-                         t "site-[A-Z0-9a-z-]+\\'"))
+  (mapc #'add-load-path
+        (append (directory-files (emacs-path "site-lisp") t
+                                 "site-[A-Z0-9a-z-]+\\'")
+                '("site-lisp" "lisp/use-package" "lisp" "")))
 
   (defun nix-read-environment (name)
-    (let ((script
-           (nth 0 (split-string
-                   (shell-command-to-string (concat "which load-env-" name))
-                   "\n"))))
-      (if (string= script "")
-          (error "Could not find environment %s" name)
-        (with-temp-buffer
-          (insert-file-contents-literally script)
-          (when (re-search-forward "^source \\(.+\\)$" nil t)
-            (let ((script2 (match-string 1)))
-              (with-temp-buffer
-                (insert-file-contents-literally script2)
-                (when (re-search-forward "^  nativeBuildInputs=\"\\(.+?\\)\""
-                                         nil t)
-                  (let ((inputs (split-string (match-string 1))))
-                    inputs)))))))))
+    (with-temp-buffer
+      (insert-file-contents-literally
+       (with-temp-buffer
+         (insert-file-contents-literally
+          (executable-find (concat "load-env-" name)))
+         (and (re-search-forward "^source \\(.+\\)$" nil t)
+              (match-string 1))))
+      (and (or (re-search-forward "^  nativeBuildInputs=\"\\(.+?\\)\"" nil t)
+               (re-search-forward "^  buildInputs=\"\\(.+?\\)\"" nil t))
+           (split-string (match-string 1)))))
 
   (when (executable-find "nix-env")
     (mapc #'(lambda (path)
@@ -42,17 +64,12 @@
                     (add-to-list 'load-path share))))
           (nix-read-environment emacs-environment)))
 
-  (eval-after-load 'advice
-    `(setq ad-redefinition-action 'accept))
+  (require 'use-package)
+  (setq use-package-verbose nil)
+  (setq use-package-expand-minimally t)
+  (setq use-package-compute-statistics nil))
 
-  (require 'cl)
-
-  (defvar use-package-verbose t)
-  (defvar use-package-expand-minimally t)
-  (setq use-package-compute-statistics nil)
-  (require 'use-package))
-
-(require 'bind-key)
+;;(require 'bind-key)
 (require 'diminish nil t)
 
 ;;; Utility macros and functions
@@ -115,768 +132,117 @@
 
 ;;; Enable disabled commands
 
-(setq disabled-command-function nil)
 
-
-(set-face-attribute 'region nil :background "#CDE7F0")
-(fset 'yes-or-no-p 'y-or-n-p)
 
 ;;; Configure libraries
 
 (eval-and-compile
   (add-to-list 'load-path (expand-file-name "lib" user-emacs-directory)))
 
-(use-package anaphora     :defer t :load-path "lib/anaphora")
-(use-package button-lock  :defer t :load-path "lib/button-lock")
+(use-package alert         :defer t  :load-path "lisp/alert")
+(use-package anaphora      :demand t :load-path "lib/anaphora")
+(use-package apiwrap       :defer t  :load-path "lib/apiwrap")
+(use-package asoc          :defer t  :load-path "lib/asoc")
+(use-package async         :defer t  :load-path "lisp/emacs-async")
+(use-package button-lock   :defer t  :load-path "lib/button-lock")
 (use-package crux          :demand t :load-path "lib/crux")
-(use-package ctable       :defer t :load-path "lib/emacs-ctable")
-(use-package dash         :defer t :load-path "lib/dash-el")
-(use-package deferred     :defer t :load-path "lib/emacs-deferred")
-(use-package epc          :defer t :load-path "lib/emacs-epc")
-(use-package epl          :defer t :load-path "lib/epl")
-(use-package f            :defer t :load-path "lib/f-el")
-(use-package fame         :defer t :load-path "lib/fame")
-(use-package fuzzy        :defer t :load-path "lib/fuzzy-el")
-(use-package gh           :defer t :load-path "lib/gh-el")
-(use-package ht           :defer t :load-path "lib/ht-el")
-(use-package let-alist    :defer t :load-path "lib/let-alist")
-(use-package logito       :defer t :load-path "lib/logito")
-(use-package makey        :defer t :load-path "lib/makey")
-(use-package marshal      :defer t :load-path "lib/marshal-el")
-(use-package pcache       :defer t :load-path "lib/pcache")
-(use-package pkg-info     :defer t :load-path "lib/pkg-info")
-(use-package popup        :defer t :load-path "lib/popup-el")
-(use-package popwin       :defer t :load-path "lib/popwin-el")
-(use-package pos-tip      :defer t :load-path "lib/pos-tip")
-(use-package request      :defer t :load-path "lib/emacs-request")
+(use-package ctable        :defer t  :load-path "lib/emacs-ctable")
+(use-package dash          :defer t  :load-path "lib/dash-el")
+(use-package deferred      :defer t  :load-path "lib/emacs-deferred")
+(use-package difflib       :defer t  :load-path "lib/difflib")
+(use-package diminish      :demand t :load-path "lib/diminish")
+(use-package el-mock       :defer t  :load-path "lib")
+(use-package elisp-refs    :defer t  :load-path "lib/elisp-refs")
+(use-package emojify       :defer t  :load-path "lib/emacs-emojify")
+(use-package epc           :defer t  :load-path "lib/emacs-epc")
+(use-package epl           :defer t  :load-path "lib/epl")
+(use-package esxml         :defer t  :load-path "lib/esxml")
+(use-package f             :defer t  :load-path "lib/f-el")
+(use-package fn            :defer t  :load-path "lib/fn-el")
+(use-package fringe-helper :defer t  :load-path "lib/fringe-helper-el")
+(use-package fuzzy         :defer t  :load-path "lib/fuzzy-el")
+(use-package gh            :defer t  :load-path "lib/gh-el")
+(use-package ghub          :defer t  :load-path "lib/ghub")
+(use-package ghub+         :defer t  :load-path "lib/ghub-plus")
+(use-package ht            :defer t  :load-path "lib/ht-el")
+(use-package kv            :defer t  :load-path "lib/kv")
+(use-package list-utils    :defer t  :load-path "lib/list-utils")
+(use-package logito        :defer t  :load-path "lib/logito")
+(use-package loop          :defer t  :load-path "lib/loop")
+(use-package m-buffer      :defer t  :load-path "lib/m-buffer")
+(use-package makey         :defer t  :load-path "lib/makey")
+(use-package marshal       :defer t  :load-path "lib/marshal-el")
+(use-package names         :defer t  :load-path "lib/names")
+(use-package noflet        :defer t  :load-path "lib/noflet")
+(use-package oauth2        :defer t  :load-path "lib/oauth2")
+(use-package ov            :defer t  :load-path "lib/ov-el")
+(use-package parent-mode   :defer t  :load-path "lib/parent-mode")
+(use-package parsebib      :defer t  :load-path "lib/parsebib")
+(use-package parsec        :defer t  :load-path "lib/parsec")
+(use-package pcache        :defer t  :load-path "lib/pcache")
+(use-package peval         :defer t  :load-path "lib/peval")
+(use-package pfuture       :defer t  :load-path "lib/pfuture")
+(use-package pkg-info      :defer t  :load-path "lib/pkg-info")
+(use-package popup         :defer t  :load-path "lib/popup-el")
+(use-package popup-pos-tip :defer t  :load-path "lib")
+(use-package popwin        :defer t  :load-path "site-lisp/popwin")
+(use-package pos-tip       :defer t  :load-path "lib")
+(use-package request       :defer t  :load-path "lib/emacs-request")
 (use-package rich-minority :defer t  :load-path "lib/rich-minority")
-(use-package s            :defer t :load-path "lib/s-el")
-(use-package tablist      :defer t :load-path "lib/tablist")
-(use-package uuidgen      :defer t :load-path "lib/uuidgen-el")
-(use-package web          :defer t :load-path "lib/emacs-web")
-(use-package websocket    :defer t :load-path "lib/emacs-websocket")
-(use-package web-server   :defer t :load-path "lib/emacs-web-server")
-(use-package with-editor  :defer t :load-path "lib/with-editor")
-(use-package working      :defer t :load-path "lib/working")
-(use-package xml-rpc      :defer t :load-path "lib/xml-rpc")
+(use-package s             :defer t  :load-path "lib/s-el")
+(use-package spinner       :defer t  :load-path "lib/spinner")
+(use-package tablist       :defer t  :load-path "lib/tablist")
+(use-package uuidgen       :defer t  :load-path "lib/uuidgen-el")
+(use-package web           :defer t  :load-path "lib/emacs-web")
+(use-package web-server    :defer t  :load-path "lib/emacs-web-server")
+(use-package websocket     :defer t  :load-path "lib/emacs-websocket")
+(use-package with-editor   :defer t  :load-path "lib/with-editor")
+(use-package xml-rpc       :defer t  :load-path "lib")
+(use-package zoutline      :defer t  :load-path "lib/zoutline")
+
 
 ;;; Keybindings
 
-;;; global-map
 
-(global-unset-key (kbd "<C-down-mouse-1>"))
-(setq ns-right-alternate-modifier nil)
+
 
 (autoload 'indent-according-to-mode "indent" nil t)
 
 (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
 
-(autoload 'org-cycle "org" nil t)
-(autoload 'hippie-expand "hippie-exp" nil t)
-(autoload 'indent-according-to-mode "indent" nil t)
-
-(defun smart-tab (&optional arg)
-  (interactive "P")
-  (cond
-   ((looking-back "^[-+* \t]*" nil)
-    (if (eq major-mode 'org-mode)
-        (org-cycle arg)
-      (indent-according-to-mode)))
-   (t
-    ;; Hippie also expands yasnippets, due to `yas-hippie-try-expand' in
-    ;; `hippie-expand-try-functions-list'.
-    (hippie-expand arg))))
-
-(define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
-
-;;; C-
-
-(defvar ctl-period-map)
-(define-prefix-command 'ctl-period-map)
-(defun goto-matching-parens (&optional arg)
-  "Go to the matching parenthesis character if one is adjacent to point."
-  (interactive "^p")
-  (cond ((looking-at "\\s(") (forward-sexp arg))
-        ((looking-back "\\s)" 1) (backward-sexp arg))
-        ;; Now, try to succeed from inside of a bracket
-        ((looking-at "\\s)") (forward-char) (backward-sexp arg))
-        ((looking-back "\\s(" 1) (backward-char) (forward-sexp arg))))
-
-(bind-key "C-."          #'ctl-period-map)
-(bind-key "C-*"          #'goto-matching-parens)
-;;(bind-key* "<C-return>"  #'other-window)
-(bind-key "C-z"          #'delete-other-windows)
-
-;;; M-
-
-(defadvice async-shell-command (before uniqify-running-shell-command activate)
-  (let ((buf (get-buffer "*Async Shell Command*")))
-    (if buf
-        (let ((proc (get-buffer-process buf)))
-          (if (and proc (eq 'run (process-status proc)))
-              (with-current-buffer buf
-                (rename-uniquely)))))))
-
-(defun mark-line (&optional arg)
-  (interactive "p")
-  (beginning-of-line)
-  (let ((here (point)))
-    (dotimes (i arg)
-      (or (zerop i) (forward-line))
-      (end-of-line))
-    (set-mark (point))
-    (goto-char here)))
-
-(defun mark-sentence (&optional arg)
-  (interactive "P")
-  (backward-sentence)
-  (mark-end-of-sentence arg))
-
-(defun delete-indentation-forward ()
-  "Delete indentation."
-  (interactive)
-  (delete-indentation t))
-
-
-(bind-key "M-!"    #'async-shell-command)
-(bind-key "M-'"    #'insert-pair)
-(bind-key "M-\""   #'insert-pair)
-(bind-key "M-`"    #'other-frame)
-(bind-key "M-j"    #'delete-indentation-forward)
-(bind-key "M-J"    #'delete-indentation)
-(bind-key "M-W"    #'mark-word)
-(bind-key "M-L"    #'mark-line)
-(bind-key "M-S"    #'mark-sentence)
-(bind-key "M-X"    #'mark-sexp)
-(bind-key "M-D"    #'mark-defun)
-(bind-key "M-g c"  #'goto-char)
-(bind-key "M-g l"  #'goto-line)
-
-;;; M-C-
-
-(bind-key "<C-M-backspace>" #'backward-kill-sexp)
-
-(defun open-line-above ()
-  (interactive)
-  (forward-line -1)
-  (end-of-line)
-  (newline-and-indent))
-
-(defun open-line-below ()
-  (interactive)
-  (end-of-line)
-  (newline-and-indent))
-
-(bind-key "<S-return>" #'open-line-below)
-(bind-key "<M-return>" #'open-line-above)
-
-;;; ctl-x-map
-
-;;; C-x
-
-
-(defvar edit-rectangle-origin)
-(defvar edit-rectangle-saved-window-config)
-
-(defun edit-rectangle (&optional start end)
-  (interactive "r")
-  (let ((strs (delete-extract-rectangle start end))
-        (mode major-mode)
-        (here (copy-marker (min (mark) (point)) t))
-        (config (current-window-configuration)))
-    (with-current-buffer (generate-new-buffer "*Rectangle*")
-      (funcall mode)
-      (set (make-local-variable 'edit-rectangle-origin) here)
-      (set (make-local-variable 'edit-rectangle-saved-window-config) config)
-      (local-set-key (kbd "C-c C-c") #'restore-rectangle)
-      (mapc #'(lambda (x) (insert x ?\n)) strs)
-      (goto-char (point-min))
-      (pop-to-buffer (current-buffer)))))
-
-(defun restore-rectangle ()
-  (interactive)
-  (let ((content (split-string (buffer-string) "\n"))
-        (origin edit-rectangle-origin)
-        (config edit-rectangle-saved-window-config))
-    (with-current-buffer (marker-buffer origin)
-      (goto-char origin)
-      (insert-rectangle content))
-    (kill-buffer (current-buffer))
-    (set-window-configuration config)))
-
-(defun split-window-below-and-switch ()
-  "Split the window horizontally, then switch to the new pane."
-  (interactive)
-  (split-window-below)
-  (other-window 1))
-
-(defun split-window-right-and-switch ()
-  "Split the window vertically, then switch to the new pane."
-  (interactive)
-  (split-window-right)
-  (other-window 1))
-
-
-(bind-key "C-x k" 'kill-this-buffer)
-(bind-key "C-x 2" 'split-window-below-and-switch)
-(bind-key "C-x 3" 'split-window-right-and-switch)
-
-(bind-key "C-x D" #'edit-rectangle)
-;; (bind-key "C-x d" #'delete-whitespace-rectangle)
-(bind-key "C-x F" #'set-fill-column)
-(bind-key "C-x t" #'toggle-truncate-lines)
-(bind-key "C-c C--" #'shrink-window)
-(bind-key "C-c C-+" #'enlarge-window)
-
-(defun delete-current-buffer-file ()
-  "Delete the current buffer and the file connected with it."
-  (interactive)
-  (let ((filename (buffer-file-name))
-        (buffer (current-buffer))
-        (name (buffer-name)))
-    (if (not (and filename (file-exists-p filename)))
-        (kill-buffer buffer)
-      (when (yes-or-no-p "Are you sure, want to remove this file? ")
-        (delete-file filename)
-        (kill-buffer buffer)
-        (message "File '%s' successfully removed" filename)))))
-
-
-(bind-key "C-x v H" #'vc-region-history)
-(bind-key "C-x K" #'delete-current-buffer-file)
-
-(bind-key "C-x J" #'join-line)
-
-;;; C-x C-
-
-(defun duplicate-line ()
-  "Duplicate the line containing point."
-  (interactive)
-  (save-excursion
-    (let (line-text)
-      (goto-char (line-beginning-position))
-      (let ((beg (point)))
-        (goto-char (line-end-position))
-        (setq line-text (buffer-substring beg (point))))
-      (if (eobp)
-          (insert ?\n)
-        (forward-line))
-      (open-line 1)
-      (insert line-text))))
-
-(bind-key "C-x C-d" #'duplicate-line)
-(bind-key "C-x C-e" #'pp-eval-last-sexp)
-(bind-key "C-x C-n" #'next-line)
-
-(defun find-alternate-file-with-sudo ()
-  (interactive)
-  (find-alternate-file (concat "/sudo::" (buffer-file-name))))
-
-(bind-key "C-x C-v" #'find-alternate-file-with-sudo)
-
-;;; C-x M-
-
-(bind-key "C-x M-n" #'set-goal-column)
-
-(defun refill-paragraph (arg)
-  (interactive "*P")
-  (let ((fun (if (memq major-mode '(c-mode c++-mode))
-                 'c-fill-paragraph
-               (or fill-paragraph-function
-                   'fill-paragraph)))
-        (width (if (numberp arg) arg))
-        prefix beg end)
-    (forward-paragraph 1)
-    (setq end (copy-marker (- (point) 2)))
-    (forward-line -1)
-    (let ((b (point)))
-      (skip-chars-forward "^A-Za-z0-9`'\"(")
-      (setq prefix (buffer-substring-no-properties b (point))))
-    (backward-paragraph 1)
-    (if (eolp)
-        (forward-char))
-    (setq beg (point-marker))
-    (delete-horizontal-space)
-    (while (
-
- (point) end)
-      (delete-indentation 1)
-      (end-of-line))
-    (let ((fill-column (or width fill-column))
-          (fill-prefix prefix))
-      (if prefix
-          (setq fill-column
-                (- fill-column (* 2 (length prefix)))))
-      (funcall fun nil)
-      (goto-char beg)
-      (insert prefix)
-      (funcall fun nil))
-    (goto-char (+ end 2))))
-
-(bind-key "C-x M-q" #'refill-paragraph) 
-
-(defun endless/fill-or-unfill (count)
-  "Like `fill-paragraph', but unfill if used twice."
-  (interactive "P")
-  (let ((fill-column
-         (if count
-             (prefix-numeric-value count)
-           (if (eq last-command 'endless/fill-or-unfill)
-               (progn (setq this-command nil)
-                      (point-max))
-             fill-column))))
-    (fill-paragraph)))
-
-(global-set-key [remap fill-paragraph]
-                #'endless/fill-or-unfill)
-
-;;; mode-specific-map
-
-;;; C-c
-
-(bind-key "C-c <tab>" #'ff-find-other-file)
-(bind-key "C-c SPC" #'just-one-space)
-
-(defmacro recursive-edit-preserving-window-config (body)
-  "*Return a command that enters a recursive edit after executing BODY.
-Upon exiting the recursive edit (with\\[exit-recursive-edit] (exit)
-or \\[abort-recursive-edit] (abort)), restore window configuration
-in current frame.
-Inspired by Erik Naggum's `recursive-edit-with-single-window'."
-  `(lambda ()
-     "See the documentation for `recursive-edit-preserving-window-config'."
-     (interactive)
-     (save-window-excursion
-       ,body
-       (recursive-edit))))
-
-(bind-key "C-c 0"
-          (recursive-edit-preserving-window-config (delete-window)))
-(bind-key "C-c 1"
-          (recursive-edit-preserving-window-config
-           (if (one-window-p 'ignore-minibuffer)
-               (error "Current window is the only window in its frame")
-             (delete-other-windows))))
-
-(defun delete-current-line (&optional arg)
-  (interactive "p")
-  (let ((here (point)))
-    (beginning-of-line)
-    (kill-line arg)
-    (goto-char here)))
-
-(defun backward-kill-line (arg)
-  "Kill ARG lines backward."
-  (interactive "p")
-  (kill-line (- 1 arg)))
-
-(bind-key "C-x C-<backspace>" #'delete-current-line)
-
-
-(bind-keys :prefix-map my-delete-map
-           :prefix "C-c d"
-           ("DEL" . backward-kill-line)
-           ("k" . kill-line) 
-           ("D" . kill-whole-line))
-;;(bind-key "C-u M-DEL" #'backward-kill-line)
-
-
-(bind-key "C-c g" #'goto-line)
-
-(defun copy-line (arg)
-  "Copy lines (as many as prefix argument) in the kill ring"
-  (interactive "p")
-  (kill-ring-save (line-beginning-position)
-                  (line-beginning-position (+ 1 arg)))
-  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
-
-(defun do-eval-buffer ()
-  (interactive)
-  (call-interactively 'eval-buffer)
-  (message "Buffer has been evaluated"))
-
-(defun do-eval-region ()
-  (interactive)
-  (call-interactively 'eval-region)
-  (message "Region has been evaluated"))
-
-(bind-keys :prefix-map my-lisp-devel-map
-           :prefix "C-c e"
-           ("E" . elint-current-buffer)
-           ("b" . do-eval-buffer)
-           ("c" . cancel-debug-on-entry)
-           ("d" . debug-on-entry)
-           ("e" . toggle-debug-on-error)
-           ("f" . emacs-lisp-byte-compile-and-load)
-           ("j" . emacs-lisp-mode)
-           ("l" . find-library)
-           ("r" . do-eval-region)
-           ("s" . scratch)
-           ("z" . byte-recompile-directory))
-
-(bind-key "C-c f" #'flush-lines)
-(bind-key "C-c k" #'keep-lines)
 
 (eval-when-compile
-  (defvar emacs-min-height)
-  (defvar emacs-min-width))
+  (setplist 'flet (use-package-plist-delete (symbol-plist 'flet)
+                                            'byte-obsolete-info)))
 
-(defvar display-name
-  (let ((width (display-pixel-width)))
-    (cond ((>= width 2560) 'retina-imac)
-          ((= width 1920) 'macbook-pro-vga)
-          ((= width 1680) 'macbook-pro)
-          ((= width 1440) 'retina-macbook-pro))))
 
-;(defvar emacs-min-top 23)
-(defvar emacs-min-top 30)
-(defvar emacs-min-left
-  (cond ((eq display-name 'retina-imac) 975)
-        ((eq display-name 'macbook-pro-vga) 521)
-        ;((eq display-name 'macbook-pro-vga) 83)
-        (t 521)))
-(defvar emacs-min-height
-  (cond ((eq display-name 'retina-imac) 57)
-        ((eq display-name 'macbook-pro-vga) 67)
-        ((eq display-name 'macbook-pro) 57)
-        (t 57)))
-(defvar emacs-min-width 100)
 
-(if running-alternate-emacs
-    (setq emacs-min-top 22
-          emacs-min-left 5
-          emacs-min-height 57
-          emacs-min-width 90))
 
-(defvar emacs-min-font
-  (cond
-   ((eq display-name 'retina-imac)
-    (if running-alternate-emacs
-        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
-      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
-      "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1"
-      ))
-   ((eq display-name 'macbook-pro)
-    (if running-alternate-emacs
-        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
-      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
-      "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
-      ))
-   ((eq display-name 'macbook-pro-vga)
-    (if running-alternate-emacs
-        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
-      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
-      "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
-      ))
-   ((string= (system-name) "ubuntu")
-    ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
-    "-*-Hack-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
-    )
-   (t
-    (if running-alternate-emacs
-        "-*-Myriad Pro-normal-normal-normal-*-17-*-*-*-p-0-iso10646-1"
-      ;; "-*-Source Code Pro-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1"
-      "-*-Hack-normal-normal-normal-*-16-*-*-*-m-0-iso10646-1"
-      ))))
+;;; Keymaps
 
-(let ((frame-alist
-       (list (cons 'top    emacs-min-top)
-             (cons 'left   emacs-min-left)
-             (cons 'height emacs-min-height)
-             (cons 'width  emacs-min-width)
-             (cons 'font   emacs-min-font))))
-  (setq initial-frame-alist frame-alist))
+(define-key input-decode-map [?\C-m] [C-m])
 
+(eval-and-compile
+  (mapc #'(lambda (entry)
+            (define-prefix-command (cdr entry))
+            (bind-key (car entry) (cdr entry)))
+        '(("<C-m>" . my-ctrl-m-map)
 
-(defun emacs-min ()
-  (interactive)
+          ("C-h e" . my-ctrl-h-e-map)
 
-  (set-frame-parameter (selected-frame) 'fullscreen nil)
-  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
+          ("C-c e" . my-ctrl-c-e-map)
+          ("C-c m" . my-ctrl-c-m-map)
+          ("C-c y" . my-ctrl-c-y-map)
 
-  (set-frame-parameter (selected-frame) 'top emacs-min-top)
-  (set-frame-parameter (selected-frame) 'left emacs-min-left)
-  (set-frame-parameter (selected-frame) 'height emacs-min-height)
-  (set-frame-parameter (selected-frame) 'width emacs-min-width)
+          ("C-."   . my-ctrl-dot-map)
+          ("C-. =" . my-ctrl-dot-equals-map)
+          ("C-. f" . my-ctrl-dot-f-map)
+          ("C-. g" . my-ctrl-dot-g-map)
+          ("C-. h" . my-ctrl-dot-h-map)
+          ("C-. m" . my-ctrl-dot-m-map)
+          ("C-. r" . my-ctrl-dot-r-map))))
 
-  (set-frame-font emacs-min-font))
-
-(if window-system
-    (add-hook 'after-init-hook 'emacs-min))
-
-(defun emacs-max ()
-  (interactive)
-  (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
-  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
-
-(defun emacs-toggle-size ()
-  (interactive)
-  (if (> (cdr (assq 'width (frame-parameters))) 100)
-      (emacs-min)
-    (emacs-max)))
-
-(bind-key "C-c m" #'emacs-toggle-size)
-
-(defcustom user-initials nil
-  "*Initials of this user."
-  :set
-  #'(lambda (symbol value)
-      (if (fboundp 'font-lock-add-keywords)
-          (mapc
-           #'(lambda (mode)
-               (font-lock-add-keywords
-                mode (list (list (concat "\\
-
-\\(" value " [^:\n]+\\):")
-                                 1 font-lock-warning-face t))))
-           '(c-mode c++-mode emacs-lisp-mode lisp-mode
-                    python-mode perl-mode java-mode groovy-mode
-                    haskell-mode literate-haskell-mode)))
-      (set symbol value))
-  :type 'string
-  :group 'mail)
-
-(defun insert-user-timestamp ()
-  "Insert a quick timestamp using the value of `user-initials'."
-  (interactive)
-  (insert (format "%s (%s): " user-initials
-                  (format-time-string "%Y-%m-%d" (current-time)))))
-
-(bind-key "C-c n" #'insert-user-timestamp)
-(bind-key "C-c o" #'customize-option)
-(bind-key "C-c O" #'customize-group)
-(bind-key "C-c F" #'customize-face)
-
-(bind-key "C-c q" #'fill-region)
-(bind-key "C-c r" #'replace-regexp)
-(bind-key "C-c s" #'replace-string)
-(bind-key "C-c u" #'rename-uniquely)
-
-(bind-key "C-c v" #'ffap)
-
-(defun view-clipboard ()
-  (interactive)
-  (delete-other-windows)
-  (switch-to-buffer "*Clipboard*")
-  (let ((inhibit-read-only t))
-    (erase-buffer)
-    (clipboard-yank)
-    (goto-char (point-min))))
-
-(bind-key "C-c V" #'view-clipboard)
-(bind-key "C-c z" #'clean-buffer-list)
-
-(bind-key "C-c =" #'count-matches)
-(bind-key "C-c ;" #'comment-or-uncomment-region)
-
-;;; C-c C-
-
-(defun delete-to-end-of-buffer ()
-  (interactive)
-  (kill-region (point) (point-max)))
-
-(bind-key "C-c C-z" #'delete-to-end-of-buffer)
-
-(defun copy-current-buffer-name ()
-  (interactive)
-  (let ((name (buffer-file-name)))
-    (kill-new name)
-    (message name)))
-
-(bind-key "C-c C-0" #'copy-current-buffer-name)
-
-
-;;; C-c M-
-
-(defun unfill-paragraph (arg)
-  (interactive "*p")
-  (let (beg end)
-    (forward-paragraph arg)
-    (setq end (copy-marker (- (point) 2)))
-    (backward-paragraph arg)
-    (if (eolp)
-        (forward-char))
-    (setq beg (point-marker))
-    (when (> (count-lines beg end) 1)
-      (while (
-
- (point) end)
-        (goto-char (line-end-position))
-        (let ((sent-end (memq (char-before) '(?. ?\; ?! ??))))
-          (delete-indentation 1)
-          (if sent-end
-              (insert ? )))
-        (end-of-line))
-      (save-excursion
-        (goto-char beg)
-        (while (re-search-forward "[^.;!?:]\\([ \t][ \t]+\\)" end t)
-          (replace-match " " nil nil nil 1))))))
-
-(bind-key "C-c M-q" #'unfill-paragraph)
-
-(defun unfill-region (beg end)
-  (interactive "r")
-  (setq end (copy-marker end))
-  (save-excursion
-    (goto-char beg)
-    (while (
-
- (point) end)
-      (unfill-paragraph 1)
-      (forward-paragraph))))
-
-
-
-;;; ctl-period-map
-
-;;; C-.
-
-(bind-key "C-. m" #'kmacro-keymap)
-
-(bind-key "C-. C-i" #'indent-rigidly)
-
-
-(defvar insert-and-counting--index 1)
-
-(defvar insert-and-counting--expr nil)
-
-(defun insert-and-counting (&optional index expr)
-  (interactive
-   (if (or current-prefix-arg
-           (not insert-and-counting--expr))
-       (list (setq insert-and-counting--index
-                   (prefix-numeric-value current-prefix-arg))
-             (setq insert-and-counting--expr
-                   (eval-expr-read-lisp-object-minibuffer "Pattern: ")))
-     (list (setq insert-and-counting--index
-                 (1+ insert-and-counting--index))
-           insert-and-counting--expr)))
-  (let ((n insert-and-counting--index))
-    (eval expr)))
-
-(bind-key "C-. C-y" #'insert-and-counting)
-
-;;; help-map
-
-(defvar lisp-find-map)
-(define-prefix-command 'lisp-find-map)
-
-(bind-key "C-h e" #'lisp-find-map)
-
-;;; C-h e
-
-(bind-key "C-h e c" #'finder-commentary)
-(bind-key "C-h e e" #'view-echo-area-messages)
-(bind-key "C-h e f" #'find-function)
-(bind-key "C-h e F" #'find-face-definition)
-
-(defun my-switch-in-other-buffer (buf)
-  (when buf
-    (split-window-vertically)
-    (switch-to-buffer-other-window buf)))
-
-(defun my-describe-symbol  (symbol &optional mode)
-  (interactive
-   (info-lookup-interactive-arguments 'symbol current-prefix-arg))
-  (let (info-buf find-buf desc-buf cust-buf)
-    (save-window-excursion
-      (ignore-errors
-        (info-lookup-symbol symbol mode)
-        (setq info-buf (get-buffer "*info*")))
-      (let ((sym (intern-soft symbol)))
-        (when sym
-          (if (functionp sym)
-              (progn
-                (find-function sym)
-                (setq find-buf (current-buffer))
-                (describe-function sym)
-                (setq desc-buf (get-buffer "*Help*")))
-            (find-variable sym)
-            (setq find-buf (current-buffer))
-            (describe-variable sym)
-            (setq desc-buf (get-buffer "*Help*"))
-            ;;(customize-variable sym)
-            ;;(setq cust-buf (current-buffer))
-            ))))
-
-    (delete-other-windows)
-
-    (switch-to-buffer find-buf)
-    (my-switch-in-other-buffer desc-buf)
-    (my-switch-in-other-buffer info-buf)
-    ;;(switch-in-other-buffer cust-buf)
-    (balance-windows)))
-
-(bind-key "C-h e d" #'my-describe-symbol)
-(bind-key "C-h e i" #'info-apropos)
-(bind-key "C-h e k" #'find-function-on-key)
-(bind-key "C-h e l" #'find-library)
-
-(defun check-papers ()
-  (interactive)
-  ;; From https://www.gnu.org/prep/maintain/html_node/Copyright-Papers.html
-  (find-file-other-window "/fencepost.gnu.org:/gd/gnuorg/copyright.list"))
-
-(bind-key "C-h e P" #'check-papers)
-
-(defvar lisp-modes '(emacs-lisp-mode
-                     inferior-emacs-lisp-mode
-                     ielm-mode
-                     lisp-mode
-                     inferior-lisp-mode
-                     lisp-interaction-mode
-                     slime-repl-mode))
-
-(defvar lisp-mode-hooks
-  (mapcar (function
-           (lambda (mode)
-             (intern
-              (concat (symbol-name mode) "-hook"))))
-          lisp-modes))
-
-(defun scratch ()
-  (interactive)
-  (let ((current-mode major-mode))
-    (switch-to-buffer-other-window (get-buffer-create "*scratch*"))
-    (goto-char (point-min))
-    (when (looking-at ";")
-      (forward-line 4)
-      (delete-region (point-min) (point)))
-    (goto-char (point-max))
-    (if (memq current-mode lisp-modes)
-        (funcall current-mode))))
-
-(bind-key "C-h e s" #'scratch)
-(bind-key "C-h e v" #'find-variable)
-(bind-key "C-h e V" #'apropos-value)
-
-
-;;; Delayed configuration
-
-(use-package dot-org
-  :load-path ("override/org-mode/contrib/lisp"
-              "override/org-mode/lisp")
-  :mode (("\\.org\\'" . org-mode)
-         ("\\.txt\\'" . org-mode))
-  :commands my-org-startup
-  :bind (("M-C"   . jump-to-org-agenda)
-         ("M-m"   . org-smart-capture)
-         ("M-M"   . org-inline-note)
-         ("C-c a" . org-agenda)
-         ("C-c S" . org-store-link)
-         ("C-c l" . org-insert-link)
-         ("C-. n" . org-velocity-read))
-  :defer 10
-  :config
-  (setq org-babel-python-command    "/anaconda3/bin/python3.6")
-  ;; (when (and nil
-  ;;            (not running-alternate-emacs)
-  ;;            (not running-development-emacs))
-  ;;   (run-with-idle-timer 300 t 'jump-to-org-agenda)
-  ;;   (my-org-startup))
-  )
+;;; Packages
 
 (use-package dot-gnus
   :disabled t
@@ -887,7 +253,6 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
   (setq gnus-init-file (expand-file-name "dot-gnus" user-emacs-directory)
         gnus-home-directory "~/Messages/Gnus/"))
 
-;; ;;; Packages
 
 (use-package ggtags
   :disabled t
@@ -912,7 +277,7 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
         (goto-char beg)
         (while (
 
- (point) end)
+                (point) end)
           (forward-char 2)
           (insert "CHECK: ")
           (forward-line 1)))
@@ -1079,25 +444,18 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
 
 ;; ;;; PACKAGE CONFIGURATIONS
 
-
 (use-package abbrev
-  :commands abbrev-mode
-  :diminish abbrev-mode
-  :init
-  (hook-into-modes #'abbrev-mode
-                   'text-mode-hook
-                   'prog-mode-hook
-                   'erc-mode-hook
-                   'LaTeX-mode-hook)
-
+  :diminish
+  :hook
+  ((text-mode prog-mode erc-mode LaTeX-mode) . abbrev-mode)
+  (expand-load
+   . (lambda ()
+       (add-hook 'expand-expand-hook 'indent-according-to-mode)
+       (add-hook 'expand-jump-hook 'indent-according-to-mode)))
   :config
   (if (file-exists-p abbrev-file-name)
-      (quietly-read-abbrev-file))
+      (quietly-read-abbrev-file)))
 
-  (add-hook 'expand-load-hook
-            (lambda ()
-              (add-hook 'expand-expand-hook 'indent-according-to-mode)
-              (add-hook 'expand-jump-hook 'indent-according-to-mode))))
 
 (use-package ace-window
   :load-path "site-lisp/ace-window"
@@ -1152,8 +510,7 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
 (use-package align 
   :bind (("M-["   . align-code)
          ("C-c [" . align-regexp)
-         ("C-c ]" . align-whitespace)
-         )
+         ("C-c ]" . align-whitespace))
   :commands align
   :preface
   (defun align-code (beg end &optional arg)
@@ -1164,13 +521,11 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
         (indent-region beg end-mark nil)
         (align beg end-mark))))
 
-    (defun align-whitespace (start end)
+  (defun align-whitespace (start end)
     "Align columns by whitespace"
     (interactive "r")
     (align-regexp start end
                   "\\(\\s-*\\)\\s-" 1 0 t)))
-
-
 
 (use-package ascii
   :disabled t
@@ -1183,11 +538,6 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
     (if ascii-display
         (ascii-off)
       (ascii-on))))
-
-(use-package async
-  :load-path "lisp/emacs-async")
-
-
 
 (use-package auto-yasnippet
   :load-path "site-lisp/auto-yasnippet"
@@ -1626,6 +976,29 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
   :mode (".*Dockerfile.*" . dockerfile-mode)
   :load-path "site-lisp/dockerfile-mode/")
 
+(use-package dot-org
+  :load-path ("override/org-mode/contrib/lisp"
+              "override/org-mode/lisp")
+  :mode (("\\.org\\'" . org-mode)
+         ("\\.txt\\'" . org-mode))
+  :commands my-org-startup
+  :bind (("M-C"   . jump-to-org-agenda)
+         ("M-m"   . org-smart-capture)
+         ("M-M"   . org-inline-note)
+         ("C-c a" . org-agenda)
+         ("C-c S" . org-store-link)
+         ("C-c l" . org-insert-link)
+         ("C-. n" . org-velocity-read))
+  ;; :defer 10
+  :config
+  (setq org-babel-python-command    "/anaconda3/bin/python3.6")
+  ;; (when (and nil
+  ;;            (not running-alternate-emacs)
+  ;;            (not running-development-emacs))
+  ;;   (run-with-idle-timer 300 t 'jump-to-org-agenda)
+  ;;   (my-org-startup))
+  )
+
 (use-package doxymacs
   :disabled t
   :load-path "site-lisp/doxymacs/lisp/")
@@ -1749,9 +1122,16 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
   :bind ("M-T" . tags-search))
 
 (use-package eval-expr
-  :disabled t
   :load-path "site-lisp/eval-expr"
   :bind ("M-:" . eval-expr)
+  :preface 
+  (defun my-elisp-indent-or-complete (&optional arg)
+    (interactive "p")
+    (call-interactively 'lisp-indent-line)
+    (unless (or (looking-back "^\\s-*")
+                (bolp)
+                (not (looking-back "[-A-Za-z0-9_*+/=<>!?]+")))
+      (call-interactively 'lisp-complete-symbol)))
   :config
   (setq eval-expr-print-function 'pp
         eval-expr-print-level 20
@@ -2604,9 +1984,65 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
   :config
   (use-package json-reformat)
   (use-package json-snatcher))
-  
+
+
+(use-package redshank
+  :load-path "site-lisp/redshank"
+  :diminish
+  :hook ((lisp-mode emacs-lisp-mode) . redshank-mode))
+
+(use-package elisp-slime-nav
+  :load-path "site-lisp/elisp-slime-nav"
+  :diminish
+  :commands (elisp-slime-nav-mode
+             elisp-slime-nav-find-elisp-thing-at-point))
+
+
+(use-package eldoc
+  :diminish
+  :hook ((c-mode-common emacs-lisp-mode) . eldoc-mode))
+
+
+
+(use-package cldoc
+  :commands (cldoc-mode turn-on-cldoc-mode)
+  :diminish)
+
+(use-package elint
+  :commands 'elint-initialize
+  :preface
+  (defun elint-current-buffer ()
+    (interactive)
+    (elint-initialize)
+    (elint-current-buffer))
+
+  :config
+  (add-to-list 'elint-standard-variables 'current-prefix-arg)
+  (add-to-list 'elint-standard-variables 'command-line-args-left)
+  (add-to-list 'elint-standard-variables 'buffer-file-coding-system)
+  (add-to-list 'elint-standard-variables 'emacs-major-version)
+  (add-to-list 'elint-standard-variables 'window-system))
+
+(use-package ert
+  :bind ("C-c e t" . ert-run-tests-interactively))
+
+(use-package highlight-cl
+  :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
+
+
+(use-package info-lookmore
+  :load-path "site-lisp/info-lookmore"
+  :after info-look
+  :config
+  (info-lookmore-elisp-cl)
+  (info-lookmore-elisp-userlast)
+  (info-lookmore-elisp-gnus)
+  (info-lookmore-apropos-elisp))
+
 (use-package lisp-mode
   :defer t
+  :hook ((emacs-lisp-mode lisp-mode)
+         . (lambda () (add-hook 'after-save-hook 'check-parens nil t)))
   :preface
   (defface esk-paren-face
     '((((class color) (background dark))
@@ -2618,7 +2054,13 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
 
   (defvar slime-mode nil)
   (defvar lisp-mode-initialized nil)
-
+  (defvar lisp-modes '(emacs-lisp-mode
+                       inferior-emacs-lisp-mode
+                       ielm-mode
+                       lisp-mode
+                       inferior-lisp-mode
+                       lisp-interaction-mode
+                       slime-repl-mode))
   :init
   ;; Change lambda to an actual lambda symbol
   (mapc
@@ -2634,116 +2076,36 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
          (1 font-lock-keyword-face)
          (2 font-lock-function-name-face
             nil t)))))
-   lisp-modes) 
-  :config
-  (use-package redshank
-    :diminish redshank-mode)
+   lisp-modes)
+  (dolist (mode '(ielm-mode
+                  inferior-emacs-lisp-mode
+                  inferior-lisp-mode
+                  lisp-interaction-mode
+                  lisp-mode
+                  emacs-lisp-mode))
+    (font-lock-add-keywords
+     mode
+     '(("(\\(lambda\\)\\>"
+        (0 (ignore
+            (compose-region (match-beginning 1)
+                            (match-end 1) ?λ))))
+       ("(\\(ert-deftest\\)\\>[         '(]*\\(setf[    ]+\\sw+\\|\\sw+\\)?"
+        (1 font-lock-keyword-face)
+        (2 font-lock-function-name-face
+           nil t))))))
 
-  (use-package elisp-slime-nav
-    :load-path "site-lisp/elisp-slime-nav"
-    :diminish elisp-slime-nav-mode)
-
-  (use-package edebug)
-
-  (use-package eldoc
-    :diminish eldoc-mode
-    :commands eldoc-mode
-    :config
-    (use-package eldoc-extension
-      :disabled t
-      :defer t
-      :init
-      (add-hook 'emacs-lisp-mode-hook
-                #'(lambda () (require 'eldoc-extension)) t))
-    (eldoc-add-command 'paredit-backward-delete
-                       'paredit-close-round))
-
-  (use-package cldoc
-    :commands (cldoc-mode turn-on-cldoc-mode)
-    :diminish cldoc-mode)
-
-  (use-package ert
-    :bind ("C-c e t" . ert-run-tests-interactively))
-
-  (use-package elint
-    :commands 'elint-initialize
-    :preface
-    (defun elint-current-buffer ()
-      (interactive)
-      (elint-initialize)
-      (elint-current-buffer))
-
-    :config
-    (add-to-list 'elint-standard-variables 'current-prefix-arg)
-    (add-to-list 'elint-standard-variables 'command-line-args-left)
-    (add-to-list 'elint-standard-variables 'buffer-file-coding-system)
-    (add-to-list 'elint-standard-variables 'emacs-major-version)
-    (add-to-list 'elint-standard-variables 'window-system))
-
-  (use-package highlight-cl
-    :init
-    (mapc (function
-           (lambda (mode-hook)
-             (add-hook mode-hook
-                       'highlight-cl-add-font-lock-keywords)))
-          lisp-mode-hooks))
-
-  (defun my-elisp-indent-or-complete (&optional arg)
-    (interactive "p")
-    (call-interactively 'lisp-indent-line)
-    (unless (or (looking-back "^\\s-*")
-                (bolp)
-                (not (looking-back "[-A-Za-z0-9_*+/=<>!?]+")))
-      (call-interactively 'lisp-complete-symbol)))
-
-  (defun my-lisp-indent-or-complete (&optional arg)
-    (interactive "p")
-    (if (or (looking-back "^\\s-*") (bolp))
-        (call-interactively 'lisp-indent-line)
-      (call-interactively 'slime-indent-and-complete-symbol)))
-
-  (defun my-byte-recompile-file ()
-    (save-excursion
-      (byte-recompile-file buffer-file-name)))
-
-  (use-package info-lookmore
-    :load-path "site-lisp/info-lookmore"
-    :config
-    (info-lookmore-elisp-cl)
-    (info-lookmore-elisp-userlast)
-    (info-lookmore-elisp-gnus)
-    (info-lookmore-apropos-elisp))
-
-  (use-package testcover
-    :commands testcover-this-defun)
-
-  (mapc (lambda (mode)
-          (info-lookup-add-help
-           :mode mode
-           :regexp "[^][()'\" \t\n]+"
-           :ignore-case t
-           :doc-spec '(("(ansicl)Symbol Index" nil nil nil))))
-        lisp-modes)
-
-  (auto-fill-mode 1)
-  (paredit-mode 1)
-  (flycheck-mode nil)
-  (redshank-mode 1)
-  (elisp-slime-nav-mode 1)
-
-  (local-set-key (kbd "<return>") 'paredit-newline)
-  (bind-key "<tab>" #'my-elisp-indent-or-complete emacs-lisp-mode-map)
-
-  (add-hook 'after-save-hook 'check-parens nil t)
-
-  (unless (memq major-mode
-                '(emacs-lisp-mode inferior-emacs-lisp-mode ielm-mode))
-    (turn-on-cldoc-mode)
-    (bind-key "M-q" #'slime-reindent-defun lisp-mode-map)
-    (bind-key "M-l" #'slime-selector lisp-mode-map)))
+(use-package lispy
+  :load-path "site-lisp/lispy"
+  :commands lispy-mode
+  :bind (:map lispy-mode-map
+              ("M-j"))
+  :bind (:map emacs-lisp-mode-map
+              ("C-1"     . lispy-describe-inline)
+              ("C-2"     . lispy-arglist-inline)
+              ("C-c C-j" . lispy-goto)))
 
 (use-package lua-mode
-  :disabled t
+  :disabled tm
   :load-path "site-lisp/lua-mode"
   :mode "\\.lua\\'"
   :interpreter ("lua" . lua-mode))
@@ -3039,19 +2401,28 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
 
 (use-package personal
   :after crux
+  :preface
+  ;; Move these in settings.el
+  (setq disabled-command-function nil)
+  (set-face-attribute 'region nil :background "#CDE7F0")
+  (fset 'yes-or-no-p 'y-or-n-p)
+  (global-unset-key (kbd "<C-down-mouse-1>"))
+  (setq ns-right-alternate-modifier nil)
   :config
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
 
   (bind-keys ("C-z" . delete-other-windows)
+             ("C-*" . goto-matching-parens)
 
-             ("M-!"  . async-shell-command)
-             ("M-'"  . insert-pair)
-             ("M-\"" . insert-pair)
-             ("M-`"  . other-frame)
-             ("M-j"  . delete-indentation-forward)
-             ("M-J"  . delete-indentation)
-             ("M-L"  . mark-line)
-             ("M-S"  . mark-sentence)
+             ("M-!"        . async-shell-command)
+             ("M-'"        . insert-pair)
+             ("M-\""       . insert-pair)
+             ("M-`"        . other-frame)
+             ("M-j"        . delete-indentation-forward)
+             ("M-J"        . delete-indentation)
+             ("M-L"        . mark-line)
+             ("M-S"        . mark-sentence) 
+             ("M-<return>" . open-line-above)
 
              ("M-g c" . goto-char)
 
@@ -3076,6 +2447,7 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
              ("C-c g"   . goto-line)
              ("C-c f"   . flush-lines)
              ("C-c k"   . keep-lines)
+             ("C-c m" . emacs-toggle-size)
              ("C-c n"   . insert-user-timestamp)
              ("C-c q"   . fill-region)
              ;; ("C-c r"   . replace-regexp)
@@ -3084,10 +2456,10 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
              ("C-c V"   . view-clipboard)
              ("C-c )"   . close-all-parentheses)
              ("C-c ="   . count-matches)
+             ("C-c ;" . comment-or-uncomment-region)
 
              ("C-c C-z" . delete-to-end-of-buffer)
              ("C-c C-0" . copy-current-buffer-name)
-
              ("C-c M-q" . unfill-paragraph))
 
   (bind-keys ("C-h e a" . apropos-value)
@@ -3110,13 +2482,10 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
              ("C-c e P" . check-papers)
              ("C-c e r" . do-eval-region)
              ("C-c e s" . scratch)
+             ("C-c e p" . python-mode)
              ("C-c e z" . byte-recompile-directory))
 
-  ;; (bind-keys ("C-c m k" . kmacro-keymap)
-  ;;            ("C-c m m" . emacs-toggle-size)) 
-  )
-
-
+  (bind-keys ("<S-return>" #'open-line-below)))
 
 (use-package projectile
   :disabled t
@@ -3384,7 +2753,7 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
   )
 
 (use-package smart-mode-line
-  :disabled t
+  :disabled t 
   :load-path "site-lisp/smart-mode-line"
   :defer 5
   :config
@@ -3776,6 +3145,98 @@ Inspired by Erik Naggum's `recursive-edit-with-single-window'."
 
 ;;; Layout
 
+(defvar display-name
+  (let ((width (display-pixel-width)))
+    (cond ((>= width 2560) 'retina-imac)
+          ((= width 1920) 'macbook-pro-vga)
+          ((= width 1680) 'macbook-pro)
+          ((= width 1440) 'retina-macbook-pro))))
+
+(defvar emacs-min-top 30)
+
+(defvar emacs-min-left
+  (cond ((eq display-name 'retina-imac) 975)
+        ((eq display-name 'macbook-pro-vga) 521)
+        ((eq display-name 'macbook-pro-vga) 837)
+        (t 521)))
+
+(defconst emacs-min-height
+  (cond (running-alternate-emacs 57)
+        ((eq display-name 'retina-imac) 57)
+        ((eq display-name 'macbook-pro-vga) 67)
+        ((eq display-name 'macbook-pro) 47)
+        (t 44)))
+
+(defconst emacs-min-width
+  (cond (running-alternate-emacs 90)
+        ((eq display-name 'retina-imac) 100)
+        (t 100)))
+
+(defvar emacs-min-font
+  (cond
+   ((eq display-name 'retina-imac)
+    (if running-alternate-emacs
+        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
+      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
+      "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1"
+      ))
+   ((eq display-name 'macbook-pro)
+    (if running-alternate-emacs
+        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
+      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
+      "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
+      ))
+   ((eq display-name 'macbook-pro-vga)
+    (if running-alternate-emacs
+        "-*-Myriad Pro-normal-normal-normal-*-20-*-*-*-p-0-iso10646-1"
+      ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
+      "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
+      ))
+   ((string= (system-name) "ubuntu")
+    ;; "-*-Source Code Pro-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1"
+    "-*-Hack-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+    )
+   (t
+    (if running-alternate-emacs
+        "-*-Myriad Pro-normal-normal-normal-*-17-*-*-*-p-0-iso10646-1"
+      ;; "-*-Source Code Pro-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1"
+      "-*-Hack-normal-normal-normal-*-16-*-*-*-m-0-iso10646-1"
+      ))))
+
+(let ((frame-alist
+       (list (cons 'top    emacs-min-top)
+             (cons 'left   emacs-min-left)
+             (cons 'height emacs-min-height)
+             (cons 'width  emacs-min-width)
+             (cons 'font   emacs-min-font))))
+  (setq initial-frame-alist frame-alist))
+
+(defun emacs-min ()
+  (interactive)
+  (set-frame-parameter (selected-frame) 'fullscreen nil)
+  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
+  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
+  (set-frame-font emacs-min-font)
+  (set-frame-parameter (selected-frame) 'top emacs-min-top)
+  (set-frame-parameter (selected-frame) 'left emacs-min-left)
+  (set-frame-parameter (selected-frame) 'height emacs-min-height)
+  (set-frame-parameter (selected-frame) 'width emacs-min-width)
+  )
+
+(if window-system
+    (add-hook 'after-init-hook 'emacs-min))
+
+(defun emacs-max ()
+  (interactive)
+  (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
+  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
+  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
+
+(defun emacs-toggle-size ()
+  (interactive)
+  (if (> (cdr (assq 'width (frame-parameters))) 100)
+      (emacs-min)
+    (emacs-max)))
 
 ;;; Finalization
 
