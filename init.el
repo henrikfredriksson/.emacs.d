@@ -67,7 +67,7 @@
   (require 'use-package)
   (setq use-package-verbose nil)
   (setq use-package-expand-minimally t)
-  (setq use-package-compute-statistics nil))
+  (setq use-package-compute-statistics t))
 
 ;;(require 'bind-key)
 (require 'diminish nil t)
@@ -99,8 +99,8 @@
            (goto-char (point-min))
            (read (current-buffer))))
         (suffix (cond ;; ((string= "emacs25alt" emacs-environment) "alt")
-                      ((string= "emacsHEAD" emacs-environment) "alt")
-                      (t "other"))))
+		 ((string= "emacsHEAD" emacs-environment) "alt")
+		 (t "other"))))
     (setq running-development-emacs (string= suffix "dev")
           running-alternate-emacs (string= suffix "alt")
           user-data-directory
@@ -129,10 +129,6 @@
              "share/info" (car (nix-read-environment emacs-environment)))
           "~/share/info")
         "~/.nix-profile/share/info")))
-
-;;; Enable disabled commands
-
-
 
 ;;; Configure libraries
 
@@ -203,20 +199,9 @@
 
 ;;; Keybindings
 
-
-
-
-(autoload 'indent-according-to-mode "indent" nil t)
-
-(define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
-
-
 (eval-when-compile
   (setplist 'flet (use-package-plist-delete (symbol-plist 'flet)
                                             'byte-obsolete-info)))
-
-
-
 
 ;;; Keymaps
 
@@ -243,15 +228,6 @@
           ("C-. r" . my-ctrl-dot-r-map))))
 
 ;;; Packages
-
-(use-package dot-gnus
-  :disabled t
-  :load-path ("override/gnus/lisp" "override/gnus/contrib")
-  :bind (("M-G"   . switch-to-gnus)
-         ("C-x m" . compose-mail))
-  :init
-  (setq gnus-init-file (expand-file-name "dot-gnus" user-emacs-directory)
-        gnus-home-directory "~/Messages/Gnus/"))
 
 
 (use-package ggtags
@@ -559,6 +535,7 @@
   (avy-setup-default))
 
 (use-package backup-each-save
+  :disabled t
   :commands backup-each-save
   :preface
   (defun show-backups ()
@@ -665,7 +642,7 @@
                   "\\(archive/sent/\\|recentf\\`\\)\\)")
           filename)))
 
-  (setq backup-each-save-filter-function 'backup-each-save-filter)
+  ;; (setq backup-each-save-filter-function 'backup-each-save-filter)
 
   (defun my-dont-backup-files-p (filename)
     (unless (string-match filename "\\(archive/sent/\\|recentf\\`\\)")
@@ -789,9 +766,10 @@
   :disabled t
   :mode "\\.use\\'")
 
-(use-package cursor-chg
+(use-package cursor-chg 
   ;; :commands change-cursor-mode
   :config
+  (setq curchg-default-cursor-color 'black)
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
@@ -975,6 +953,15 @@
   :disabled t
   :mode (".*Dockerfile.*" . dockerfile-mode)
   :load-path "site-lisp/dockerfile-mode/")
+
+(use-package dot-gnus
+  :disabled t
+  :load-path ("override/gnus/lisp" "override/gnus/contrib")
+  :bind (("M-G"   . switch-to-gnus)
+         ("C-x m" . compose-mail))
+  :init
+  (setq gnus-init-file (expand-file-name "dot-gnus" user-emacs-directory)
+        gnus-home-directory "~/Messages/Gnus/"))
 
 (use-package dot-org
   :load-path ("override/org-mode/contrib/lisp"
@@ -1821,6 +1808,9 @@
   :defer
   :config
   (auto-image-file-mode 1))
+
+(use-package indent
+  :commands indent-according-to-mode)
 
 (use-package indent-shift
   :bind (("C-c <" . indent-shift-left)
@@ -2753,7 +2743,7 @@
   )
 
 (use-package smart-mode-line
-  :disabled t 
+  :disabled t
   :load-path "site-lisp/smart-mode-line"
   :defer 5
   :config
@@ -3247,10 +3237,10 @@
 
   (add-hook 'after-init-hook
             `(lambda ()
-               (let ((elapsed (float-time (time-subtract (current-time)
-                                                         emacs-start-time))))
+               (let ((elapsed
+                      (float-time
+                       (time-subtract (current-time) emacs-start-time))))
                  (message "Loading %s...done (%.3fs) [after-init]"
-                          ,load-file-name elapsed)))
-            t))
+                          ,load-file-name elapsed))) t))
 
 ;;; init.el ends here
