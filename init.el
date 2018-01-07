@@ -1,7 +1,9 @@
+(require 'profiler)
+(profiler-start 'cpu+mem)
+
 (defconst emacs-start-time (current-time))
 
-(setq message-log-max 16384
-      load-prefer-newer t)
+(setq message-log-max 16384)
 
 ;;; Functions
 
@@ -65,9 +67,9 @@
           (nix-read-environment emacs-environment)))
 
   (require 'use-package)
-  (setq use-package-verbose nil)
-  (setq use-package-expand-minimally t)
-  (setq use-package-compute-statistics t))
+  (setq use-package-verbose 'debug)
+  (setq use-package-expand-minimally nil)
+  (setq use-package-compute-statistics nil))
 
 ;;(require 'bind-key)
 (require 'diminish nil t)
@@ -88,7 +90,7 @@
 (defvar running-alternate-emacs nil)
 (defvar running-development-emacs nil)
 
-(defvar user-data-directory (expand-file-name "data" user-emacs-directory))
+(defvar user-data-directory (emacs-path "data"))
 
 (if (string= "emacs26" emacs-environment)
     (load (expand-file-name "settings" user-emacs-directory))
@@ -183,6 +185,7 @@
 (use-package popup-pos-tip :defer t  :load-path "lib")
 (use-package popwin        :defer t  :load-path "site-lisp/popwin")
 (use-package pos-tip       :defer t  :load-path "lib")
+(use-package pythonic      :defer t  :load-path "site-lisp/pythonic")
 (use-package request       :defer t  :load-path "lib/emacs-request")
 (use-package rich-minority :defer t  :load-path "lib/rich-minority")
 (use-package s             :defer t  :load-path "lib/s-el")
@@ -227,6 +230,9 @@
           ("C-. m" . my-ctrl-dot-m-map)
           ("C-. r" . my-ctrl-dot-r-map))))
 
+(when (eq system-type 'darwin)
+  (setq mac-right-option-modifier 'none))
+
 ;;; Packages
 
 
@@ -260,7 +266,7 @@
       (insert "*/\n")))
 
   (defvar printf-index 0)
-  
+
   (defun insert-counting-printf (arg)
     (interactive "P")
     (if arg
@@ -475,11 +481,9 @@
 (use-package aggressive-indent
   :load-path "site-lisp/aggressive-indent-mode"
   :diminish
-  :hook (emacs-lisp-mode . aggressive-indent-mode)
-  :hook (python-mode . aggressive-indent-mode))
+  :hook (emacs-lisp-mode . aggressive-indent-mode))
 
-(use-package alert
-  :disabled t
+(use-package alert 
   :load-path "lisp/alert"
   :commands alert)
 
@@ -535,7 +539,6 @@
   (avy-setup-default))
 
 (use-package backup-each-save
-  :disabled t
   :commands backup-each-save
   :preface
   (defun show-backups ()
@@ -745,7 +748,7 @@
     (ansi-color-process-output nil)
     (set (make-local-variable 'comint-last-output-start)
          (point-marker)))
-  
+
   :config
   (add-hook 'compilation-filter-hook #'compilation-ansi-color-process-output))
 
@@ -769,7 +772,7 @@
 (use-package cursor-chg 
   ;; :commands change-cursor-mode
   :config
-  (setq curchg-default-cursor-color 'black)
+  (setq curchg-default-cursor-color 'Black)
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
@@ -976,7 +979,7 @@
          ("C-c S" . org-store-link)
          ("C-c l" . org-insert-link)
          ("C-. n" . org-velocity-read))
-  ;; :defer 10
+  :defer 10
   :config
   (setq org-babel-python-command    "/anaconda3/bin/python3.6")
   ;; (when (and nil
@@ -1244,7 +1247,7 @@
   (setenv "PATH" (concat "~/Library/Haskell/bin:"
                          (getenv "PATH")))
   (add-to-list 'exec-path "~/Library/Haskell/bin")
-  
+
   :preface
   (defvar interactive-haskell-mode-map)
   (defun snippet (name)
@@ -1370,6 +1373,7 @@
 
 
 (use-package helm-autoloads
+  :disabled t
   :load-path "site-lisp/helm"
   :if (not running-alternate-emacs)
   :defer 5
@@ -1386,11 +1390,13 @@
     :load-path "site-lisp/helm"))
 
 (use-package helm-dash
-  :after hlm
+  :disabled y
+  :after helm
   :load-path "site-lisp/helm-dash"
   :commands helm-dash)
 
 (use-package helm-descbinds
+  :disabled t
   :load-path "site-lisp/helm-descbinds"
   :after helm
   :bind ("C-h b" . helm-descbinds)
@@ -1398,18 +1404,16 @@
   (fset 'describe-bindings 'helm-descbinds))
 
 (use-package helm-describe-modes
+  :disabled t
   :load-path "site-lisp/helm-describe-modes"
   :after helm
   :bind ("C-h m" . helm-describe-modes))
 
 (use-package helm-navi
+  :disabled t
   :load-path "site-lisp/helm-navi"
   :after (helm navi)
   :commands helm-navi)
-
- 
-  
-
 
 (use-package hi-lock
   :bind (("M-o l" . highlight-lines-matching-regexp)
@@ -1644,7 +1648,6 @@
   (use-package hl-line+))
 
 (use-package hydra
-  :disabled t
   :load-path "site-lisp/hydra"
   :defer 10
   :config
@@ -1867,7 +1870,7 @@
 
 (use-package ivy
   :load-path "site-lisp/swiper"
-  :defer 1
+  :defer 5
   :diminish ivy-mode
   :bind (("C-x b" . ivy-switch-buffer)
          ("C-x B" . ivy-switch-buffer-other-window)
@@ -2019,6 +2022,13 @@
 (use-package highlight-cl
   :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
 
+(use-package indent-guide
+  :disabled t
+  :load-path "site-lisp/indent-guide"
+  :hook (python-mode . indent-guide-mode) 
+  :config
+  (set-face-background 'indent-guide-face "white")
+  (setq indent-guide-char ":"))
 
 (use-package info-lookmore
   :load-path "site-lisp/info-lookmore"
@@ -2398,84 +2408,85 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
+  ;;(set-face-attribute 'modeline-buffer-id nil :foreground "DarkGreen")
   :config
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
 
-  (bind-keys ("C-z" . delete-other-windows)
-             ("C-*" . goto-matching-parens)
+  (bind-keys ("C-z"             . delete-other-windows)
+             ("C-*"             . goto-matching-parens)
 
-             ("M-!"        . async-shell-command)
-             ("M-'"        . insert-pair)
-             ("M-\""       . insert-pair)
-             ("M-`"        . other-frame)
-             ("M-j"        . delete-indentation-forward)
-             ("M-J"        . delete-indentation)
-             ("M-L"        . mark-line)
-             ("M-S"        . mark-sentence) 
-             ("M-<return>" . open-line-above)
+             ("M-!"             . async-shell-command)
+             ("M-'"             . insert-pair)
+             ("M-\""            . insert-pair)
+             ("M-`"             . other-frame)
+             ("M-j"             . delete-indentation-forward)
+             ("M-J"             . delete-indentation)
+             ("M-L"             . mark-line)
+             ;;("M-S"             . mark-sentence) 
+             ("M-<return>"      . open-line-above)
 
-             ("M-g c" . goto-char)
+             ("M-g c"           . goto-char)
 
              ("<C-M-backspace>" . backward-kill-sexp)
 
-             ("C-h f"   . counsel-describe-function)
-             ("C-h v"   . describe-variable)
+             ("C-h f"           . counsel-describe-function)
+             ("C-h v"           . describe-variable)
 
-             ("C-x d"   . delete-whitespace-rectangle)
-             ("C-x t"   . toggle-truncate-lines)
-             ("C-x K"   . delete-current-buffer-file)
+             ("C-x d"           . delete-whitespace-rectangle)
+             ("C-x t"           . toggle-truncate-lines)
+             ("C-x K"           . delete-current-buffer-file)
 
-             ("C-x C-d" . duplicate-line)
-             ("C-x C-e" . pp-eval-last-sexp)
-             ("C-x C-v" . find-alternate-file-with-sudo)
+             ("C-x C-d"         . duplicate-line)
+             ("C-x C-e"         . pp-eval-last-sexp)
+             ("C-x C-v"         . find-alternate-file-with-sudo)
 
-             ("C-x M-q" . refill-paragraph)
+             ("C-x M-q"         . refill-paragraph)
 
-             ("C-c SPC" . just-one-space)
-             ("C-c 0"   . recursive-edit-preserving-window-config-pop)
-             ("C-c 1"   . recursive-edit-preserving-window-config)
-             ("C-c g"   . goto-line)
-             ("C-c f"   . flush-lines)
-             ("C-c k"   . keep-lines)
-             ("C-c m" . emacs-toggle-size)
-             ("C-c n"   . insert-user-timestamp)
-             ("C-c q"   . fill-region)
-             ;; ("C-c r"   . replace-regexp)
-             ("C-c s"   . replace-string)
-             ("C-c u"   . rename-uniquely)
-             ("C-c V"   . view-clipboard)
-             ("C-c )"   . close-all-parentheses)
-             ("C-c ="   . count-matches)
-             ("C-c ;" . comment-or-uncomment-region)
+             ("C-c SPC"         . just-one-space)
+             ("C-c 0"           . recursive-edit-preserving-window-config-pop)
+             ("C-c 1"           . recursive-edit-preserving-window-config)
+             ("C-c g"           . goto-line)
+             ("C-c f"           . flush-lines)
+             ("C-c k"           . keep-lines)
+             ("C-c m"           . emacs-toggle-size)
+             ("C-c n"           . insert-user-timestamp)
+             ("C-c q"           . fill-region)
+             ;; ("C-c r"        . replace-regexp)
+             ("C-c s"           . replace-string)
+             ("C-c u"           . rename-uniquely)
+             ("C-c V"           . view-clipboard)
+             ("C-c )"           . close-all-parentheses)
+             ("C-c ="           . count-matches)
+             ("C-c ;"           . comment-or-uncomment-region)
 
-             ("C-c C-z" . delete-to-end-of-buffer)
-             ("C-c C-0" . copy-current-buffer-name)
-             ("C-c M-q" . unfill-paragraph))
+             ("C-c C-z"         . delete-to-end-of-buffer)
+             ("C-c C-0"         . copy-current-buffer-name)
+             ("C-c M-q"         . unfill-paragraph))
 
-  (bind-keys ("C-h e a" . apropos-value)
-             ("C-h e e" . view-echo-area-messages)
-             ("C-h e f" . find-function)
-             ("C-h e k" . find-function-on-key)
-             ("C-h e l" . counsel-find-library)
-             ("C-h e u" . counsel-unicode-char)
-             ("C-h e v" . find-variable))
+  (bind-keys ("C-h e a"         . apropos-value)
+             ("C-h e e"         . view-echo-area-messages)
+             ("C-h e f"         . find-function)
+             ("C-h e k"         . find-function-on-key)
+             ("C-h e l"         . counsel-find-library)
+             ("C-h e u"         . counsel-unicode-char)
+             ("C-h e v"         . find-variable))
 
-  (bind-keys ("C-c e E" . elint-current-buffer)
-             ("C-c e b" . do-eval-buffer)
-             ("C-c e c" . cancel-debug-on-entry)
-             ("C-c e d" . debug-on-entry)
-             ("C-c e e" . toggle-debug-on-error)
-             ("C-c e f" . emacs-lisp-byte-compile-and-load)
-             ("C-c e i" . crux-find-user-init-file)
-             ("C-c e j" . emacs-lisp-mode)
-             ("C-c e l" . counsel-find-library)
-             ("C-c e P" . check-papers)
-             ("C-c e r" . do-eval-region)
-             ("C-c e s" . scratch)
-             ("C-c e p" . python-mode)
-             ("C-c e z" . byte-recompile-directory))
+  (bind-keys ("C-c e E"         . elint-current-buffer)
+             ("C-c e b"         . do-eval-buffer)
+             ("C-c e c"         . cancel-debug-on-entry)
+             ("C-c e d"         . debug-on-entry)
+             ("C-c e e"         . toggle-debug-on-error)
+             ("C-c e f"         . emacs-lisp-byte-compile-and-load)
+             ("C-c e i"         . crux-find-user-init-file)
+             ("C-c e j"         . emacs-lisp-mode)
+             ("C-c e l"         . counsel-find-library)
+             ("C-c e P"         . check-papers)
+             ("C-c e r"         . do-eval-region)
+             ("C-c e s"         . scratch)
+             ("C-c e p"         . python-mode)
+             ("C-c e z"         . byte-recompile-directory))
 
-  (bind-keys ("<S-return>" #'open-line-below)))
+  (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
   :disabled t
@@ -2503,28 +2514,26 @@
       (((class color) (background light))
        (:foreground "grey55")))
     "Face used to dim parentheses.")
-  :config
-  
-  (use-package pythonic
-    :load-path "site-lisp/pythonic")
+  :config 
 
   (use-package anaconda-mode
     :load-path "site-lisp/anaconda-mode"
     :diminish (anaconda-mode))
-  
-  (use-package company-anaconda
+
+  (use-package company-anaconda 
     :load-path "site-lisp/company-anaconda"
+    :after company-mode
     :config
     (add-hook 'python-mode-hook 'anaconda-mode)
     (add-to-list 'company-backends '(company-anaconda :with company-capf))
-    
+
     ;; (eval-after-load "company"
     ;;   '(add-to-list 'company-backends 'company-anaconda))
     )
 
 
   (defvar python-mode-initialized nil)
-  
+
   (defun my-python-mode-hook ()
     (unless python-mode-initialized
       (setq python-mode-initialized t)
@@ -2734,57 +2743,47 @@
   (setq inferior-lisp-program "/Users/johnw/.nix-profile/bin/sbcl"
         slime-contribs '(slime-fancy)))
 
-(use-package nyan-mode
-  :disabled t
-  :load-path "site-lisp/nyan-mode"
-  :config
-  (nyan-mode)
-  ;;(nyan-start-animation)
-  )
-
 (use-package smart-mode-line
-  :disabled t
   :load-path "site-lisp/smart-mode-line"
-  :defer 5
+  :defer 10
   :config
-  (setq sml/theme 'light)
-  (sml/setup))
+  (sml/setup)
+  (sml/apply-theme 'light)
+  (remove-hook 'display-time-hook 'sml/propertize-time-string))
 
 (use-package smart-tabs-mode
   :commands smart-tabs-mode
   :load-path "site-lisp/smarttabs")
 
-(use-package smartparens
+(use-package smartparens 
   :load-path "site-lisp/smartparens"
   :diminish (smartparens-mode)
   :config
-  (bind-key "C-<right>"    #'sp-forward-slurp-sexp)
-  (bind-key "C-<left>"     #'sp-forward-barf-sexp)
-  (bind-key "C-M-<left>"   #'sp-backward-slurp-sexp)
-  (bind-key "C-M-<right>"  #'sp-backward-barf-sexp)
-  
-  (bind-key "C-d"          #'sp-delete-char)
-  (bind-key "C-k"          #'sp-kill-sexp)
-  (bind-key "M-d"          #'sp-kill-word)
-  (bind-key "C-M-f"        #'sp-forward-sexp)
-  (bind-key "C-. D"        #'sp-down-sexp)
-  (bind-key "C-M-n"        #'sp-up-sexp)
-  (bind-key "M-I"          #'sp-splice-sexp)
-  (bind-key "M-k"          #'sp-raise-sexp)
-  (bind-key "M-S"          #'sp-split-sexp)
-  (bind-key "M-J"          #'sp-join-sexp)
+  (bind-keys ("C-<right>"    . sp-forward-slurp-sexp)
+             ("C-<left>"     . sp-forward-barf-sexp)
+             ("C-M-<left>"   . sp-backward-slurp-sexp)
+             ("C-M-<right>"  . sp-backward-barf-sexp)
 
-  (bind-key "M-s"          #'sp-split-sexp) 
-  (bind-key "M-J"          #'sp-join-sexp)  
-  (bind-key "C-M-S"        #'sp-rewrap-sexp)
-  (bind-key "M-<down>"     #'sp-splice-sexp-killing-forward)
-  (bind-key "M-q"          #'sp-indent-defun)
-  (bind-key "C-j"          #'sp-newline)
+             ("C-d"          . sp-delete-char)
+             ;;("C-k"          . sp-kill-whole-line)
+             ("M-d"          . sp-kill-word)
+             ("C-M-f"        . sp-forward-sexp)
+             ("C-. D"        . sp-down-sexp)
+             ("C-M-n"        . sp-up-sexp)
+             ("M-I"          . sp-splice-sexp)
+             ("M-k"          . sp-raise-sexp)
+             ("M-S"          . sp-split-sexp)
+             ("M-J"          . sp-join-sexp)
+             
+             ("C-M-S"        . sp-rewrap-sexp)
+             ("M-<down>"     . sp-splice-sexp-killing-forward)
+             ;;("M-q"          . sp-indent-defun)
+             ("C-j"          . sp-newline)
 
-  (bind-key "C-. C" #'sp-convolute-sexp) 
-  (bind-key "C-. B" #'sp-splice-sexp-killing-backward)
-  (bind-key "C-. f" #'sp-splice-sexp-killing-forward)
-  (bind-key "C-. a" #'sp-add-to-next-sexp))
+             ("C-. C" . sp-convolute-sexp) 
+             ("C-. B" . sp-splice-sexp-killing-backward)
+             ("C-. f" . sp-splice-sexp-killing-forward)
+             ("C-. a" . sp-add-to-next-sexp)))
 
 (use-package smerge-mode
   :commands smerge-mode
@@ -2820,7 +2819,6 @@
 
 (use-package tex-site
   :load-path "site-lisp/auctex"
-  :defer t
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
@@ -2845,9 +2843,10 @@
                                            (match-end 2))))
               (add-to-list 'latex-help-cmd-alist (cons key value))))))
     latex-help-cmd-alist)
-  
-  
+
+
   (use-package company-math
+    :disabled
     :load-path "site-lisp/site-company/company-math"
     :after company-mode
     :preface
@@ -2856,18 +2855,19 @@
       :defer t))
 
   (use-package company-auctex
+    :disabled t
     :load-path "site-lisp/company-auctex"
     :after company-mode
     :config
     (company-auctex-init)
     )
-  
+
   (setq TeX-auto-save nil)
   (setq TeX-parse-self t)
   (setq-default TeX-master nil)
   (setq TeX-PDF-mode t)
 
-  
+
   (use-package ebib
     :disabled  t
     :load-path "site-lisp/ebib"
@@ -2875,40 +2875,43 @@
     (use-package parsebib :load-path "site-lisp/parsebib"))
 
   (use-package latex
+    :disabled t
     :config
     (use-package preview)
     (add-hook 'LaTeX-mode-hook 'reftex-mode)
-    
-    
-    ;; (load (expand-file-name "site-lisp/auctex/style/minted"
-                            ;; user-emacs-directory))
 
-    
+
+    ;; (load (expand-file-name "site-lisp/auctex/style/minted"
+    ;; user-emacs-directory))
+
+
     ;; (info-lookup-add-help :mode 'LaTeX-mode
     ;;                       :regexp ".*"
     ;;                       :parse-rule "\\\\?[a-zA-Z]+\\|\\\\[^a-zA-Z]"
     ;;                       :doc-spec '(("(latex2e)Concept Index" )
     ;;                                   ("(latex2e)Command Index"))))
 
-  )
-  
+    )
+  (setq TeX-view-program-list (quote (("Preview" "\"open -a Preview.app %o\""))))
   (use-package latex-extra
     :load-path "site-lisp/latex-extra"
+    :disabled t
     :diminish latex-extra-mode
     :config
     (add-hook 'LaTeX-mode-hook #'latex-extra-mode))
-  
+
   (defun my-latex-mode-hook ()
     (company-mode t)
     (LaTeX-math-mode t)  
     (smartparens-mode t)
     (flycheck-mode t)
     )
-  
+
   (add-hook 'LaTeX-mode-hook 'my-latex-mode-hook)
   )
 
 (use-package texinfo
+  :disabled t
   :defines texinfo-section-list
   :mode ("\\.texi\\'" . texinfo-mode)
   :config
@@ -3097,40 +3100,29 @@
 
 (use-package yasnippet
   :load-path "site-lisp/yasnippet"
-  ;;:diminish yas-minor-mode
-  ;;:commands (yas-expand yas-minor-mode)
-  ;;:functions (yas-guess-snippet-directories yas-table-name)
-  ;;:defines (yas-guessed-modes)
+  :defer 10
+  :diminish yas-minor-mode
+  :bind (("C-c y d" . yas-load-directory)
+         ("C-c y i" . yas-insert-snippet)
+         ("C-c y f" . yas-visit-snippet-file)
+         ("C-c y n" . yas-new-snippet)
+         ("C-c y t" . yas-tryout-snippet)
+         ("C-c y l" . yas-describe-tables)
+         ("C-c y g" . yas/global-mode)
+         ("C-c y m" . yas/minor-mode)
+         ("C-c y a" . yas-reload-all)
+         ("C-c y x" . yas-expand))
+  :bind (:map yas-keymap
+              ("C-i" . yas-next-field-or-maybe-expand))
   :mode ("/\\.emacs\\.d/snippets/" . snippet-mode)
-  :bind (("C-c y TAB" . yas-expand)
-         ("C-c y s"   . yas-insert-snippet)
-         ("C-c y n"   . yas-new-snippet)
-         ("C-c y v"   . yas-visit-snippet-file))
-  :preface
-  ;; (defun yas-new-snippet (&optional choose-instead-of-guess)
-  ;;   (interactive "P")
-  ;;   (let ((guessed-directories (yas-guess-snippet-directories)))
-  ;;     (switch-to-buffer "*new snippet*")
-  ;;     (erase-buffer)
-  ;;     (kill-all-local-variables)
-  ;;     (snippet-mode)
-  ;;     (set (make-local-variable 'yas-guessed-modes)
-  ;;          (mapcar #'(lambda (d) (intern (yas-table-name (car d))))
-  ;;                  guessed-directories))
-  ;;     (unless (and choose-instead-of-guess
-  ;;                  (not (y-or-n-p "Insert a snippet with useful headers? ")))
-  ;;       (yas-expand-snippet
-  ;;        (concat "\n"
-  ;;                "# -*- mode: snippet -*-\n"
-  ;;                "# name: $1\n"
-  ;;                "# --\n"
-  ;;                "$0\n")))))
-
   :config
-  (yas-load-directory "~/.emacs.d/snippets/")
-  (yas-global-mode 1)
+  (yas-load-directory (emacs-path "snippets"))
+  (yas-global-mode 1))
 
-  (bind-key "C-i" #'yas-next-field-or-maybe-expand yas-keymap))
+(use-package yasnippet-snippets
+  :disabled t
+  :load-path "site-lisp/yasnippet-snippets"
+  :after yasnippet)
 
 
 ;;; Layout

@@ -48,6 +48,10 @@
 (defconst my-org-soft-blue   "#e8eff9")
 (defconst my-org-soft-purple "#f3e8f9")
 
+
+(add-to-list 'org-structure-template-alist '("src" "#+BEGIN_SRC\n\n#+END_SRC"))
+
+
 ;; (declare-function cfw:open-calendar-buffer "calfw")
 ;; (declare-function cfw:refresh-calendar-buffer "calfw")
 ;; (declare-function cfw:org-create-source "calfw-org")
