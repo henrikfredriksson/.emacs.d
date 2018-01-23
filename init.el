@@ -1,5 +1,5 @@
-(require 'profiler)
-(profiler-start 'cpu+mem)
+;; (require 'profiler)
+;; (profiler-start 'cpu+mem)
 
 (defconst emacs-start-time (current-time))
 
@@ -67,7 +67,8 @@
           (nix-read-environment emacs-environment)))
 
   (require 'use-package)
-  (setq use-package-verbose 'debug)
+  ;; (setq use-package-verbose 'debug)
+  (setq use-package-verbose t)
   (setq use-package-expand-minimally nil)
   (setq use-package-compute-statistics nil))
 
@@ -81,9 +82,9 @@
 
 (defun get-jobhours-string ()                                 
   (with-current-buffer (get-buffer "*scratch*")               
-   (let ((str (shell-command-to-string "jobhours")))          
-     (require 'ansi-color)
-     (ansi-color-apply (substring str 0 (1- (length str)))))))
+    (let ((str (shell-command-to-string "jobhours")))          
+      (require 'ansi-color)
+      (ansi-color-apply (substring str 0 (1- (length str)))))))
 
 ;;; Load customization settings
 
@@ -480,6 +481,7 @@
 
 (use-package aggressive-indent
   :load-path "site-lisp/aggressive-indent-mode"
+  :defer
   :diminish
   :hook (emacs-lisp-mode . aggressive-indent-mode))
 
@@ -532,8 +534,8 @@
   (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1))))
 
 (use-package avy
-  :demand t
   :load-path "site-lisp/avy"
+  :defer 5
   :bind ("M-h" . avy-goto-char)
   :config
   (avy-setup-default))
@@ -769,7 +771,8 @@
   :disabled t
   :mode "\\.use\\'")
 
-(use-package cursor-chg 
+(use-package cursor-chg
+  :defer 5
   ;; :commands change-cursor-mode
   :config
   (setq curchg-default-cursor-color 'Black)
@@ -2408,7 +2411,6 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
-  ;;(set-face-attribute 'modeline-buffer-id nil :foreground "DarkGreen")
   :config
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
 
@@ -2525,7 +2527,7 @@
     :after company-mode
     :config
     (add-hook 'python-mode-hook 'anaconda-mode)
-    (add-to-list 'company-backends '(company-anaconda :with company-capf))
+    ;;(add-to-list 'company-backends '(company-anaconda :with company-capf))
 
     ;; (eval-after-load "company"
     ;;   '(add-to-list 'company-backends 'company-anaconda))
@@ -2749,7 +2751,9 @@
   :config
   (sml/setup)
   (sml/apply-theme 'light)
-  (remove-hook 'display-time-hook 'sml/propertize-time-string))
+  (remove-hook 'display-time-hook 'sml/propertize-time-string)
+  (when (eq system-type 'darwin)
+    (setq mac-right-option-modifier 'none)))
 
 (use-package smart-tabs-mode
   :commands smart-tabs-mode
@@ -2804,6 +2808,9 @@
   :disabled t
   :bind ("<f8>" . stopwatch))
 
+(use-package swap-regions 
+  :load-path "site-lisp/swap-regions"
+  :commands swap-regions)
 
 (use-package swiper-helm
   :disabled t
@@ -2867,7 +2874,7 @@
   (setq-default TeX-master nil)
   (setq TeX-PDF-mode t)
 
-
+  
   (use-package ebib
     :disabled  t
     :load-path "site-lisp/ebib"
