@@ -8,7 +8,6 @@
  '(TeX-auto-save t)
  '(TeX-auto-untabify t)
  '(TeX-electric-escape t)
- ;;'(TeX-engine (quote xetex))
  '(TeX-expand-list
    (quote
     (("%p" TeX-printer-query)
@@ -159,7 +158,7 @@
  '(abbrev-file-name "~/.emacs.d/abbrevs")
  '(ac-auto-show-menu 1.0)
  '(ac-auto-start 3)
- '(ac-comphist-file "~/.emacs.d/data-other/ac-comphist.dat")
+ '(ac-comphist-file "~/.emacs.d/data-other-other-other/ac-comphist.dat")
  '(ac-dwim nil)
  '(ac-ignore-case nil)
  '(ac-trigger-key "<tab>")
@@ -200,7 +199,7 @@
  '(auto-revert-use-notify nil)
  '(auto-save-file-name-transforms (quote (("\\`/[^/]*:.*" "/tmp" t))))
  '(auto-save-interval 64)
- '(auto-save-list-file-prefix "~/.emacs.d/data-other/auto-save-list/.saves-")
+ '(auto-save-list-file-prefix "~/.emacs.d/data-other-other-other/auto-save-list/.saves-")
  '(auto-save-timeout 2)
  '(avy-case-fold-search nil)
  '(avy-keys (quote (97 111 101 117 105 100 104 116 110 115)))
@@ -226,15 +225,16 @@
      ("HOME" . "Home")
      ("^$" . "Work"))))
  '(bbdb/mail-auto-create-p nil)
- '(bc-bookmark-file "~/.emacs.d/data-other/breadcrumb")
+ '(bc-bookmark-file "~/.emacs.d/data-other-other-other/breadcrumb")
  '(bind-key-segregation-regexp "\\`\\(\\(C-[chx.] \\|M-[gso] \\)\\([CM]-\\)?\\|.+-\\)")
  '(bm-buffer-persistence t)
  '(bm-cycle-all-buffers t)
  '(bm-highlight-style (quote bm-highlight-only-fringe))
  '(bm-in-lifo-order t)
- '(bm-repository-file "/Users/johnw/.emacs.d/data-other/bm-repository")
- '(bmkp-bmenu-commands-file "~/.emacs.d/data-other/bmk-bmenu-commands.el")
- '(bmkp-bmenu-state-file "~/.emacs.d/data-other/bmk-bmenu-state.el")
+ '(bm-repository-file
+   "/Users/johnw/.emacs.d/data-other-other-other/bm-repository")
+ '(bmkp-bmenu-commands-file "~/.emacs.d/data-other-other-other/bmk-bmenu-commands.el")
+ '(bmkp-bmenu-state-file "~/.emacs.d/data-other-other-other/bmk-bmenu-state.el")
  '(bmkp-crosshairs-flag nil)
  '(bmkp-last-as-first-bookmark-file "~/doc/tasks/bookmarks")
  '(bookmark-default-file "~/doc/tasks/bookmarks")
@@ -397,7 +397,7 @@
  '(dired-omit-mode nil t)
  '(dired-recursive-copies (quote always))
  '(dired-recursive-deletes (quote always))
- '(diredful-init-file "~/.emacs.d/data-other/diredful-conf.el")
+ '(diredful-init-file "~/.emacs.d/data-other-other-other/diredful-conf.el")
  '(display-time-interval 300)
  '(display-time-mode t)
  '(display-time-use-mail-icon t)
@@ -766,11 +766,11 @@
  '(ido-ignore-files
    (quote
     ("\\`CVS/" "\\`#" "\\`.#" "\\`\\.\\./" "\\`\\./" "\\`\\.DS_Store" "\\`\\.localized" "\\.sparsebundle/" "\\.dmg\\'")))
- '(ido-save-directory-list-file "~/.emacs.d/data-other/ido.last")
+ '(ido-save-directory-list-file "~/.emacs.d/data-other-other-other/ido.last")
  '(ido-use-virtual-buffers t)
  '(ido-use-virtual-buffers-automatically t)
  '(idris-interpreter-flags (quote ("-p" "effects")))
- '(image-dired-dir "~/.emacs.d/data-other/image-dired/")
+ '(image-dired-dir "~/.emacs.d/data-other-other-other/image-dired/")
  '(indent-tabs-mode nil)
  '(inhibit-startup-echo-area-message "johnw")
  '(inhibit-startup-screen t)
@@ -804,7 +804,6 @@
  '(ledger-binary-path "~/bin/ledger")
  '(ledger-file "/Volumes/Files/Accounts/ledger.dat")
  '(ledger-post-use-ido t)
- '(line-number-mode t)
  '(load-prefer-newer t)
  '(mac-pass-command-to-system nil)
  '(mac-pass-control-to-system nil)
@@ -824,18 +823,17 @@
  '(magit-stage-all-confirm nil)
  '(magit-unstage-all-confirm nil)
  '(magit-use-overlays nil)
- '(magithub-dir "/Users/johnw/.emacs.d/data-other/magithub")
+ '(magithub-dir "/Users/johnw/.emacs.d/data-other-other-other/magithub")
  '(make-backup-file-name-function (quote my-make-backup-file-name))
  '(malyon-stories-directory "~/doc/games")
  '(markdown-command "pandoc -f markdown_mmd -S" t)
  '(markdown-command-needs-filename t)
  '(markdown-enable-math t)
  '(markdown-open-command "open-markdown")
- '(mc/list-file "~/.emacs.d/data-other/mc-lists.el")
+ '(mc/list-file "~/.emacs.d/data-other-other-other/mc-lists.el")
  '(mediawiki-site-alist
    (quote
     (("Wikipedia" "https://en.wikipedia.org/w/" "jwiegley" "" nil "Main Page"))))
- '(menu-bar-mode t)
  '(moccur-following-mode-toggle nil)
  '(modelinepos-column-limit 80)
  '(mudel-mode-hook (quote (mudel-add-scroll-to-bottom)))
@@ -853,14 +851,15 @@
    (quote
     (gnus-thread-sort-by-most-recent-date gnus-thread-sort-by-total-score)))
  '(next-line-add-newlines nil)
- '(nix-buffer-directory-name "~/.emacs.d/data-other/nix-buffer")
- '(nov-save-place-file "~/.emacs.d/data-other/nov-places")
- '(ns-alternate-modifier (quote alt))
+ '(nix-buffer-directory-name "~/.emacs.d/data-other-other-other/nix-buffer")
+ '(nov-save-place-file "~/.emacs.d/data-other-other-other/nov-places")
+ '(ns-alternate-modifier (quote none))
  '(ns-command-modifier (quote meta))
  '(ns-function-modifier (quote hyper))
- '(ns-right-alternate-modifier (quote super))
+ '(ns-right-alternate-modifier (quote none))
  '(ns-right-control-modifier (quote hyper))
- '(nsm-settings-file "/Users/johnw/.emacs.d/data-other/network-security.data")
+ '(nsm-settings-file
+   "/Users/johnw/.emacs.d/data-other-other-other/network-security.data")
  '(nxml-sexp-element-flag t)
  '(nxml-slash-auto-complete-flag t)
  '(olivetti-hide-mode-line t)
@@ -1075,6 +1074,7 @@ SCHEDULED: %t
  '(org-drawers (quote ("PROPERTIES" "CLOCK" "LOGBOOK" "OUT")))
  '(org-edit-src-content-indentation 0)
  '(org-enforce-todo-dependencies t)
+ '(org-export-babel-evaluate nil)
  '(org-export-latex-classes
    (quote
     (("article" "\\documentclass[11pt]{article}"
@@ -1207,14 +1207,16 @@ SCHEDULED: %t
 '(pdf-tools-handle-upgrades nil)
 '(persistent-scratch-autosave-interval 30)
 '(persistent-scratch-backup-directory "~/.backups")
-'(persistent-scratch-file-name "~/.emacs.d/data-other/persistent-scratch")
-'(persistent-scratch-save-file "/Users/johnw/.emacs.d/data-other/persistent-scratch")
+'(persistent-scratch-file-name "~/.emacs.d/data-other-other-other/persistent-scratch")
+'(persistent-scratch-save-file
+"/Users/johnw/.emacs.d/data-other-other-other/persistent-scratch")
 '(pp^L-^L-string "                                            ")
-'(projectile-cache-file "~/.emacs.d/data-other/projectile.cache")
+'(projectile-cache-file "~/.emacs.d/data-other-other-other/projectile.cache")
 '(projectile-completion-system (quote ivy))
 '(projectile-enable-caching t)
 '(projectile-globally-ignored-files (quote ("TAGS" "GPATH" "GRTAGS" "GTAGS" "ID")))
-'(projectile-known-projects-file "~/.emacs.d/data-other/projectile-bookmarks.eld")
+'(projectile-known-projects-file
+"~/.emacs.d/data-other-other-other/projectile-bookmarks.eld")
 '(proof-auto-action-when-deactivating-scripting (quote retract))
 '(proof-autosend-enable nil)
 '(proof-electric-terminator-enable t)
@@ -1238,7 +1240,7 @@ SCHEDULED: %t
 (quote
  ("~\\'" "\\`out\\'" "\\.log\\'" "^/[^/]*:" "\\.el\\.gz\\'")))
 '(recentf-max-saved-items 2000)
-'(recentf-save-file "~/.emacs.d/data-other/recentf")
+'(recentf-save-file "~/.emacs.d/data-other-other-other/recentf")
 '(redisplay-dont-pause t t)
 '(reftex-plug-into-AUCTeX t t)
 '(reftex-trust-label-prefix t)
@@ -1246,7 +1248,7 @@ SCHEDULED: %t
 '(rng-schema-locating-files
 (quote
  ("schemas.xml" "~/src/schemas.xml" "~/.nix-profile/share/emacs/24.4/etc/schema/schemas.xml")))
-'(runner-init-file "~/.emacs.d/data-other/runner-conf.el")
+'(runner-init-file "~/.emacs.d/data-other-other-other/runner-conf.el")
 '(safe-local-eval-forms
 (quote
  ((add-hook
@@ -1318,10 +1320,10 @@ SCHEDULED: %t
  ("*eshell*" "*shell*" "*mail*" "*inferior-lisp*" "*ielm*" "*scheme*")))
 '(save-abbrevs (quote silently))
 '(save-interprogram-paste-before-kill t)
-'(save-kill-file-name "~/.emacs.d/data-other/kill-ring-saved.el")
+'(save-kill-file-name "~/.emacs.d/data-other-other-other/kill-ring-saved.el")
 '(scroll-bar-mode nil)
 '(select-enable-clipboard t)
-'(semanticdb-default-save-directory "~/.emacs.d/data-other/semanticdb")
+'(semanticdb-default-save-directory "~/.emacs.d/data-other-other-other/semanticdb")
 '(sendmail-program "msmtp")
 '(sentence-end-double-space nil)
 '(session-globals-exclude (quote (load-history flyspell-auto-correct-ring)))
@@ -1334,7 +1336,7 @@ SCHEDULED: %t
 '(session-initialize (quote (session places keys)))
 '(session-name-disable-regexp "\\(\\`/tmp\\|COMMIT_EDITMSG\\)")
 '(session-registers (quote (t (0 . 127))))
-'(session-save-file "~/.emacs.d/data-other/session")
+'(session-save-file "~/.emacs.d/data-other-other-other/session")
 '(shackle-default-rule (quote (:select t)))
 '(shackle-rules
 (quote
@@ -1353,7 +1355,7 @@ SCHEDULED: %t
 '(shm-use-presentation-mode t)
 '(show-paren-delay 0)
 '(slime-kill-without-query-p t)
-'(slime-repl-history-file "~/.emacs.d/data-other/slime-history.eld")
+'(slime-repl-history-file "~/.emacs.d/data-other-other-other/slime-history.eld")
 '(slime-startup-animation nil)
 '(smart-compile-alist
 (quote
@@ -1394,7 +1396,7 @@ SCHEDULED: %t
                    (buffer-file-name buf)))
    . "cd ~/Products/cree/edg && (ninja && ctest -j$(ncpu)) & (cd ~/src/cree; mktags src ext/llvm) & wait"))))
 '(smex-history-length 20)
-'(smex-save-file "~/.emacs.d/data-other/smex-items")
+'(smex-save-file "~/.emacs.d/data-other-other-other/smex-items")
 '(sp-highlight-pair-overlay nil)
 '(sql-sqlite-program "sqlite3")
 '(sr-attributes-display-mask (quote (nil nil t nil nil nil)))
@@ -1458,8 +1460,8 @@ SCHEDULED: %t
 '(tramp-auto-save-directory "~/.backups")
 '(tramp-default-method-alist
 (quote
- (("\\`\\(127\\.0\\.0\\.1\\|::1\\|localhost6?\\)\\'" "\\`root\\'" "sudo"))) nil (tramp))
-'(tramp-persistency-file-name "~/.emacs.d/data-other/tramp" nil (tramp))
+ (("\\`\\(127\\.0\\.0\\.1\\|::1\\|localhost6?\\)\\'" "\\`root\\'" "sudo"))))
+'(tramp-persistency-file-name "~/.emacs.d/data-other-other-other/tramp" nil (tramp))
 '(tramp-use-ssh-controlmaster-options nil nil (tramp))
 '(trash-directory "~/.Trash")
 '(undo-limit 800000)
@@ -1467,8 +1469,8 @@ SCHEDULED: %t
 '(undo-tree-mode-lighter "")
 '(undo-tree-visualizer-timestamps t)
 '(uniquify-buffer-name-style (quote post-forward-angle-brackets) nil (uniquify))
-'(url-cache-directory "~/.emacs.d/data-other/url/cache")
-'(url-configuration-directory "~/.emacs.d/data-other/url/")
+'(url-cache-directory "~/.emacs.d/data-other-other-other/url/cache")
+'(url-configuration-directory "~/.emacs.d/data-other-other-other/url/")
 '(url-irc-function (quote url-irc-erc))
 '(use-package-enable-imenu-support t)
 '(user-full-name "Henrik Fredriksson")

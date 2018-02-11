@@ -535,7 +535,7 @@
 
 (use-package avy
   :load-path "site-lisp/avy"
-  :defer 5
+  :defer 10
   :bind ("M-h" . avy-goto-char)
   :config
   (avy-setup-default))
@@ -679,16 +679,11 @@
          ("\\.cmake\\'"    . cmake-mode)))
 
 (use-package color-moccur
-  :disabled t
   :commands (isearch-moccur isearch-all isearch-moccur-all)
-  :bind ("M-s O" . moccur)
-  :init
-  (bind-key "M-o" #'isearch-moccur isearch-mode-map)
-  (bind-key "M-h" #'helm-occur-from-isearch isearch-mode-map)
-  (bind-key "M-O" #'isearch-moccur-all isearch-mode-map)
-  (bind-key "M-H" #'helm-multi-occur-from-isearch isearch-mode-map)
-  :config
-  (use-package moccur-edit))
+  :bind (("M-s O" . moccur)
+         :map isearch-mode-map
+         ("M-o" . isearch-moccur)
+         ("M-O" . isearch-moccur-all)))
 
 (use-package company
   :load-path "site-lisp/company-mode"
@@ -811,7 +806,6 @@
   :commands (diffview-current diffview-region diffview-message))
 
 (use-package dired
-  :disabled t
   :bind ("C-c J" . dired-double-jump)
   :preface
   (defvar mark-files-cache (make-hash-table :test #'equal))
@@ -858,9 +852,9 @@
 
   (use-package dired-ranger
     :bind (:map dired-mode-map
-           ("W" . dired-ranger-copy)
-           ("X" . dired-ranger-move)
-           ("Y" . dired-ranger-paste)))
+                ("W" . dired-ranger-copy)
+                ("X" . dired-ranger-move)
+                ("Y" . dired-ranger-paste)))
 
   (use-package dired-toggle
     :load-path "site-lisp/site-dired/dired-toggle"
@@ -1351,18 +1345,6 @@
     :load-path "lisp/haskell-config"
     :config (bind-key "C-c M-q" #'haskell-edit-reformat haskell-mode-map))
 
-  (use-package helm-hoogle
-    :load-path "lisp/helm-hoogle"
-    :commands helm-hoogle
-    :init (bind-key "A-M-h" #'helm-hoogle haskell-mode-map)
-    :config
-    (add-hook
-     'helm-c-hoogle-transform-hook
-     #'(lambda ()
-         (goto-char (point-min))
-         (while (re-search-forward "file:///nix/store" nil t)
-           (replace-match "http://127.0.0.1:8687/file//nix/store" t t)))))
-
   (eval-after-load 'align
     '(nconc
       align-rules-list
@@ -1374,34 +1356,25 @@
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
                 (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
-
-(use-package helm-autoloads
-  :disabled t
-  :load-path "site-lisp/helm"
-  :if (not running-alternate-emacs)
-  :defer 5
+(use-package helm
+  :defer t
+  :bind (:map helm-map
+              ("<tab>" . helm-execute-persistent-action)
+              ("C-i"   . helm-execute-persistent-action)
+              ("C-z"   . helm-select-action)
+              ("A-v"   . helm-previous-page))
   :config
-  (use-package helm
-    :bind (:map helm-map
-                ("<tab>" . helm-execute-persistent-action)
-                ("C-i"   . helm-execute-persistent-action)
-                ("C-z"   . helm-select-action)
-                ("A-v"   . helm-previous-page))
-    :config
-    (helm-autoresize-mode 1))
-  (use-package helm-multi-match
-    :load-path "site-lisp/helm"))
+  (helm-autoresize-mode 1))
 
 (use-package helm-dash
-  :disabled y
+  :disabled t
   :after helm
   :load-path "site-lisp/helm-dash"
   :commands helm-dash)
 
 (use-package helm-descbinds
-  :disabled t
   :load-path "site-lisp/helm-descbinds"
-  :after helm
+  :after (helm)
   :bind ("C-h b" . helm-descbinds)
   :init
   (fset 'describe-bindings 'helm-descbinds))
@@ -1411,6 +1384,19 @@
   :load-path "site-lisp/helm-describe-modes"
   :after helm
   :bind ("C-h m" . helm-describe-modes))
+
+(use-package helm-hoogle
+  :load-path "lisp/helm-hoogle"
+  :after helm
+  :commands helm-hoogle
+  ;;:init (bind-key "A-M-h" #'helm-hoogle haskell-mode-map)
+  :config
+  (add-hook
+   'helm-c-hoogle-transform-hook
+   #'(lambda ()
+       (goto-char (point-min))
+       (while (re-search-forward "file:///nix/store" nil t)
+         (replace-match "http://127.0.0.1:8687/file//nix/store" t t)))))
 
 (use-package helm-navi
   :disabled t
@@ -1927,22 +1913,51 @@
   (ivy-mode 1)
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
 
+;; (use-package counsel
+;;   :after ivy
+;;   :load-path "site-lisp/swiper"
+;;   :demand t
+;;   :diminish (counsel-mode)
+;;   :bind (("M-x" . counsel-M-x)
+;;          ("C-x C-f " . counsel-find-file)
+;;          ("C-s" . swiper))
+;;   :bind (:map counsel-mode-map
+;;               ("M-y"))
+;;   :commands counsel-minibuffer-history
+;;   :init
+;;   (define-key minibuffer-local-map (kbd "M-r")
+;;     'counsel-minibuffer-history)
+;;   :config
+;;   (counsel-mode 1))
+
 (use-package counsel
   :after ivy
-  :load-path "site-lisp/swiper"
   :demand t
-  :diminish (counsel-mode)
-  :bind (("M-x" . counsel-M-x)
-         ("C-x C-f " . counsel-find-file)
-         ("C-s" . swiper))
-  :bind (:map counsel-mode-map
-              ("M-y"))
+  :diminish
+  :custom (counsel-find-file-ignore-regexp
+           (concat "\\(\\`\\.[^.]\\|"
+                   (regexp-opt completion-ignored-extensions)
+                   "\\'\\)"))
+  :bind (("C-x C-f" . counsel-find-file)
+         ("C-c e l" . counsel-find-library)
+         ("C-c e q" . counsel-set-variable)
+         ("C-h e l" . counsel-find-library)
+         ("C-h e u" . counsel-unicode-char)
+         ("C-h f"   . counsel-describe-function)
+         ("C-x r b" . counsel-bookmark)
+         ("M-x"     . counsel-M-x)
+         ;; ("M-y"     . counsel-yank-pop)
+
+         ("M-s f" . counsel-rg)
+         ("M-s j" . counsel-dired-jump)
+         ("M-s n" . counsel-file-jump))
   :commands counsel-minibuffer-history
   :init
-  (define-key minibuffer-local-map (kbd "M-r")
-    'counsel-minibuffer-history)
+  (bind-key "M-r" #'counsel-minibuffer-history minibuffer-local-map)
   :config
-  (counsel-mode 1))
+  (add-to-list 'ivy-sort-matches-functions-alist
+               '(counsel-find-file . ivy--sort-files-by-date)))
+
 
 (use-package js2-mode
   :load-path "site-lisp/js2-mode"
@@ -2325,6 +2340,13 @@
     (setq markdown-preview-stylesheets (list "~/Downloads/github.css"))
     ))
 
+(use-package mode-line-bell
+  :disabled t
+  :load-path "site-lisp/mode-line-bell"
+  :defer 5
+  :config
+  (mode-line-bell-mode))
+
 (use-package multi-term
   :disabled t
   :bind (("C-. t" . multi-term-next)
@@ -2491,19 +2513,13 @@
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
-  :disabled t
-  :load-path "site-lisp/projectile"
-  :diminish projectile-mode
-  :commands projectile-mode
-  :defer 5
+  :defer 30
+  :diminish
+  :bind* ("C-c TAB" . projectile-find-other-file)
   :bind-keymap ("C-c p" . projectile-command-map)
   :config
-  (use-package helm-projectile
-    :load-path "site-lisp/helm-projectile"
-    :config
-    (setq projectile-completion-system 'helm)
-    (helm-projectile-on))
-  (projectile-mode))
+  (projectile-global-mode))
+
 
 (use-package python
   :defer
@@ -2654,6 +2670,21 @@
 
   (add-hook 'ruby-mode-hook 'my-ruby-mode-hook))
 
+(use-package sky-color-clock
+  :disabled
+  :load-path "site-lisp/sky-color-clock"
+  :config
+  (require 'solar)
+  (sky-color-clock-initialize 56.16156)
+
+  (defvar my-sky-color-string "")
+  (put 'my-sky-color-string 'risky-local-variable t)
+  (defun update-my-sky-color-string ()
+    (setq my-sky-color-string (sky-color-clock)))
+  (run-at-time 0 60 #'update-my-sky-color-string)
+  (push '(:eval my-sky-color-string) (default-value 'mode-line-format))
+  )
+
 (use-package selected
   :load-path "site-lisp/selected"
   :defer 5
@@ -2669,6 +2700,7 @@
   (bind-key "u" #'upcase-region selected-keymap))
 
 (use-package session
+  :disabled t
   :if (not noninteractive)
   :load-path "site-lisp/session"
   :preface
@@ -2752,8 +2784,9 @@
   (sml/setup)
   (sml/apply-theme 'light)
   (remove-hook 'display-time-hook 'sml/propertize-time-string)
-  (when (eq system-type 'darwin)
-    (setq mac-right-option-modifier 'none)))
+  ;; (when (eq system-type 'darwin)
+  ;;   (setq mac-right-option-modifier 'super))
+  )
 
 (use-package smart-tabs-mode
   :commands smart-tabs-mode

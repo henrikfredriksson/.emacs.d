@@ -3,7 +3,7 @@
 /.python-environments/
 .DS_Store
 /anaconda-mode/
-/data*
+/data*/
 /doc/
 /eshell/
 /lib/
