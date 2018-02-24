@@ -1357,6 +1357,7 @@
                 (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
 (use-package helm
+  :load-path "site-lisp/helm"
   :defer t
   :bind (:map helm-map
               ("<tab>" . helm-execute-persistent-action)
@@ -1364,6 +1365,7 @@
               ("C-z"   . helm-select-action)
               ("A-v"   . helm-previous-page))
   :config
+  (helm-mode 1)
   (helm-autoresize-mode 1))
 
 (use-package helm-dash
@@ -1869,7 +1871,7 @@
               ("M-r" . ivy-reverse-i-search))
   :custom
   (ivy-dynamic-exhibit-delay-ms 200)
-  (ivy-height 10)
+  (ivy-height 20)
   (ivy-initial-inputs-alist nil t)
   (ivy-magic-tilde nil)
   (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
@@ -1912,23 +1914,6 @@
   :config
   (ivy-mode 1)
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
-
-;; (use-package counsel
-;;   :after ivy
-;;   :load-path "site-lisp/swiper"
-;;   :demand t
-;;   :diminish (counsel-mode)
-;;   :bind (("M-x" . counsel-M-x)
-;;          ("C-x C-f " . counsel-find-file)
-;;          ("C-s" . swiper))
-;;   :bind (:map counsel-mode-map
-;;               ("M-y"))
-;;   :commands counsel-minibuffer-history
-;;   :init
-;;   (define-key minibuffer-local-map (kbd "M-r")
-;;     'counsel-minibuffer-history)
-;;   :config
-;;   (counsel-mode 1))
 
 (use-package counsel
   :after ivy
@@ -2513,9 +2498,10 @@
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
-  :defer 30
+  :load-path "site-lisp/projectile"
+  :defer 10
   :diminish
-  :bind* ("C-c TAB" . projectile-find-other-file)
+  ;;:bind* ("C-c TAB" . projectile-find-other-file)
   :bind-keymap ("C-c p" . projectile-command-map)
   :config
   (projectile-global-mode))
@@ -2845,14 +2831,24 @@
   :load-path "site-lisp/swap-regions"
   :commands swap-regions)
 
-(use-package swiper-helm
-  :disabled t
-  :load-path ("site-lisp/swiper"
-              "site-lisp/swiper-helm")
-  :bind ("C-. C-s" . swiper-helm)
+
+(use-package swiper
+  :after ivy
+  :bind ("C-s" . swiper)
+  :bind (:map swiper-map
+              ("M-y" . yank)
+              ("M-%" . swiper-query-replace)
+              ("C-." . swiper-avy)
+              ;; ("M-c" . swiper-mc)
+              ("M-c" . haba/swiper-mc-fixed)
+              )
+  :bind (:map isearch-mode-map
+              ("C-o" . swiper-from-isearch))
   :config
-  (use-package swiper
-    :load-path "site-lisp/swiper"))
+  (defun haba/swiper-mc-fixed ()
+    (interactive)
+    (setq swiper--current-window-start nil)
+    (swiper-mc)))
 
 (use-package tablegen-mode
   :mode ("\\.td\\'" . tablegen-mode))
