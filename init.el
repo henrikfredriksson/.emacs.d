@@ -1871,7 +1871,7 @@
               ("M-r" . ivy-reverse-i-search))
   :custom
   (ivy-dynamic-exhibit-delay-ms 200)
-  (ivy-height 20)
+  (ivy-height 10)
   (ivy-initial-inputs-alist nil t)
   (ivy-magic-tilde nil)
   (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
