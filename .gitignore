@@ -6,6 +6,7 @@
 /data*/
 /doc/
 /eshell/
+/games/
 /lib/
 /lisp/
 /override/
@@ -15,4 +16,6 @@
 abbrevs
 Makefile
 mutt-init.el
+recentf
+.session
 

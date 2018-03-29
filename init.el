@@ -770,7 +770,7 @@
   :defer 5
   ;; :commands change-cursor-mode
   :config
-  (setq curchg-default-cursor-color 'Black)
+  (setq curchg-default-cursor-color 'Purple)
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
@@ -1356,14 +1356,17 @@
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
                 (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
-(use-package helm
+(use-package helm-config
   :load-path "site-lisp/helm"
-  :defer t
+  :demand t
   :bind (:map helm-map
               ("<tab>" . helm-execute-persistent-action)
               ("C-i"   . helm-execute-persistent-action)
               ("C-z"   . helm-select-action)
-              ("A-v"   . helm-previous-page))
+              ("A-v"   . helm-previous-page)
+              ("C-x C-f" . helm-find-files)
+              ("C-x b" . helm-mini)
+              ("M-x" . helm-M-x)) 
   :config
   (helm-mode 1)
   (helm-autoresize-mode 1))
@@ -2864,6 +2867,7 @@
   ;; :preface
   (require 'tex)
   :config
+  (unbind-key "\\" LaTeX-mode-map)
   (defun latex-help-get-cmd-alist ()    ;corrected version:
     "Scoop up the commands in the index of the latex info manual.
    The values are saved in `latex-help-cmd-alist' for speed."
@@ -2879,7 +2883,6 @@
                                            (match-end 2))))
               (add-to-list 'latex-help-cmd-alist (cons key value))))))
     latex-help-cmd-alist)
-
 
   (use-package company-math
     :disabled
