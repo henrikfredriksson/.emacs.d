@@ -138,67 +138,67 @@
 (eval-and-compile
   (add-to-list 'load-path (expand-file-name "lib" user-emacs-directory)))
 
-(use-package alert         :defer t  :load-path "lisp/alert")
+(use-package alert         :defer  t  :load-path "lisp/alert")
 (use-package anaphora      :demand t :load-path "lib/anaphora")
-(use-package apiwrap       :defer t  :load-path "lib/apiwrap")
-(use-package asoc          :defer t  :load-path "lib/asoc")
-(use-package async         :defer t  :load-path "lisp/emacs-async")
-(use-package button-lock   :defer t  :load-path "lib/button-lock")
+(use-package apiwrap       :defer  t  :load-path "lib/apiwrap")
+(use-package asoc          :defer  t  :load-path "lib/asoc")
+(use-package async         :defer  t  :load-path "lisp/emacs-async")
+(use-package button-lock   :defer  t  :load-path "lib/button-lock")
 (use-package crux          :demand t :load-path "lib/crux")
-(use-package ctable        :defer t  :load-path "lib/emacs-ctable")
-(use-package dash          :defer t  :load-path "lib/dash-el")
-(use-package deferred      :defer t  :load-path "lib/emacs-deferred")
-(use-package difflib       :defer t  :load-path "lib/difflib")
+(use-package ctable        :defer  t  :load-path "lib/emacs-ctable")
+(use-package dash          :defer  t  :load-path "lib/dash-el")
+(use-package deferred      :defer  t  :load-path "lib/emacs-deferred")
+(use-package difflib       :defer  t  :load-path "lib/difflib")
 (use-package diminish      :demand t :load-path "lib/diminish")
-(use-package el-mock       :defer t  :load-path "lib")
-(use-package elisp-refs    :defer t  :load-path "lib/elisp-refs")
-(use-package emojify       :defer t  :load-path "lib/emacs-emojify")
-(use-package epc           :defer t  :load-path "lib/emacs-epc")
-(use-package epl           :defer t  :load-path "lib/epl")
-(use-package esxml         :defer t  :load-path "lib/esxml")
-(use-package f             :defer t  :load-path "lib/f-el")
-(use-package fn            :defer t  :load-path "lib/fn-el")
-(use-package fringe-helper :defer t  :load-path "lib/fringe-helper-el")
-(use-package fuzzy         :defer t  :load-path "lib/fuzzy-el")
-(use-package gh            :defer t  :load-path "lib/gh-el")
-(use-package ghub          :defer t  :load-path "lib/ghub")
-(use-package ghub+         :defer t  :load-path "lib/ghub-plus")
-(use-package ht            :defer t  :load-path "lib/ht-el")
-(use-package kv            :defer t  :load-path "lib/kv")
-(use-package list-utils    :defer t  :load-path "lib/list-utils")
-(use-package logito        :defer t  :load-path "lib/logito")
-(use-package loop          :defer t  :load-path "lib/loop")
-(use-package m-buffer      :defer t  :load-path "lib/m-buffer")
-(use-package makey         :defer t  :load-path "lib/makey")
-(use-package marshal       :defer t  :load-path "lib/marshal-el")
-(use-package names         :defer t  :load-path "lib/names")
-(use-package noflet        :defer t  :load-path "lib/noflet")
-(use-package oauth2        :defer t  :load-path "lib/oauth2")
-(use-package ov            :defer t  :load-path "lib/ov-el")
-(use-package parent-mode   :defer t  :load-path "lib/parent-mode")
-(use-package parsebib      :defer t  :load-path "lib/parsebib")
-(use-package parsec        :defer t  :load-path "lib/parsec")
-(use-package pcache        :defer t  :load-path "lib/pcache")
-(use-package peval         :defer t  :load-path "lib/peval")
-(use-package pfuture       :defer t  :load-path "lib/pfuture")
-(use-package pkg-info      :defer t  :load-path "lib/pkg-info")
-(use-package popup         :defer t  :load-path "lib/popup-el")
-(use-package popup-pos-tip :defer t  :load-path "lib")
-(use-package popwin        :defer t  :load-path "site-lisp/popwin")
-(use-package pos-tip       :defer t  :load-path "lib")
-(use-package pythonic      :defer t  :load-path "site-lisp/pythonic")
-(use-package request       :defer t  :load-path "lib/emacs-request")
-(use-package rich-minority :defer t  :load-path "lib/rich-minority")
-(use-package s             :defer t  :load-path "lib/s-el")
-(use-package spinner       :defer t  :load-path "lib/spinner")
-(use-package tablist       :defer t  :load-path "lib/tablist")
-(use-package uuidgen       :defer t  :load-path "lib/uuidgen-el")
-(use-package web           :defer t  :load-path "lib/emacs-web")
-(use-package web-server    :defer t  :load-path "lib/emacs-web-server")
-(use-package websocket     :defer t  :load-path "lib/emacs-websocket")
-(use-package with-editor   :defer t  :load-path "lib/with-editor")
-(use-package xml-rpc       :defer t  :load-path "lib")
-(use-package zoutline      :defer t  :load-path "lib/zoutline")
+(use-package el-mock       :defer  t  :load-path "lib")
+(use-package elisp-refs    :defer  t  :load-path "lib/elisp-refs")
+(use-package emojify       :defer  t  :load-path "lib/emacs-emojify")
+(use-package epc           :defer  t  :load-path "lib/emacs-epc")
+(use-package epl           :defer  t  :load-path "lib/epl")
+(use-package esxml         :defer  t  :load-path "lib/esxml")
+(use-package f             :defer  t  :load-path "lib/f-el")
+(use-package fn            :defer  t  :load-path "lib/fn-el")
+(use-package fringe-helper :defer  t  :load-path "lib/fringe-helper-el")
+(use-package fuzzy         :defer  t  :load-path "lib/fuzzy-el")
+(use-package gh            :defer  t  :load-path "lib/gh-el")
+(use-package ghub          :defer  t  :load-path "lib/ghub")
+(use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
+(use-package ht            :defer  t  :load-path "lib/ht-el")
+(use-package kv            :defer  t  :load-path "lib/kv")
+(use-package list-utils    :defer  t  :load-path "lib/list-utils")
+(use-package logito        :defer  t  :load-path "lib/logito")
+(use-package loop          :defer  t  :load-path "lib/loop")
+(use-package m-buffer      :defer  t  :load-path "lib/m-buffer")
+(use-package makey         :defer  t  :load-path "lib/makey")
+(use-package marshal       :defer  t  :load-path "lib/marshal-el")
+(use-package names         :defer  t  :load-path "lib/names")
+(use-package noflet        :defer  t  :load-path "lib/noflet")
+(use-package oauth2        :defer  t  :load-path "lib/oauth2")
+(use-package ov            :defer  t  :load-path "lib/ov-el")
+(use-package parent-mode   :defer  t  :load-path "lib/parent-mode")
+(use-package parsebib      :defer  t  :load-path "lib/parsebib")
+(use-package parsec        :defer  t  :load-path "lib/parsec")
+(use-package pcache        :defer  t  :load-path "lib/pcache")
+(use-package peval         :defer  t  :load-path "lib/peval")
+(use-package pfuture       :defer  t  :load-path "lib/pfuture")
+(use-package pkg-info      :defer  t  :load-path "lib/pkg-info")
+(use-package popup         :defer  t  :load-path "lib/popup-el")
+(use-package popup-pos-tip :defer  t  :load-path "lib")
+(use-package popwin        :defer  t  :load-path "site-lisp/popwin")
+(use-package pos-tip       :defer  t  :load-path "lib")
+(use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
+(use-package request       :defer  t  :load-path "lib/emacs-request")
+(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
+(use-package s             :defer  t  :load-path "lib/s-el")
+(use-package spinner       :defer  t  :load-path "lib/spinner")
+(use-package tablist       :defer  t  :load-path "lib/tablist")
+(use-package uuidgen       :defer  t  :load-path "lib/uuidgen-el")
+(use-package web           :defer  t  :load-path "lib/emacs-web")
+(use-package web-server    :defer  t  :load-path "lib/emacs-web-server")
+(use-package websocket     :defer  t  :load-path "lib/emacs-websocket")
+(use-package with-editor   :defer  t  :load-path "lib/with-editor")
+(use-package xml-rpc       :defer  t  :load-path "lib")
+(use-package zoutline      :defer  t  :load-path "lib/zoutline")
 
 
 ;;; Keybindings
@@ -236,11 +236,24 @@
 
 ;;; Packages
 
+;; (use-package memoize
+;;   :load-path "site-lisp/emacs-memoize")
+
+;; (use-package all-the-icons
+;;   :load-path "site-lisp/all-the-icons"
+;;   )
+
+;; (use-package all-the-icons-ivy
+;;   :load-path "site-lisp/all-the-icons-ivy"
+;;   :after (ivy) 
+;;   :config
+;;   (all-the-icons-ivy-setup))
+
 
 (use-package ggtags
   :disabled t
   :load-path "site-lisp/ggtags"
-  :commands ggtags-mode
+  :commands ggtags-mod
   :diminish ggtags-mode)
 
 (use-package cc-mode
@@ -1100,6 +1113,7 @@
 (use-package exec-path-from-shell
   :demand t
   :config
+  (setq exec-path-from-shell-arguments '("-l"))
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize))
   )
@@ -1358,34 +1372,28 @@
 
 (use-package helm-config
   :load-path "site-lisp/helm"
-  :demand t
+  :defer t
   :bind (:map helm-map
               ("<tab>" . helm-execute-persistent-action)
               ("C-i"   . helm-execute-persistent-action)
               ("C-z"   . helm-select-action)
-              ("A-v"   . helm-previous-page)
-              ("C-x C-f" . helm-find-files)
-              ("C-x b" . helm-mini)
-              ("M-x" . helm-M-x)) 
+              ("A-v"   . helm-previous-page))
   :config
-  (helm-mode 1)
-  (helm-autoresize-mode 1))
+  (helm-autoresize-mode 1)
+  )
 
 (use-package helm-dash
-  :disabled t
-  :after helm
   :load-path "site-lisp/helm-dash"
   :commands helm-dash)
 
+
 (use-package helm-descbinds
   :load-path "site-lisp/helm-descbinds"
-  :after (helm)
   :bind ("C-h b" . helm-descbinds)
   :init
   (fset 'describe-bindings 'helm-descbinds))
 
 (use-package helm-describe-modes
-  :disabled t
   :load-path "site-lisp/helm-describe-modes"
   :after helm
   :bind ("C-h m" . helm-describe-modes))
@@ -1932,7 +1940,7 @@
          ("C-h e l" . counsel-find-library)
          ("C-h e u" . counsel-unicode-char)
          ("C-h f"   . counsel-describe-function)
-         ("C-x r b" . counsel-bookmark)
+         ("C-x r b" . counsel-bookmark) 
          ("M-x"     . counsel-M-x)
          ;; ("M-y"     . counsel-yank-pop)
 
@@ -2857,9 +2865,10 @@
   :mode ("\\.td\\'" . tablegen-mode))
 
 (use-package tex-site
+  :defer t
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
-  :mode ("\\.tex\\'" . LaTeX-mode)
+  :mode ("\\.tex\\'" . LaTeX-mode) 
   :init
   (setq reftex-plug-into-AUCTeX t)
   (setenv "PATH" (concat "/Library/TeX/texbin:" (getenv "PATH")))
@@ -2867,7 +2876,9 @@
   ;; :preface
   (require 'tex)
   :config
-  (unbind-key "\\" LaTeX-mode-map)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (setq reftex-extra-bindings t)
+  
   (defun latex-help-get-cmd-alist ()    ;corrected version:
     "Scoop up the commands in the index of the latex info manual.
    The values are saved in `latex-help-cmd-alist' for speed."
@@ -2905,7 +2916,7 @@
   (setq TeX-parse-self t)
   (setq-default TeX-master nil)
   (setq TeX-PDF-mode t)
-
+  
   
   (use-package ebib
     :disabled  t
