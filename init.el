@@ -783,7 +783,8 @@
   :defer 5
   ;; :commands change-cursor-mode
   :config
-  (setq curchg-default-cursor-color 'Purple)
+  ;; (setq curchg-default-cursor-color 'Purple)
+  (setq curchg-default-cursor-color 'Black)
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
@@ -977,8 +978,8 @@
         gnus-home-directory "~/Messages/Gnus/"))
 
 (use-package dot-org
-  :load-path ("override/org-mode/contrib/lisp"
-              "override/org-mode/lisp")
+  :load-path ("site-lisp/org-mode/contrib/lisp"
+              "site-lisp/org-mode/lisp")
   :mode (("\\.org\\'" . org-mode)
          ("\\.txt\\'" . org-mode))
   :commands my-org-startup
@@ -1370,7 +1371,52 @@
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
                 (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
-(use-package helm-config
+
+;; (use-package helm-config
+;;   :load-path "site-lisp/helm"
+;;   :init
+;;   (custom-set-variables '(helm-command-prefix-key "C-;"))
+;;   :config
+;;   (bind-keys :map helm-command-map
+;;              ("a" . helm-ag)
+;;              ("o" . helm-occur)
+;;              ("y" . yas-insert-snippet)))
+
+;; (use-package helm
+;;   :load-path "site-lisp/helm"
+;;   ;; :init
+;;   ;; :bind (;("M-x" . helm-M-x)
+;;   ;;        ("M-y" . helm-show-kill-ring)
+;;   ;;        ("C-x b" . helm-mini)
+;;   ;;        ("M-/" . helm-dabbrev))
+;;   :config
+;;   (helm-autoresize-mode 1)
+;;   (setq
+;;    helm-scroll-amount 4 ; scroll 4 lines other window using M-<next>/M-<prior>
+;;    helm-quick-update t  ; do not display invisible candidates
+;;    helm-idle-delay 0.01 ; be idle for this many seconds, before updating in delayed sources.
+;;    helm-input-idle-delay 0.01 ; be idle for this many seconds, before updating candidate buffer
+;;    helm-split-window-default-side 'other ;; open helm buffer in another window
+;;    helm-split-window-in-side-p nil ;; open helm buffer inside current window, not occupy whole other window
+;;    helm-candidate-number-limit 200   ; limit the number of displayed canidates
+;;    helm-move-to-line-cycle-in-source nil ; move to end or beginning of source when reaching top or bottom of source.
+;;    ;; helm-command
+;;    helm-M-x-requires-pattern 0          ; show all candidates when set to 0
+;;    )
+
+;;   (bind-keys ("M-x" . helm-M-x)
+;;              ("M-y" . helm-show-kill-ring)
+;;              ("C-x b" . helm-mini))
+;;   (bind-keys :map helm-map
+;;              ("C-o" . nil)
+;;              ("TAB" . helm-execute-persistent-action)
+;;              ("C-i" . helm-execute-persistent-action)
+;;              ("C-z" . helm-select-action)
+;;              ("C-h" . delete-backward-char)))
+
+
+
+(use-package helm
   :load-path "site-lisp/helm"
   :defer t
   :bind (:map helm-map
@@ -1379,8 +1425,7 @@
               ("C-z"   . helm-select-action)
               ("A-v"   . helm-previous-page))
   :config
-  (helm-autoresize-mode 1)
-  )
+  (helm-autoresize-mode 1))
 
 (use-package helm-dash
   :load-path "site-lisp/helm-dash"
@@ -2053,6 +2098,11 @@
   (info-lookmore-elisp-gnus)
   (info-lookmore-apropos-elisp))
 
+(use-package langtool
+  :load-path "site-lisp/langtool"
+  :config
+  (setq langtool-language-tool-jar "~/Documents/code/langtool/languagetool-commandline.jar"))
+
 (use-package lisp-mode
   :defer t
   :hook ((emacs-lisp-mode lisp-mode)
@@ -2337,8 +2387,8 @@
     ))
 
 (use-package mode-line-bell
-  :disabled t
   :load-path "site-lisp/mode-line-bell"
+  :disabled t
   :defer 5
   :config
   (mode-line-bell-mode))
@@ -2429,7 +2479,9 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
+  
   :config
+  (setq ispell-program-name "/usr/local/bin/aspell")
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
 
   (bind-keys ("C-z"             . delete-other-windows)
@@ -2776,7 +2828,7 @@
 
 (use-package smart-mode-line
   :load-path "site-lisp/smart-mode-line"
-  :defer 10
+  :defer 5
   :config
   (sml/setup)
   (sml/apply-theme 'light)
@@ -2865,17 +2917,19 @@
   :mode ("\\.td\\'" . tablegen-mode))
 
 (use-package tex-site
-  :defer t
+  :defer 5
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode) 
   :init
+  
+  ;; :preface
+  :config
+  (require 'tex)
+  
   (setq reftex-plug-into-AUCTeX t)
   (setenv "PATH" (concat "/Library/TeX/texbin:" (getenv "PATH")))
   (add-to-list 'exec-path "/Library/TeX/texbin")
-  ;; :preface
-  (require 'tex)
-  :config
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (setq reftex-extra-bindings t)
   
@@ -3039,7 +3093,7 @@
 (use-package which-key
   :load-path "site-lisp/which-key"
   :diminish which-key-mode
-  :defer 5
+  :defer 10
   :config
   (which-key-mode)
   (setq which-key-idle-delay 2.0)

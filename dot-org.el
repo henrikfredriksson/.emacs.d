@@ -22,6 +22,14 @@
 (require 'ob-haskell)
 (require 'ob-sh)
 (require 'ox-md)
+
+
+(use-package ox-reveal
+  :load-path "site-lisp/ox-reveal"
+  :config
+  (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
+  ;;(setq org-reveal-title-slide nil)
+  )
 ;; (require 'ox-opml)
 
 (setq org-latex-listings 'minted

@@ -651,7 +651,7 @@
  '(haskell-process-load-or-reload-prompt t)
  '(helm-command-prefix-key nil)
  '(helm-dash-browser-func (quote eww))
- '(helm-dash-docsets-path "/Users/johnw/Library/Application Support/Dash/DocSets/")
+ '(helm-dash-docsets-path "/Users/hfn/code/DocSets/")
  '(helm-minibuffer-history-key nil)
  '(hi2-ifte-offset 4)
  '(hi2-layout-offset 4)
