@@ -2374,6 +2374,10 @@
 
   (remove-hook 'server-switch-hook 'magit-commit-diff))
 
+(use-package magit-popup
+  :load-path "site-lisp/magit-popup"
+  :defer t)
+
 (use-package markdown-mode
   :load-path "site-lisp/markdown-mode"
   :mode (("\\`README\\.md\\'" . gfm-mode)
@@ -2926,6 +2930,7 @@
   ;; :preface
   :config
   (require 'tex)
+  ;;(unbind-key "\\" latex-mode-map)
   
   (setq reftex-plug-into-AUCTeX t)
   (setenv "PATH" (concat "/Library/TeX/texbin:" (getenv "PATH")))
