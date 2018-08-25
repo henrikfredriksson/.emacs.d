@@ -133,6 +133,7 @@
           "~/share/info")
         "~/.nix-profile/share/info")))
 
+
 ;;; Configure libraries
 
 (eval-and-compile
@@ -236,18 +237,7 @@
 
 ;;; Packages
 
-;; (use-package memoize
-;;   :load-path "site-lisp/emacs-memoize")
 
-;; (use-package all-the-icons
-;;   :load-path "site-lisp/all-the-icons"
-;;   )
-
-;; (use-package all-the-icons-ivy
-;;   :load-path "site-lisp/all-the-icons-ivy"
-;;   :after (ivy) 
-;;   :config
-;;   (all-the-icons-ivy-setup))
 
 
 (use-package ggtags
@@ -259,9 +249,9 @@
 (use-package cc-mode
   :disabled t
   :load-path "override/cc-mode"
-  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
-         ("\\.m\\'"                   . c-mode)
-         ("\\.mm\\'"                  . c++-mode))
+  :mode (("\\                                  . h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
+         ("\\                                  . m\\'"                   . c-mode)
+         ("\\                         . mm\\'" . c++-mode))
   :preface
   (defun my-paste-as-check ()
     (interactive)
@@ -286,9 +276,9 @@
     (if arg
         (setq printf-index 0))
     (if t
-        (insert (format "std::cerr << \"step %d..\" << std::endl;\n"
+        (insert (format "std::cerr << \"step %d . .\" << std::endl;\n"
                         (setq printf-index (1+ printf-index))))
-      (insert (format "printf(\"step %d..\\n\");\n"
+      (insert (format "printf(\"step %d         . .\\n\");\n"
                       (setq printf-index (1+ printf-index)))))
     (forward-line -1)
     (indent-according-to-mode)
@@ -363,10 +353,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                  . ((substatement-open before after)
+                                             . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                  . ((statement-block-intro . +)
+                                             . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -379,7 +369,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
+                                             . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . "")))
@@ -390,10 +380,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                  . ((substatement-open before after)
+                                             . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                  . ((statement-block-intro . +)
+                                             . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -406,7 +396,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
+                                             . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . "")))
@@ -417,10 +407,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                  . ((substatement-open before after)
+                                             . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                  . ((statement-block-intro . +)
+                                             . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -433,7 +423,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
+                                             . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . ""))))
@@ -445,7 +435,7 @@
   :hook
   ((text-mode prog-mode erc-mode LaTeX-mode) . abbrev-mode)
   (expand-load
-   . (lambda ()
+                                             . (lambda ()
        (add-hook 'expand-expand-hook 'indent-according-to-mode)
        (add-hook 'expand-jump-hook 'indent-according-to-mode)))
   :config
@@ -464,7 +454,7 @@
 
 (use-package agda2-mode
   :disabled t
-  :mode "\\.agda\\'"
+  :mode "\\ . agda\\'"
   :load-path "site-lisp/agda/src/data/emacs-mode"
   :defines agda2-mode-map
   :preface
@@ -562,10 +552,10 @@
     (let* ((file (make-backup-file-name (buffer-file-name)))
            (dir (file-name-directory file))
            (args (concat "-iname '" (file-name-nondirectory file)
-                         ".~*~'"))
+                         "                                . ~*~'"))
            (dired-buffers dired-buffers)
            (find-ls-option '("-print0 | xargs -0 ls -lta" . "-lta")))
-      ;; Check that it's really a directory.
+      ;; Check that it's really a directory               . 
       (or (file-directory-p dir)
           (error "Backup directory does not exist: %s" dir))
       (with-current-buffer (get-buffer-create "*Backups*")
@@ -588,7 +578,7 @@
         (erase-buffer)
         (setq default-directory dir
               args (concat
-                    find-program " . "
+                    find-program "                                            . "
                     (if (string= args "")
                         ""
                       (concat
@@ -596,15 +586,15 @@
                        " " args " "
                        (shell-quote-argument ")")
                        " "))
-                    (if (string-match "\\`\\(.*\\) {} \\(\\\\;\\|+\\)\\'"
+                    (if (string-match "\\`\\(                        . *\\) {} \\(\\\\;\\|+\\)\\'"
                                       (car find-ls-option))
                         (format "%s %s %s"
                                 (match-string 1 (car find-ls-option))
                                 (shell-quote-argument "{}")
                                 find-exec-terminator)
                       (car find-ls-option))))
-        ;; Start the find process.
-        (message "Looking for backup files...")
+        ;; Start the find process                                    . 
+        (message "Looking for backup files                           .        . .")
         (shell-command (concat args "&") (current-buffer))
         ;; The next statement will bomb in classic dired (no optional arg
         ;; allowed)
@@ -620,7 +610,7 @@
                 (find-dired ,dir ,find-args)))
         ;; Set subdir-alist so that Tree Dired will work:
         (if (fboundp 'dired-simple-subdir-alist)
-            ;; will work even with nested dired format (dired-nstd.el,v 1.15
+            ;; will work even with nested dired format (dired-nstd   . el,v 1 . 15
             ;; and later)
             (dired-simple-subdir-alist)
           ;; else we have an ancient tree dired (or classic dired, where
@@ -631,16 +621,16 @@
              find-ls-subdir-switches)
         (setq buffer-read-only nil)
         ;; Subdir headlerline must come first because the first marker in
-        ;; subdir-alist points there.
+        ;; subdir-alist points there                                 . 
         (insert "  " dir ":\n")
         ;; Make second line a ``find'' line in analogy to the ``total'' or
-        ;; ``wildcard'' line.
+        ;; ``wildcard'' line                                                  . 
         (insert "  " args "\n")
         (setq buffer-read-only t)
         (let ((proc (get-buffer-process (current-buffer))))
           (set-process-filter proc (function find-dired-filter))
           (set-process-sentinel proc (function find-dired-sentinel))
-          ;; Initialize the process marker; it is used by the filter.
+          ;; Initialize the process marker; it is used by the filter          . 
           (move-marker (process-mark proc) 1 (current-buffer)))
         (setq mode-line-process '(":%s")))))
 
@@ -655,8 +645,8 @@
   :config
   (defun backup-each-save-filter (filename)
     (not (string-match
-          (concat "\\(^/tmp\\|\\.emacs\\.d/data\\(-alt\\)?/"
-                  "\\|\\.newsrc\\(\\.eld\\)?\\|"
+          (concat "\\(^/tmp\\|\\ . emacs\\.d/data\\(-alt\\)?/"
+                  "\\|\\ . newsrc\\(\\.eld\\)?\\|"
                   "\\(archive/sent/\\|recentf\\`\\)\\)")
           filename)))
 
@@ -688,25 +678,25 @@
 
 (use-package cmake-mode
   :disabled t
-  :mode (("CMakeLists.txt" . cmake-mode)
-         ("\\.cmake\\'"    . cmake-mode)))
+  :mode (("CMakeLists . txt" . cmake-mode)
+         ("\\         . cmake\\'"    . cmake-mode)))
 
 (use-package color-moccur
   :commands (isearch-moccur isearch-all isearch-moccur-all)
   :bind (("M-s O" . moccur)
          :map isearch-mode-map
-         ("M-o" . isearch-moccur)
-         ("M-O" . isearch-moccur-all)))
+         ("M-o"   . isearch-moccur)
+         ("M-O"   . isearch-moccur-all)))
 
 (use-package company
   :load-path "site-lisp/company-mode"
   :diminish company-mode
   :commands company-mode
-  ;;:bind ("<tab>" . company-complete-common-or-cycle)
+  ;;:bind ("<tab>"           . company-complete-common-or-cycle)
   :config
   (setq company-dabbrev-downcase 0)
-  ;; From https://github.com/company-mode/company-mode/issues/87
-  ;; See also https://github.com/company-mode/company-mode/issues/123
+  ;; From https://github     . com/company-mode/company-mode/issues/87
+  ;; See also https://github . com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
       (around only-show-tooltip-when-invoked activate)
     (when (company-explicit-action-p)
@@ -716,9 +706,9 @@
     (save-excursion
       (if (outline-on-heading-p t)
           nil
-        (if (looking-at "\\_>") t
+        (if (looking-at "\\_>") T
           (backward-char 1)
-          (if (looking-at "\\.") t
+          (if (looking-at "\\ . ") t
             (backward-char 1)
             (if (looking-at "->") t nil))))))
 
@@ -773,18 +763,16 @@
 
 (use-package css-mode
   :disabled t
-  :mode "\\.css\\'")
+  :mode "\\ . css\\'")
 
 (use-package csv-mode
   :disabled t
-  :mode "\\.use\\'")
+  :mode "\\ . use\\'")
 
 (use-package cursor-chg
   :defer 5
-  ;; :commands change-cursor-mode
   :config
-  ;; (setq curchg-default-cursor-color 'Purple)
-  (setq curchg-default-cursor-color 'Black)
+  (setq curchg-default-cursor-color 'Purple)
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
@@ -797,7 +785,7 @@
 
 (use-package dash-at-point
   :load-path "site-lisp/dash-at-point"
-  :bind ("C-c D" . dash-at-point)
+  :bind ("C-c D"                                        . dash-at-point)
   :config
   (add-to-list 'dash-at-point-mode-alist '(haskell-mode . "haskell")))
 
@@ -808,7 +796,7 @@
 
 (use-package dedicated
   :disabled t
-  :bind ("C-. D" . dedicated-mode))
+  :bind ("C- . D" . dedicated-mode))
 
 (use-package diff-mode
   :commands diff-mode
@@ -826,7 +814,7 @@
 
   (defun mark-similar-versions (name)
     (let ((pat name))
-      (if (string-match "^\\(.+?\\)-[0-9._-]+$" pat)
+      (if (string-match "^\\( . +?\\)-[0-9._-]+$" pat)
           (setq pat (match-string 1 pat)))
       (or (gethash pat mark-files-cache)
           (ignore (puthash pat t mark-files-cache)))))
@@ -840,10 +828,10 @@
     (interactive
      (list (read-directory-name "First directory: "
                                 (expand-file-name "~")
-                                nil nil "dl/")
+                                nil nil "Documents/")
            (read-directory-name "Second directory: "
                                 (expand-file-name "~")
-                                nil nil "Archives/")))
+                                nil nil "Downloads/")))
     (dired first-dir)
     (dired-other-window second-dir))
 
@@ -883,11 +871,11 @@
     (add-hook 'dired-toggle-mode-hook #'my-dired-toggle-mode-hook))
 
   (defadvice dired-omit-startup (after diminish-dired-omit activate)
-    "Make sure to remove \"Omit\" from the modeline."
+    "Make sure to remove \"Omit\" from the modeline . "
     (diminish 'dired-omit-mode) dired-mode-map)
 
   (defadvice dired-next-line (around dired-next-line+ activate)
-    "Replace current buffer if file is a directory."
+    "Replace current buffer if file is a directory . "
     ad-do-it
     (while (and  (not  (eobp)) (not ad-return-value))
       (forward-line)
@@ -897,7 +885,7 @@
       (setq ad-return-value(dired-move-to-filename))))
 
   (defadvice dired-previous-line (around dired-previous-line+ activate)
-    "Replace current buffer if file is a directory."
+    "Replace current buffer if file is a directory . "
     ad-do-it
     (while (and  (not  (bobp)) (not ad-return-value))
       (forward-line -1)
@@ -909,7 +897,7 @@
 
   ;; Omit files that Git would ignore
   (defun dired-omit-regexp ()
-    (let ((file (expand-file-name ".git"))
+    (let ((file (expand-file-name "                              . git"))
           parent-dir)
       (while (and (not (file-exists-p file))
                   (progn
@@ -917,12 +905,12 @@
                           (file-name-directory
                            (directory-file-name
                             (file-name-directory file))))
-                    ;; Give up if we are already at the root dir.
+                    ;; Give up if we are already at the root dir . 
                     (not (string= (file-name-directory file)
                                   parent-dir))))
-        ;; Move up to the parent dir and try again.
-        (setq file (expand-file-name ".git" parent-dir)))
-      ;; If we found a change log in a parent, use that.
+        ;; Move up to the parent dir and try again               . 
+        (setq file (expand-file-name "                           . git" parent-dir)))
+      ;; If we found a change log in a parent, use that          . 
       (if (file-exists-p file)
           (let ((regexp (funcall dired-omit-regexp-orig))
                 (omitted-files
@@ -965,13 +953,13 @@
 
 (use-package dockerfile-mode
   :disabled t
-  :mode (".*Dockerfile.*" . dockerfile-mode)
+  :mode (" . *Dockerfile.*" . dockerfile-mode)
   :load-path "site-lisp/dockerfile-mode/")
 
 (use-package dot-gnus
   :disabled t
   :load-path ("override/gnus/lisp" "override/gnus/contrib")
-  :bind (("M-G"   . switch-to-gnus)
+  :bind (("M-G" . switch-to-gnus)
          ("C-x m" . compose-mail))
   :init
   (setq gnus-init-file (expand-file-name "dot-gnus" user-emacs-directory)
@@ -980,19 +968,19 @@
 (use-package dot-org
   :load-path ("site-lisp/org-mode/contrib/lisp"
               "site-lisp/org-mode/lisp")
-  :mode (("\\.org\\'" . org-mode)
-         ("\\.txt\\'" . org-mode))
+  :mode (("\\                                            . org\\'" . org-mode)
+         ("\\                                            . txt\\'" . org-mode))
   :commands my-org-startup
-  :bind (("M-C"   . jump-to-org-agenda)
-         ("M-m"   . org-smart-capture)
-         ("M-M"   . org-inline-note)
-         ("C-c a" . org-agenda)
+  :bind (("M-C"                                                    . jump-to-org-agenda)
+         ("M-m"                                          . org-smart-capture)
+         ("M-M"                                                    . org-inline-note)
+         ("C-c a"                                        . org-agenda)
          ("C-c S" . org-store-link)
          ("C-c l" . org-insert-link)
          ("C-. n" . org-velocity-read))
   :defer 10
   :config
-  (setq org-babel-python-command    "/anaconda3/bin/python3.6")
+  (setq org-babel-python-command "/anaconda3/bin/python3 . 6")
   ;; (when (and nil
   ;;            (not running-alternate-emacs)
   ;;            (not running-development-emacs))
@@ -1008,13 +996,13 @@
   :defer t
   :preface
   (defvar modi/fns-in-edebug nil
-    "List of functions for which `edebug' is instrumented.")
+    "List of functions for which `edebug' is instrumented . ")
 
   (defconst modi/fns-regexp
     (concat "(\\s-*"
             "\\(defun\\|defmacro\\)\\s-+"
             "\\(?1:\\(\\w\\|\\s_\\)+\\)\\_>") ; word or symbol char
-    "Regexp to find defun or defmacro definition.")
+    "Regexp to find defun or defmacro definition . ")
 
   (defun modi/toggle-edebug-defun ()
     (interactive)
@@ -1046,18 +1034,18 @@
   :config
   (use-package ediff-keep)
   (bind-keys :prefix-map ctl-period-equals-map
-             :prefix "C-. ="
-             ("b" . ediff-buffers)
-             ("B" . ediff-buffers3)
-             ("c" . compare-windows)
-             ("=" . ediff-files)
-             ("f" . ediff-files)
-             ("F" . ediff-files3)
-             ("r" . ediff-revision)
-             ("p" . ediff-patch-file)
-             ("P" . ediff-patch-buffer)
-             ("l" . ediff-regions-linewise)
-             ("w" . ediff-regions-wordwise)))
+             :prefix "C- . ="
+             ("b"        . ediff-buffers)
+             ("B"        . ediff-buffers3)
+             ("c"        . compare-windows)
+             ("="        . ediff-files)
+             ("f"        . ediff-files)
+             ("F"        . ediff-files3)
+             ("r"        . ediff-revision)
+             ("p"        . ediff-patch-file)
+             ("P"        . ediff-patch-buffer)
+             ("l"        . ediff-regions-linewise)
+             ("w"        . ediff-regions-wordwise)))
 
 (use-package edit-env
   :disabled t
@@ -1080,11 +1068,11 @@
       (define-key map [backspace]    'eshell-isearch-delete-char)
       (define-key map [delete]       'eshell-isearch-delete-char)
       map)
-    "Keymap used in isearch in Eshell.")
+    "Keymap used in isearch in Eshell . ")
 
   (defun eshell-initialize ()
     (defun eshell-spawn-external-command (beg end)
-      "Parse and expand any history references in current input."
+      "Parse and expand any history references in current input . "
       (save-excursion
         (goto-char end)
         (when (looking-back "&!" beg)
@@ -1168,8 +1156,8 @@
   (defalias 'flycheck-show-error-at-point-soon 'flycheck-show-error-at-point))
 
 (use-package flyspell
-  :bind (("C-c i b" . flyspell-buffer)
-         ("C-c i f" . flyspell-mode))
+  :bind (("C-c i b"   . flyspell-buffer)
+         ("C-c i f"   . flyspell-mode))
   :init
   (use-package ispell
     :bind (("C-c i c" . ispell-comments-and-strings)
@@ -1179,7 +1167,7 @@
            ("C-c i r" . ispell-region)
            ("C-c i w" . ispell-word)))
   :config
-  (unbind-key "C-." flyspell-mode-map))
+  (unbind-key "C-     . " flyspell-mode-map))
 
 (use-package gist
   :disabled t
@@ -1198,7 +1186,7 @@
 
 (use-package git-link
   :disabled t
-  :bind ("C-. G" . git-link)
+  :bind ("C- . G" . git-link)
   :commands (git-link git-link-commit git-link-homepage)
   :load-path "site-lisp/git-link")
 
@@ -1209,7 +1197,7 @@
 
 (use-package graphviz-dot-mode
   :disabled t
-  :mode "\\.dot\\'")
+  :mode "\\ . dot\\'")
 
 (use-package grep
   :disabled t
@@ -1224,13 +1212,13 @@
   (grep-apply-setting
    'grep-find-command
    '("rg --no-heading --color=always -j4 -nH -e " . 43)
-   ;; '("find . -name '*.v' -type f -print0 | xargs -P4 -0 egrep -nH " . 61)
+   ;; '("find                                     . -name '*                          . v' -type f -print0 | xargs -P4 -0 egrep -nH " . 61)
    ))
 
 (use-package gud
   :disabled t
   :commands gud-gdb
-  :bind ("C-. g" . show-debugger)
+  :bind ("C- . g" . show-debugger)
   :init
   (defun show-debugger ()
     (interactive)
@@ -1252,9 +1240,9 @@
 
 (use-package haskell-mode-autoloads
   :load-path "site-lisp/haskell-mode"
-  :mode (("\\.hs\\(c\\|-boot\\)?\\'" . haskell-mode)
-         ("\\.lhs\\'" . literate-haskell-mode)
-         ("\\.cabal\\'" . haskell-cabal-mode))
+  :mode (("\\ . hs\\(c\\|-boot\\)?\\'" . haskell-mode)
+         ("\\ . lhs\\'" . literate-haskell-mode)
+         ("\\ . cabal\\'" . haskell-cabal-mode))
   :init
   (setenv "PATH" (concat "~/Library/Haskell/bin:"
                          (getenv "PATH")))
@@ -1264,7 +1252,7 @@
   (defvar interactive-haskell-mode-map)
   (defun snippet (name)
     (interactive "sName: ")
-    (find-file (expand-file-name (concat name ".hs") "~/src/notes"))
+    (find-file (expand-file-name (concat name " . hs") "~/src/notes"))
     (haskell-mode)
     (goto-char (point-min))
     (when (eobp)
@@ -1273,7 +1261,7 @@
 
   (defvar hoogle-server-process nil)
   (defun my-haskell-hoogle (query &optional arg)
-    "Do a Hoogle search for QUERY."
+    "Do a Hoogle search for QUERY                             . "
     (interactive
      (let ((def (haskell-ident-at-point)))
        (if (and def (symbolp def)) (setq def (symbol-name def)))
@@ -1284,15 +1272,15 @@
              current-prefix-arg)))
     (unless (and hoogle-server-process
                  (process-live-p hoogle-server-process))
-      (message "Starting local Hoogle server on port 8687...")
+      (message "Starting local Hoogle server on port 8687 .   . .")
       (with-current-buffer (get-buffer-create " *hoogle-web*")
         (cd temporary-file-directory)
         (setq hoogle-server-process
               (start-process "hoogle-web" (current-buffer) "hoogle"
                              "server" "--local" "--port=8687")))
-      (message "Starting local Hoogle server on port 8687...done"))
+      (message "Starting local Hoogle server on port 8687     . ..done"))
     (browse-url
-     (format "http://127.0.0.1:8687/?hoogle=%s"
+     (format "http://127                                  . 0 . 0.1:8687/?hoogle=%s"
              (replace-regexp-in-string
               " " "+" (replace-regexp-in-string "\\+" "%2B" query)))))
 
@@ -1364,65 +1352,20 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp . ,(cdr x))
+                       (regexp       . ,(cdr x))
                        (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
                 (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
-
-;; (use-package helm-config
-;;   :load-path "site-lisp/helm"
-;;   :init
-;;   (custom-set-variables '(helm-command-prefix-key "C-;"))
-;;   :config
-;;   (bind-keys :map helm-command-map
-;;              ("a" . helm-ag)
-;;              ("o" . helm-occur)
-;;              ("y" . yas-insert-snippet)))
-
-;; (use-package helm
-;;   :load-path "site-lisp/helm"
-;;   ;; :init
-;;   ;; :bind (;("M-x" . helm-M-x)
-;;   ;;        ("M-y" . helm-show-kill-ring)
-;;   ;;        ("C-x b" . helm-mini)
-;;   ;;        ("M-/" . helm-dabbrev))
-;;   :config
-;;   (helm-autoresize-mode 1)
-;;   (setq
-;;    helm-scroll-amount 4 ; scroll 4 lines other window using M-<next>/M-<prior>
-;;    helm-quick-update t  ; do not display invisible candidates
-;;    helm-idle-delay 0.01 ; be idle for this many seconds, before updating in delayed sources.
-;;    helm-input-idle-delay 0.01 ; be idle for this many seconds, before updating candidate buffer
-;;    helm-split-window-default-side 'other ;; open helm buffer in another window
-;;    helm-split-window-in-side-p nil ;; open helm buffer inside current window, not occupy whole other window
-;;    helm-candidate-number-limit 200   ; limit the number of displayed canidates
-;;    helm-move-to-line-cycle-in-source nil ; move to end or beginning of source when reaching top or bottom of source.
-;;    ;; helm-command
-;;    helm-M-x-requires-pattern 0          ; show all candidates when set to 0
-;;    )
-
-;;   (bind-keys ("M-x" . helm-M-x)
-;;              ("M-y" . helm-show-kill-ring)
-;;              ("C-x b" . helm-mini))
-;;   (bind-keys :map helm-map
-;;              ("C-o" . nil)
-;;              ("TAB" . helm-execute-persistent-action)
-;;              ("C-i" . helm-execute-persistent-action)
-;;              ("C-z" . helm-select-action)
-;;              ("C-h" . delete-backward-char)))
-
-
-
 (use-package helm
   :load-path "site-lisp/helm"
   :defer t
   :bind (:map helm-map
               ("<tab>" . helm-execute-persistent-action)
-              ("C-i"   . helm-execute-persistent-action)
-              ("C-z"   . helm-select-action)
+              ("C-i" . helm-execute-persistent-action)
+              ("C-z" . helm-select-action)
               ("A-v"   . helm-previous-page))
   :config
   (helm-autoresize-mode 1))
@@ -1430,7 +1373,6 @@
 (use-package helm-dash
   :load-path "site-lisp/helm-dash"
   :commands helm-dash)
-
 
 (use-package helm-descbinds
   :load-path "site-lisp/helm-descbinds"
@@ -1447,20 +1389,25 @@
   :load-path "lisp/helm-hoogle"
   :after helm
   :commands helm-hoogle
-  ;;:init (bind-key "A-M-h" #'helm-hoogle haskell-mode-map)
+  ;;:
   :config
   (add-hook
    'helm-c-hoogle-transform-hook
    #'(lambda ()
        (goto-char (point-min))
        (while (re-search-forward "file:///nix/store" nil t)
-         (replace-match "http://127.0.0.1:8687/file//nix/store" t t)))))
+         (replace-match "http://127 . 0.0.1:8687/file//nix/store" t t)))))
 
 (use-package helm-navi
   :disabled t
   :load-path "site-lisp/helm-navi"
   :after (helm navi)
   :commands helm-navi)
+
+(use-package helm-swoop
+  :load-path "site-lisp/helm-swoop"
+  :bind (("M-s C-s" . helm-swoop )
+         ("C-s"     . helm-swoop-without-pre-input)))
 
 (use-package hi-lock
   :bind (("M-o l" . highlight-lines-matching-regexp)
@@ -1711,14 +1658,13 @@
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
 (use-package ido
-  :disabled t
   :defines (ido-cur-item
             ido-require-match
             ido-selected
             ido-final-text
             ido-show-confirm-message)
-  :bind (("C-x b" . ido-switch-buffer)
-         ("C-x B" . ido-switch-buffer-other-window))
+  ;; :bind (("C-x b" . ido-switch-buffer)
+  ;;        ("C-x B" . ido-switch-buffer-other-window))
   :preface
   (eval-when-compile
     (defvar ido-require-match)
@@ -1755,25 +1701,27 @@
 
   :config
   (ido-mode 'buffer)
+  (setq ido-max-work-file-list 100))
 
-  (use-package ido-hacks
-    :demand t
-    :load-path "site-lisp/ido-hacks"
-    :bind ("M-x" . my-ido-hacks-execute-extended-command)
-    :config
-    (ido-hacks-mode 1)
+(use-package ido-hacks
+  :after ido
+  :demand t
+  :load-path "site-lisp/ido-hacks"
+  :bind ("M-x" . my-ido-hacks-execute-extended-command)
+  :config
+  (ido-hacks-mode 1)
 
-    (defvar ido-hacks-completing-read (symbol-function 'completing-read))
-    (fset 'completing-read ido-hacks-orgin-completing-read-function)
-    (defun my-ido-hacks-execute-extended-command (&optional arg)
-      (interactive "P")
-      (flet ((completing-read
-              (prompt collection &optional predicate require-match
-                      initial-input hist def inherit-input-method)
-              (funcall ido-hacks-completing-read
-                       prompt collection predicate require-match
-                       initial-input hist def inherit-input-method)))
-        (ido-hacks-execute-extended-command arg))))
+  (defvar ido-hacks-completing-read (symbol-function 'completing-read))
+  (fset 'completing-read ido-hacks-orgin-completing-read-function)
+  (defun my-ido-hacks-execute-extended-command (&optional arg)
+    (interactive "P")
+    (flet ((completing-read
+            (prompt collection &optional predicate require-match
+                    initial-input hist def inherit-input-method)
+            (funcall ido-hacks-completing-read
+                     prompt collection predicate require-match
+                     initial-input hist def inherit-input-method)))
+      (ido-hacks-execute-extended-command arg)))
 
   (use-package flx-ido
     :load-path "site-lisp/flx"
@@ -1916,12 +1864,14 @@
   (bind-key "C-i" #'isearch-complete isearch-mode-map))
 
 (use-package ivy
+  :disabled t
   :load-path "site-lisp/swiper"
   :defer 5
   :diminish ivy-mode
-  :bind (("C-x b" . ivy-switch-buffer)
-         ("C-x B" . ivy-switch-buffer-other-window)
-         ("M-H"   . ivy-resume))
+  :bind (("C-x C-f" . ivy-find-file)
+         ("C-x b"   . ivy-switch-buffer)
+         ("C-x B"   . ivy-switch-buffer-other-window)
+         ("M-H"     . ivy-resume))
   :bind (:map ivy-minibuffer-map
               ("C-r" . ivy-previous-line-or-history)
               ("M-r" . ivy-reverse-i-search))
@@ -1972,6 +1922,7 @@
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
 
 (use-package counsel
+  :disabled t
   :after ivy
   :demand t
   :diminish
@@ -1979,7 +1930,7 @@
            (concat "\\(\\`\\.[^.]\\|"
                    (regexp-opt completion-ignored-extensions)
                    "\\'\\)"))
-  :bind (("C-x C-f" . counsel-find-file)
+  :bind (;;("C-x C-f" . counsel-find-file)
          ("C-c e l" . counsel-find-library)
          ("C-c e q" . counsel-set-variable)
          ("C-h e l" . counsel-find-library)
@@ -2169,16 +2120,16 @@
               ("C-c C-j" . lispy-goto)))
 
 (use-package lua-mode
-  :disabled tm
+  :disabled t
   :load-path "site-lisp/lua-mode"
   :mode "\\.lua\\'"
   :interpreter ("lua" . lua-mode))
 
 (use-package lusty-explorer
-  :disabled t
-  :demand t
+  :defer 5
   :load-path "site-lisp/lusty-emacs"
-  :bind ("C-x C-f" . my-lusty-file-explorer)
+  :bind (("C-x C-f" . my-lusty-file-explorer)
+         ("C-x b" . lusty-buffer-explorer))
   :preface
   (defun lusty-read-directory ()
     "Launch the file/directory mode of LustyExplorer."
@@ -2391,8 +2342,8 @@
     ))
 
 (use-package mode-line-bell
-  :load-path "site-lisp/mode-line-bell"
   :disabled t
+  :load-path "site-lisp/mode-line-bell"
   :defer 5
   :config
   (mode-line-bell-mode))
@@ -2565,6 +2516,7 @@
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
+  :disabled t
   :load-path "site-lisp/projectile"
   :defer 10
   :diminish
@@ -2575,7 +2527,7 @@
 
 
 (use-package python
-  :defer
+  :defer t
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python" . python-mode)
   :preface
@@ -2831,9 +2783,11 @@
         slime-contribs '(slime-fancy)))
 
 (use-package smart-mode-line
+  :disabled t
   :load-path "site-lisp/smart-mode-line"
   :defer 5
   :config
+  (setq mode-line-format (delq 'mode-line-position mode-line-format))
   (sml/setup)
   (sml/apply-theme 'light)
   (remove-hook 'display-time-hook 'sml/propertize-time-string)
@@ -2880,6 +2834,11 @@
   :config
   (setq smerge-command-prefix (kbd "C-. C-.")))
 
+(use-package smex
+  :disabled t
+  :load-path "site-lisp/smex"
+  :bind ("M-x" . smex))
+
 (use-package sort-words
   :load-path "site-lisp/sort-words"
   :commands sort-words)
@@ -2900,7 +2859,9 @@
 
 
 (use-package swiper
+  :disabled t
   :after ivy
+  :load-path "site-lisp/swiper"
   :bind ("C-s" . swiper)
   :bind (:map swiper-map
               ("M-y" . yank)
@@ -2955,7 +2916,6 @@
     latex-help-cmd-alist)
 
   (use-package company-math
-    :disabled
     :load-path "site-lisp/site-company/company-math"
     :after company-mode
     :preface
