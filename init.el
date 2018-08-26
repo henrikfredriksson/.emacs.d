@@ -1368,6 +1368,8 @@
               ("C-z" . helm-select-action)
               ("A-v"   . helm-previous-page))
   :config
+  (use-package helm-config
+    :bind ("M-x" . helm-M-x))
   (helm-autoresize-mode 1))
 
 (use-package helm-ag
@@ -1662,6 +1664,7 @@
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
 (use-package ido
+  :disabled t
   :defines (ido-cur-item
             ido-require-match
             ido-selected
@@ -1708,6 +1711,7 @@
   (setq ido-max-work-file-list 100))
 
 (use-package ido-hacks
+  :disabled t
   :after ido
   :demand t
   :load-path "site-lisp/ido-hacks"
@@ -1872,13 +1876,13 @@
   :load-path "site-lisp/swiper"
   :defer 5
   :diminish ivy-mode
-  :bind (("C-x C-f" . ivy-find-file)
+  :bind (
          ("C-x b"   . ivy-switch-buffer)
          ("C-x B"   . ivy-switch-buffer-other-window)
          ("M-H"     . ivy-resume))
-  :bind (:map ivy-minibuffer-map
-              ("C-r" . ivy-previous-line-or-history)
-              ("M-r" . ivy-reverse-i-search))
+  ;; :bind (:map ivy-minibuffer-map
+  ;;             ("C-r" . ivy-previous-line-or-history)
+  ;;             ("M-r" . ivy-reverse-i-search))
   :custom
   (ivy-dynamic-exhibit-delay-ms 200)
   (ivy-height 10)
@@ -1923,12 +1927,14 @@
 
   :config
   (ivy-mode 1)
+  (unbind-key "C-x C-f" ivy-mode-map)
   (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
 
 (use-package counsel
   :disabled t
   :after ivy
   :demand t
+  :commands (counsel-M-x)
   :diminish
   :custom (counsel-find-file-ignore-regexp
            (concat "\\(\\`\\.[^.]\\|"
@@ -1952,7 +1958,7 @@
   (bind-key "M-r" #'counsel-minibuffer-history minibuffer-local-map)
   :config
   (add-to-list 'ivy-sort-matches-functions-alist
-               '(counsel-find-file . ivy--sort-files-by-date)))
+               '(counsel-find-file . ivys--sort-files-by-date)))
 
 
 (use-package js2-mode
@@ -2056,7 +2062,7 @@
 (use-package langtool
   :load-path "site-lisp/langtool"
   :config
-  (setq langtool-language-tool-jar "~/Documents/code/langtool/languagetool-commandline.jar"))
+  (setq langtool-language-tool-jar "~/Documents/src/langtool/languagetool-commandline.jar"))
 
 (use-package lisp-mode
   :defer t
@@ -2130,7 +2136,6 @@
   :interpreter ("lua" . lua-mode))
 
 (use-package lusty-explorer
-  :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
          ("C-x b" . lusty-buffer-explorer))
@@ -2391,6 +2396,91 @@
   :bind ("C-!" . mf/mirror-region-in-multifile)
   :load-path "site-lisp/multifiles-el")
 
+
+
+(use-package mc-extras
+  :after multiple-cursors
+  :load-path "site-lisp/mc-extras"
+  :bind (("<C-m> M-C-f" . mc/mark-next-sexps)
+         ("<C-m> M-C-b" . mc/mark-previous-sexps)
+         ("<C-m> <"     . mc/mark-all-above)
+         ("<C-m> >"     . mc/mark-all-below)
+         ("<C-m> C-d"   . mc/remove-current-cursor)
+         ("<C-m> C-k"   . mc/remove-cursors-at-eol)
+         ("<C-m> M-d"   . mc/remove-duplicated-cursors)
+         ("<C-m> |"     . mc/move-to-column)
+         ("<C-m> ~"     . mc/compare-chars)))
+
+(use-package multiple-cursors
+  :load-path "site-lisp/multiple-cursors"
+  :after phi-search
+  :defer 5
+
+  ;; - Sometimes you end up with cursors outside of your view. You can scroll
+  ;;   the screen to center on each cursor with `C-v` and `M-v`.
+  ;;
+  ;; - If you get out of multiple-cursors-mode and yank - it will yank only
+  ;;   from the kill-ring of main cursor. To yank from the kill-rings of every
+  ;;   cursor use yank-rectangle, normally found at C-x r y.
+
+  :bind (("<C-m> ^"     . mc/edit-beginnings-of-lines)
+         ("<C-m> `"     . mc/edit-beginnings-of-lines)
+         ("<C-m> $"     . mc/edit-ends-of-lines)
+         ("<C-m> '"     . mc/edit-ends-of-lines)
+         ("<C-m> R"     . mc/reverse-regions)
+         ("<C-m> S"     . mc/sort-regions)
+         ("<C-m> W"     . mc/mark-all-words-like-this)
+         ("<C-m> Y"     . mc/mark-all-symbols-like-this)
+         ("<C-m> a"     . mc/mark-all-like-this-dwim)
+         ("<C-m> c"     . mc/mark-all-dwim)
+         ("<C-m> l"     . mc/insert-letters)
+         ("<C-m> n"     . mc/insert-numbers)
+         ("<C-m> r"     . mc/mark-all-in-region)
+         ("<C-m> s"     . set-rectangular-region-anchor)
+         ("<C-m> %"     . mc/mark-all-in-region-regexp)
+         ("<C-m> t"     . mc/mark-sgml-tag-pair)
+         ("<C-m> w"     . mc/mark-next-like-this-word)
+         ("<C-m> x"     . mc/mark-more-like-this-extended)
+         ("<C-m> y"     . mc/mark-next-like-this-symbol)
+         ("<C-m> C-x"   . reactivate-mark)
+         ("<C-m> C-SPC" . mc/mark-pop)
+         ("<C-m> ("     . mc/mark-all-symbols-like-this-in-defun)
+         ("<C-m> C-("   . mc/mark-all-words-like-this-in-defun)
+         ("<C-m> M-("   . mc/mark-all-like-this-in-defun)
+         ("<C-m> ["     . mc/vertical-align-with-space)
+         ("<C-m> {"     . mc/vertical-align)
+
+         ("S-<down-mouse-1>")
+         ("S-<mouse-1>" . mc/add-cursor-on-click))
+  :bind (:map selected-keymap
+              ("c"   . mc/edit-lines)
+              ("."   . mc/mark-next-like-this)
+              ("<"   . mc/unmark-next-like-this)
+              ("C->" . mc/skip-to-next-like-this)
+              (","   . mc/mark-previous-like-this)
+              (">"   . mc/unmark-previous-like-this)
+              ("C-<" . mc/skip-to-previous-like-this)
+              ("y"   . mc/mark-next-symbol-like-this)
+              ("Y"   . mc/mark-previous-symbol-like-this)
+              ("w"   . mc/mark-next-word-like-this)
+              ("W"   . mc/mark-previous-word-like-this))
+
+  :preface
+  (defun reactivate-mark ()
+    (interactive)
+    (activate-mark)))
+
+(use-package phi-search
+  :load-path "site-lisp/phi-search"
+  :defer 5)
+
+(use-package phi-search-mc
+  :after (phi-search multiple-cursors)
+  :load-path "site-lisp/phi-search-mc"
+  :config
+  (phi-search-mc/setup-keys)
+  (add-hook 'isearch-mode-mode #'phi-search-from-isearch-mc/setup-keys))
+
 (use-package paredit
   :commands paredit-mode
   :diminish paredit-mode
@@ -2582,6 +2672,7 @@
     (setq indicate-empty-lines t)
     (set (make-local-variable 'parens-require-spaces) nil)
     (setq indent-tabs-mode nil)
+    (setq tab-width 4)
     (setq python-indent-offset 4)
     (flycheck-mode)
     (company-mode)
@@ -2887,7 +2978,7 @@
   :mode ("\\.td\\'" . tablegen-mode))
 
 (use-package tex-site
-  :defer 5
+  :defer 10
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode) 
