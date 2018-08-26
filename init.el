@@ -1370,6 +1370,10 @@
   :config
   (helm-autoresize-mode 1))
 
+(use-package helm-ag
+  :load-path "site-lisp/helm-ag"
+  :commands (helm-ag helm-ag-this-file))
+
 (use-package helm-dash
   :load-path "site-lisp/helm-dash"
   :commands helm-dash)
@@ -2292,6 +2296,7 @@
     (remove-hook 'server-switch-hook 'magit-commit-diff))
 
   (use-package git-gutter+
+    :disabled
     :load-path "site-lisp/git-gutter-plus"
     :diminish git-gutter+-mode
     :config
