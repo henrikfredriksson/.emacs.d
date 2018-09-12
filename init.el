@@ -13,25 +13,16 @@
       garbage-collection-message t
       auto-window-vscroll nil)
 
-
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-selection-coding-system 'utf-8)
-(set-file-name-coding-system 'utf-8)
-(set-clipboard-coding-system 'utf-8)
-(set-buffer-file-coding-system 'utf-8) 
-
-
 (add-hook 'after-init-hook
           `(lambda ()
              (setq file-name-handler-alist file-name-handler-alist-old
                    gc-cons-threshold 800000
-                   gc-cons-percentage 0.1)
+                   gc-cons-percentage 0.6)
              (garbage-collect)) t)
 
-
+;; (run-with-idle-timer 10 t (lambda () (garbage-collect)))
+(run-with-idle-timer 20 t #'garbage-collect)
+(setq garbage-collection-messages t)
 
 ;;; Functions
 
@@ -98,7 +89,7 @@
 
   (defconst load-path-reject-re "/\\.emacs\\.d/\\(lib\\|site-lisp\\)/"
     "Regexp matching `:load-path' values to be rejected.")
-  
+
   (if init-file-debug
       (setq use-package-verbose t
             use-package-expand-minimally nil
@@ -115,9 +106,9 @@
 (defsubst hook-into-modes (func &rest modes)
   (dolist (mode-hook modes) (add-hook mode-hook func)))
 
-(defun get-jobhours-string ()                                 
-  (with-current-buffer (get-buffer "*scratch*")               
-    (let ((str (shell-command-to-string "jobhours")))          
+(defun get-jobhours-string ()
+  (with-current-buffer (get-buffer "*scratch*")
+    (let ((str (shell-command-to-string "jobhours")))
       (require 'ansi-color)
       (ansi-color-apply (substring str 0 (1- (length str)))))))
 
@@ -174,67 +165,68 @@
 (eval-and-compile
   (add-to-list 'load-path (expand-file-name "lib" user-emacs-directory)))
 
-(use-package alert         :defer  t  :load-path "lisp/alert")
-(use-package anaphora      :demand t  :load-path "lib/anaphora")
-(use-package apiwrap       :defer  t  :load-path "lib/apiwrap")
-(use-package asoc          :defer  t  :load-path "lib/asoc")
-(use-package async         :defer  t  :load-path "lisp/emacs-async")
-(use-package button-lock   :defer  t  :load-path "lib/button-lock")
-(use-package crux          :demand t  :load-path "lib/crux")
-(use-package ctable        :defer  t  :load-path "lib/emacs-ctable")
-(use-package dash          :defer  t  :load-path "lib/dash-el")
-(use-package deferred      :defer  t  :load-path "lib/emacs-deferred")
-(use-package difflib       :defer  t  :load-path "lib/difflib")
-(use-package diminish      :demand t  :load-path "lib/diminish")
-(use-package el-mock       :defer  t  :load-path "lib")
-(use-package elisp-refs    :defer  t  :load-path "lib/elisp-refs")
-(use-package emojify       :defer  t  :load-path "lib/emacs-emojify")
-(use-package epc           :defer  t  :load-path "lib/emacs-epc")
-(use-package epl           :defer  t  :load-path "lib/epl")
-(use-package esxml         :defer  t  :load-path "lib/esxml")
-(use-package f             :defer  t  :load-path "lib/f-el")
-(use-package fn            :defer  t  :load-path "lib/fn-el")
-(use-package fringe-helper :defer  t  :load-path "lib/fringe-helper-el")
-(use-package fuzzy         :defer  t  :load-path "lib/fuzzy-el")
-(use-package gh            :defer  t  :load-path "lib/gh-el")
-(use-package ghub          :defer  t  :load-path "lib/ghub")
-(use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
-(use-package ht            :defer  t  :load-path "lib/ht-el")
-(use-package kv            :defer  t  :load-path "lib/kv")
-(use-package list-utils    :defer  t  :load-path "lib/list-utils")
-(use-package logito        :defer  t  :load-path "lib/logito")
-(use-package loop          :defer  t  :load-path "lib/loop")
-(use-package m-buffer      :defer  t  :load-path "lib/m-buffer")
-(use-package makey         :defer  t  :load-path "lib/makey")
-(use-package marshal       :defer  t  :load-path "lib/marshal-el")
-(use-package names         :defer  t  :load-path "lib/names")
-(use-package noflet        :defer  t  :load-path "lib/noflet")
-(use-package oauth2        :defer  t  :load-path "lib/oauth2")
-(use-package ov            :defer  t  :load-path "lib/ov-el")
-(use-package parent-mode   :defer  t  :load-path "lib/parent-mode")
-(use-package parsebib      :defer  t  :load-path "lib/parsebib")
-(use-package parsec        :defer  t  :load-path "lib/parsec")
-(use-package pcache        :defer  t  :load-path "lib/pcache")
-(use-package peval         :defer  t  :load-path "lib/peval")
-(use-package pfuture       :defer  t  :load-path "lib/pfuture")
-(use-package pkg-info      :defer  t  :load-path "lib/pkg-info")
-(use-package popup         :defer  t  :load-path "lib/popup-el")
-(use-package popup-pos-tip :defer  t  :load-path "lib")
-(use-package popwin        :defer  t  :load-path "site-lisp/popwin")
-(use-package pos-tip       :defer  t  :load-path "lib")
-(use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
-(use-package request       :defer  t  :load-path "lib/emacs-request")
-(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
-(use-package s             :defer  t  :load-path "lib/s-el")
-(use-package spinner       :defer  t  :load-path "lib/spinner")
-(use-package tablist       :defer  t  :load-path "lib/tablist")
-(use-package uuidgen       :defer  t  :load-path "lib/uuidgen-el")
-(use-package web           :defer  t  :load-path "lib/emacs-web")
-(use-package web-server    :defer  t  :load-path "lib/emacs-web-server")
-(use-package websocket     :defer  t  :load-path "lib/emacs-websocket")
-(use-package with-editor   :defer  t  :load-path "lib/with-editor")
-(use-package xml-rpc       :defer  t  :load-path "lib")
-(use-package zoutline      :defer  t  :load-path "lib/zoutline")
+(use-package alert          :defer  t  :load-path "lisp/alert")
+(use-package anaphora       :demand t  :load-path "lib/anaphora")
+(use-package apiwrap        :defer  t  :load-path "lib/apiwrap")
+(use-package asoc           :defer  t  :load-path "lib/asoc")
+(use-package async          :defer  t  :load-path "lisp/emacs-async")
+(use-package button-lock    :defer  t  :load-path "lib/button-lock")
+(use-package crux           :demand t  :load-path "lib/crux")
+(use-package ctable         :defer  t  :load-path "lib/emacs-ctable")
+(use-package dash           :defer  t  :load-path "lib/dash-el")
+(use-package deferred       :defer  t  :load-path "lib/emacs-deferred")
+(use-package difflib        :defer  t  :load-path "lib/difflib")
+(use-package diminish       :demand t  :load-path "lib/diminish")
+(use-package el-mock        :defer  t  :load-path "lib")
+(use-package elisp-refs     :defer  t  :load-path "lib/elisp-refs")
+(use-package emojify        :defer  t  :load-path "lib/emacs-emojify")
+(use-package epc            :defer  t  :load-path "lib/emacs-epc")
+(use-package epl            :defer  t  :load-path "lib/epl")
+(use-package esxml          :defer  t  :load-path "lib/esxml")
+(use-package f              :defer  t  :load-path "lib/f-el")
+(use-package fn             :defer  t  :load-path "lib/fn-el")
+(use-package fringe-helper  :defer  t  :load-path "lib/fringe-helper-el")
+(use-package fuzzy          :defer  t  :load-path "lib/fuzzy-el")
+(use-package gh             :defer  t  :load-path "lib/gh-el")
+(use-package ghub           :defer  t  :load-path "lib/ghub")
+(use-package ghub+          :defer  t  :load-path "lib/ghub-plus")
+(use-package ht             :defer  t  :load-path "lib/ht-el")
+(use-package jedi-core      :demand t  :load-path "site-lisp/jedi")
+(use-package kv             :defer  t  :load-path "lib/kv")
+(use-package list-utils     :defer  t  :load-path "lib/list-utils")
+(use-package logito         :defer  t  :load-path "lib/logito")
+(use-package loop           :defer  t  :load-path "lib/loop")
+(use-package m-buffer       :defer  t  :load-path "lib/m-buffer")
+(use-package makey          :defer  t  :load-path "lib/makey")
+(use-package marshal        :defer  t  :load-path "lib/marshal-el")
+(use-package names          :defer  t  :load-path "lib/names")
+(use-package noflet         :defer  t  :load-path "lib/noflet")
+(use-package oauth2         :defer  t  :load-path "lib/oauth2")
+(use-package ov             :defer  t  :load-path "lib/ov-el")
+(use-package parent-mode    :defer  t  :load-path "lib/parent-mode")
+(use-package parsebib       :defer  t  :load-path "lib/parsebib")
+(use-package parsec         :defer  t  :load-path "lib/parsec")
+(use-package pcache         :defer  t  :load-path "lib/pcache")
+(use-package peval          :defer  t  :load-path "lib/peval")
+(use-package pfuture        :defer  t  :load-path "lib/pfuture")
+(use-package pkg-info       :defer  t  :load-path "lib/pkg-info")
+(use-package popup          :defer  t  :load-path "lib/popup-el")
+(use-package popup-pos-tip  :defer  t  :load-path "lib")
+(use-package popwin         :defer  t  :load-path "site-lisp/popwin")
+(use-package pos-tip        :defer  t  :load-path "lib")
+(use-package pythonic       :defer  t  :load-path "site-lisp/pythonic")
+(use-package request        :defer  t  :load-path "lib/emacs-request")
+(use-package rich-minority  :defer  t  :load-path "lib/rich-minority")
+(use-package s              :defer  t  :load-path "lib/s-el")
+(use-package spinner        :defer  t  :load-path "lib/spinner")
+(use-package tablist        :defer  t  :load-path "lib/tablist")
+(use-package uuidgen        :defer  t  :load-path "lib/uuidgen-el")
+(use-package web            :defer  t  :load-path "lib/emacs-web")
+(use-package web-server     :defer  t  :load-path "lib/emacs-web-server")
+(use-package websocket      :defer  t  :load-path "lib/emacs-websocket")
+(use-package with-editor    :defer  t  :load-path "lib/with-editor")
+(use-package xml-rpc        :defer  t  :load-path "lib")
+(use-package zoutline       :defer  t  :load-path "lib/zoutline")
 
 
 ;;; Keybindings
@@ -273,9 +265,9 @@
 ;;; Packages
 
 (use-package ggtags
-  :disabled t
   :load-path "site-lisp/ggtags"
-  :commands ggtags-mod
+  :defer
+  :commands ggtags-mode
   :diminish ggtags-mode)
 
 (use-package cc-mode
@@ -480,9 +472,9 @@
   :bind ("<C-return>" . ace-window))
 
 (use-package ag
-  :disabled t
-  :commands ag-project
-  :load-path "site-lisp/ag")
+  :commands ag
+  :load-path "site-lisp/ag"
+  )
 
 (use-package agda2-mode
   :disabled t
@@ -518,13 +510,13 @@
   :load-path "site-lisp/aggressive-indent-mode"
   :defer
   :diminish
-  :hook ((emacs-lisp-mode web-mode) . aggressive-indent-mode))
+  :hook ((emacs-lisp-mode) . aggressive-indent-mode))
 
-(use-package alert 
+(use-package alert
   :load-path "lisp/alert"
   :commands alert)
 
-(use-package align 
+(use-package align
   :bind (("M-["   . align-code)
          ("C-c [" . align-regexp)
          ("C-c ]" . align-whitespace))
@@ -587,7 +579,7 @@
                          "                                . ~*~'"))
            (dired-buffers dired-buffers)
            (find-ls-option '("-print0 | xargs -0 ls -lta" . "-lta")))
-      ;; Check that it's really a directory               . 
+      ;; Check that it's really a directory               .
       (or (file-directory-p dir)
           (error "Backup directory does not exist: %s" dir))
       (with-current-buffer (get-buffer-create "*Backups*")
@@ -625,7 +617,7 @@
                                 (shell-quote-argument "{}")
                                 find-exec-terminator)
                       (car find-ls-option))))
-        ;; Start the find process                                    . 
+        ;; Start the find process                                    .
         (message "Looking for backup files                           .        . .")
         (shell-command (concat args "&") (current-buffer))
         ;; The next statement will bomb in classic dired (no optional arg
@@ -653,16 +645,16 @@
              find-ls-subdir-switches)
         (setq buffer-read-only nil)
         ;; Subdir headlerline must come first because the first marker in
-        ;; subdir-alist points there                                 . 
+        ;; subdir-alist points there                                 .
         (insert "  " dir ":\n")
         ;; Make second line a ``find'' line in analogy to the ``total'' or
-        ;; ``wildcard'' line                                                  . 
+        ;; ``wildcard'' line                                                  .
         (insert "  " args "\n")
         (setq buffer-read-only t)
         (let ((proc (get-buffer-process (current-buffer))))
           (set-process-filter proc (function find-dired-filter))
           (set-process-sentinel proc (function find-dired-sentinel))
-          ;; Initialize the process marker; it is used by the filter          . 
+          ;; Initialize the process marker; it is used by the filter          .
           (move-marker (process-mark proc) 1 (current-buffer)))
         (setq mode-line-process '(":%s")))))
 
@@ -724,10 +716,9 @@
   :load-path "site-lisp/company-mode"
   :diminish company-mode
   :commands company-mode
-  ;;:bind ("<tab>"           . company-complete-common-or-cycle)
   :config
   (setq company-dabbrev-downcase 0)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 0)
   ;; From https://github     . com/company-mode/company-mode/issues/87
   ;; See also https://github . com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
@@ -761,6 +752,14 @@
        (setq company-backends
              (mapcar #'company-mode/backend-with-yas company-backends)))))
 
+(use-package company-php
+  :after company
+  :load-path "site-lisp/ac-php"
+  :config
+  (ac-php-core-eldoc-setup)
+  (make-local-variable 'company-backends)
+  (add-to-list 'company-backends 'company-ac-php-backend))
+
 (use-package compile
   :disabled t
   :bind (("C-c c" . compile)
@@ -787,11 +786,11 @@
 
 
 (use-package crosshairs
-  :disabled t
   :bind ("M-o c" . crosshairs-mode)
   :config
   (use-package col-highlight
     :config
+
     (use-package vline)))
 
 (use-package css-mode
@@ -818,7 +817,7 @@
 
 (use-package dash-at-point
   :load-path "site-lisp/dash-at-point"
-  :bind ("C-c D"                                        . dash-at-point)
+  :bind ("C-c D" . dash-at-point)
   :config
   (add-to-list 'dash-at-point-mode-alist '(haskell-mode . "haskell")))
 
@@ -938,12 +937,12 @@
                           (file-name-directory
                            (directory-file-name
                             (file-name-directory file))))
-                    ;; Give up if we are already at the root dir . 
+                    ;; Give up if we are already at the root dir .
                     (not (string= (file-name-directory file)
                                   parent-dir))))
-        ;; Move up to the parent dir and try again               . 
+        ;; Move up to the parent dir and try again               .
         (setq file (expand-file-name "                           . git" parent-dir)))
-      ;; If we found a change log in a parent, use that          . 
+      ;; If we found a change log in a parent, use that          .
       (if (file-exists-p file)
           (let ((regexp (funcall dired-omit-regexp-orig))
                 (omitted-files
@@ -1146,7 +1145,7 @@
 (use-package eval-expr
   :load-path "site-lisp/eval-expr"
   :bind ("M-:" . eval-expr)
-  :preface 
+  :preface
   (defun my-elisp-indent-or-complete (&optional arg)
     (interactive "p")
     (call-interactively 'lisp-indent-line)
@@ -1186,18 +1185,20 @@
   :commands (flycheck-mode
              flycheck-next-error
              flycheck-previous-error)
-  :bind (("M-n" . flycheck-next-error)
-         ("M-p" . flycheck-previous-error))
-  
+  ;; :bind (("M-n" . flycheck-next-error)
+  ;;        ("M-p" . flycheck-previous-error))
+
   :config
   (defalias 'flycheck-show-error-at-point-soon 'flycheck-show-error-at-point))
 
 (use-package flycheck-color-mode-line
-  :load-path "site-lisp/flycheck-color-mode-line"
   :after flycheck
+  :load-path "site-lisp/flycheck-color-mode-line"
   :config
-  (set-face-background 'flycheck-color-mode-line-error-face "#870000")
-  (set-face-background 'flycheck-color-mode-line-warning-face "#707070"))
+  (flycheck-color-mode-line-mode 1)
+  ;; (set-face-background 'flycheck-color-mode-line-error-face "#FF3333")
+  ;; (set-face-background 'flycheck-color-mode-line-warning-face "#FFFFF0")
+  )
 
 
 (use-package flyspell
@@ -1245,20 +1246,12 @@
   :mode "\\ . dot\\'")
 
 (use-package grep
-  :disabled t
   :bind (("M-s d" . find-grep-dired)
          ("M-s n" . find-name-dired)
          ("M-s f" . find-grep)
          ("M-s G" . grep))
   :config
-  (add-hook 'grep-mode-hook #'(lambda () (use-package grep-ed)))
-
-  (grep-apply-setting 'grep-command "egrep -nH -e ")
-  (grep-apply-setting
-   'grep-find-command
-   '("rg --no-heading --color=always -j4 -nH -e " . 43)
-   ;; '("find                                     . -name '*                          . v' -type f -print0 | xargs -P4 -0 egrep -nH " . 61)
-   ))
+  (grep-apply-setting 'grep-command "grep -nH "))
 
 (use-package gud
   :disabled t
@@ -1416,7 +1409,7 @@
   (use-package helm-config
     :disabled t
     :bind (("M-x" . helm-M-x)))
-  
+
   (helm-autoresize-mode 1))
 
 (use-package helm-ag
@@ -1452,6 +1445,7 @@
        (goto-char (point-min))
        (while (re-search-forward "file:///nix/store" nil t)
          (replace-match "http://127 . 0.0.1:8687/file//nix/store" t t)))))
+
 
 (use-package helm-navi
   :disabled t
@@ -1807,8 +1801,9 @@
                           ido-file-completion-map))))
 
 (use-package iedit
-  :load-path "site-lisp/iedit"
-  :bind (("C-;" . iedit-mode)))
+  :disabled t
+  :defer t
+  :load-path "site-lisp/iedit")
 
 (use-package ielm
   :disabled t
@@ -1956,7 +1951,7 @@
   (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
   (ivy-sort-matches-functions-alist '((t)))
   (ivy-use-virtual-buffers t)
-  (ivy-wrap t)  
+  (ivy-wrap t)
   :preface
   (defun ivy-done-or-delete-char ()
     (interactive)
@@ -2010,7 +2005,7 @@
          ("C-h e l" . counsel-find-library)
          ("C-h e u" . counsel-unicode-char)
          ("C-h f"   . counsel-describe-function)
-         ("C-x r b" . counsel-bookmark) 
+         ("C-x r b" . counsel-bookmark)
          ("M-x"     . counsel-M-x)
          ;; ("M-y"     . counsel-yank-pop)
 
@@ -2107,7 +2102,7 @@
 (use-package indent-guide
   :disabled t
   :load-path "site-lisp/indent-guide"
-  :hook (python-mode . indent-guide-mode) 
+  :hook (python-mode . indent-guide-mode)
   :config
   (set-face-background 'indent-guide-face "white")
   (setq indent-guide-char ":"))
@@ -2307,7 +2302,7 @@
   :load-path "site-lisp/macrostep"
   :bind ("C-c e m" . macrostep-expand))
 
-(use-package magit 
+(use-package magit
   :load-path ("site-lisp/magit/lisp"
               "lib/with-editor")
   :bind (("C-x g" . magit-status)
@@ -2407,7 +2402,7 @@
   :mode (("\\`README\\.md\\'" . gfm-mode)
          ("\\.md\\'"          . markdown-mode)
          ("\\.markdown\\'"    . markdown-mode))
-  :config  
+  :config
   (use-package markdown-preview-mode
     :load-path "site-lisp/markdown-preview-mode"
     :config
@@ -2602,9 +2597,23 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
-  
-  :config 
+
+  (defun my-find-user-init-file ()
+    "Edit the `user-init-file', in another window."
+    (interactive)
+    (find-file user-init-file))
+
+
+  :config
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (set-file-name-coding-system 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
 
   (bind-keys ("C-z"             . delete-other-windows)
              ("C-*"             . goto-matching-parens)
@@ -2616,8 +2625,9 @@
              ("M-j"             . delete-indentation-forward)
              ("M-J"             . delete-indentation)
              ("M-L"             . mark-line)
-             ;;("M-S"             . mark-sentence) 
+             ;;("M-S"           . mark-sentence)
              ("M-<return>"      . open-line-above)
+             ("C-,"             . pop-global-mark)
 
              ("M-g c"           . goto-char)
 
@@ -2650,11 +2660,17 @@
              ("C-c V"           . view-clipboard)
              ("C-c )"           . close-all-parentheses)
              ("C-c ="           . count-matches)
+             ("C-;"             . comment-line)
              ("C-c ;"           . comment-or-uncomment-region)
+
 
              ("C-c C-z"         . delete-to-end-of-buffer)
              ("C-c C-0"         . copy-current-buffer-name)
-             ("C-c M-q"         . unfill-paragraph))
+             ("C-c M-q"         . unfill-paragraph)
+
+             ("M-S-<up>"        . move-region-up)
+             ("M-S-<down>"      . move-region-down))
+
 
   (bind-keys ("C-h e a"         . apropos-value)
              ("C-h e e"         . view-echo-area-messages)
@@ -2668,7 +2684,8 @@
              ("C-c e d"         . debug-on-entry)
              ("C-c e e"         . toggle-debug-on-error)
              ("C-c e f"         . emacs-lisp-byte-compile-and-load)
-             ("C-c e i"         . crux-find-user-init-file)
+             ;; ("C-c e i"         . crux-find-user-init-file)
+             ("C-c e i"         . my-find-user-init-file)
              ("C-c e j"         . emacs-lisp-mode)
              ("C-c e P"         . check-papers)
              ("C-c e r"         . do-eval-region)
@@ -2683,14 +2700,21 @@
   :load-path "site-lisp/projectile"
   :defer 10
   :diminish
+  :bind-keymap ("C-c p" . projectile-command-map)
   :config
-  (projectile-global-mode 1))
+  (setq projectile-indexing-method 'native)
+  (setq projectile-completion-method 'helm)
+
+  (projectile-global-mode))
 
 
 (use-package python
   :defer t
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python3" . python-mode)
+  :bind (:map inferior-python-mode-map
+              ("M-k" . comint-clear-buffer)
+              )
   :preface
   (defface paren-face
     '((((class color) (background dark))
@@ -2698,8 +2722,46 @@
       (((class color) (background light))
        (:foreground "grey55")))
     "Face used to dim parentheses.")
-  :config
 
+  (defvar python-prettify-symbols-alist
+    '(("::"     . ?∷)
+      ("for" . ?∀)
+      ("exists" . ?∃)
+      ("->"     . ?→)
+      ("<-"     . ?←)
+      ("=>"     . ?⇒)
+      ("~>"     . ?⇝)
+      ("<~"     . ?⇜)
+      ("<>"     . ?⨂)
+      ("msum"   . ?⨁)
+      ("\\"     . ?λ)
+      ("not"    . ?¬)
+      ("&&"     . ?∧)
+      ("||"     . ?∨)
+      ("/="     . ?≠)
+      ("<="     . ?≤)
+      (">="     . ?≥)
+      ("<<<"    . ?⋘)
+      (">>>"    . ?⋙)
+      ("lambda" . ?λ)
+      ("int" .      #x2124)
+      ("float" .    #x211d)
+      ("str" .      #x1d54a)
+      ("True" .     #x1d54b)
+      ("False" .    #x1d53d)
+
+      ("`elem`"             . ?∈)
+      ("`notElem`"          . ?∉)
+      ("`member`"           . ?∈)
+      ("`notMember`"        . ?∉)
+      ("`union`"            . ?∪)
+      ("`intersection`"     . ?∩)
+      ("`isSubsetOf`"       . ?⊆)
+      ("`isProperSubsetOf`" . ?⊂)
+      ("undefined"          . ?⊥)))
+
+  :config
+  (setq-local prettify-symbols-alist python-prettify-symbols-alist)
 
   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
     "List of environment variables \\[universal-coding-system-argument] should set")
@@ -2718,13 +2780,15 @@ the same coding systems as Emacs."
         (setenv extra-env (symbol-name (ad-get-arg 0))))
       ad-do-it))
 
-  
+
   (setq python-python-command "/usr/local/bin/python3")
   ;;(setq python-shell-interpreter "python3")
   (setq py-python-command "python3")
-  
+
+
   (defvar python-mode-initialized nil)
 
+  (add-hook 'before-save-hook 'whitespace-cleanup)
   (defun my-python-mode-hook ()
     (unless python-mode-initialized
       (setq python-mode-initialized t)
@@ -2749,24 +2813,49 @@ the same coding systems as Emacs."
     (setq tab-width 4)
     (set-variable 'py-indent-offset 4)
     (set-variable 'python-indent-guess-indent-offset nil)
-    (flycheck-mode)
-    (company-mode)
-    (smartparens-mode)
-    (whitespace-mode)
+    (flycheck-mode 1)
+    (prettify-symbols-mode)
+    (company-mode 1)
+    (smartparens-mode 1)
+    (whitespace-mode 1)
     (setenv "LANG" "UTF-8")
     (bind-key "C-c C-z" #'python-shell python-mode-map)
     (unbind-key "C-c c" python-mode-map))
 
+
   (add-hook 'python-mode-hook 'my-python-mode-hook)
-  (add-hook 'python-mode-hook 
+  (add-hook 'python-mode-hook
             (lambda ()
-              (font-lock-add-keywords nil 
+              (font-lock-add-keywords nil
                                       '(("(\\|)" . 'paren-face)))
-              (font-lock-add-keywords nil 
+              (font-lock-add-keywords nil
                                       '(("{\\|}" . 'paren-face)))
-              (font-lock-add-keywords nil 
+              (font-lock-add-keywords nil
                                       '(("\\[\\|\\]" . 'paren-face)))
-              )))
+              ))
+  (use-package company-jedi
+    ;; hfn (2018-09-11):
+    ;; Not really working. Needs configuration
+
+    :load-path "site-lisp/emacs-company-jedi"
+    :config
+    (setq jedi:server-command (list "python" jedi:server-script))
+    (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
+    (setq jedi:complete-on-dot t)
+    (setq jedi:use-shortcuts t)
+    (setq jedi:server-args
+          '("--sys-path" "/usr/local/lib/python3.7/site-packages/"))
+    ;; (defun config/enable-company-jedi ()
+    ;;   (add-to-list 'company-backends 'company-jedi))
+    ;; (add-hook 'python-mode-hook 'config/enable-company-jedi)
+    (add-hook 'python-mode-hook 'jedi:setup)
+    (setq jedi:complete-on-dot t
+          jedi:use-shortcuts t
+          jedi:environment-root "jedi"
+          python-environment-directory "~/.virtualenvs")
+    (add-to-list 'company-backends 'company-jedi))
+
+  )
 
 (use-package recentf
   :defer 10
@@ -2960,23 +3049,21 @@ the same coding systems as Emacs."
         slime-contribs '(slime-fancy)))
 
 (use-package smart-mode-line
-  :disabled t
   :load-path "site-lisp/smart-mode-line"
   :defer 5
   :config
   (setq mode-line-format (delq 'mode-line-position mode-line-format))
   (sml/setup)
   (sml/apply-theme 'light)
-  (remove-hook 'display-time-hook 'sml/propertize-time-string)
-  ;; (when (eq system-type 'darwin)
-  ;;   (setq mac-right-option-modifier 'super))
-  )
+  (add-to-list 'sml/replacer-regexp-list '("^~/src/" ":src:") t)
+  (add-to-list 'sml/replacer-regexp-list '("^~/dbwebb-kurser/" ":dbwebb:"))
+  (remove-hook 'display-time-hook 'sml/propertize-time-string))
 
 (use-package smart-tabs-mode
   :commands smart-tabs-mode
   :load-path "site-lisp/smarttabs")
 
-(use-package smartparens 
+(use-package smartparens
   :load-path "site-lisp/smartparens"
   :diminish (smartparens-mode)
   :config
@@ -2995,13 +3082,13 @@ the same coding systems as Emacs."
              ("M-k"          . sp-raise-sexp)
              ("M-S"          . sp-split-sexp)
              ("M-J"          . sp-join-sexp)
-             
+
              ("C-M-S"        . sp-rewrap-sexp)
              ("M-<down>"     . sp-splice-sexp-killing-forward)
              ;;("M-q"          . sp-indent-defun)
              ("C-j"          . sp-newline)
 
-             ("C-. C" . sp-convolute-sexp) 
+             ("C-. C" . sp-convolute-sexp)
              ("C-. B" . sp-splice-sexp-killing-backward)
              ("C-. f" . sp-splice-sexp-killing-forward)
              ("C-. a" . sp-add-to-next-sexp)))
@@ -3029,7 +3116,7 @@ the same coding systems as Emacs."
   :disabled t
   :bind ("<f8>" . stopwatch))
 
-(use-package swap-regions 
+(use-package swap-regions
   :load-path "site-lisp/swap-regions"
   :commands swap-regions)
 
@@ -3065,13 +3152,13 @@ the same coding systems as Emacs."
   :config
   (require 'tex)
   ;;(unbind-key "\\" latex-mode-map)
-  
+
   (setq reftex-plug-into-AUCTeX t)
   (setenv "PATH" (concat "/Library/TeX/texbin:" (getenv "PATH")))
   (add-to-list 'exec-path "/Library/TeX/texbin")
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (setq reftex-extra-bindings t)
-  
+
   (defun latex-help-get-cmd-alist ()    ;corrected version:
     "Scoop up the commands in the index of the latex info manual.
    The values are saved in `latex-help-cmd-alist' for speed."
@@ -3107,8 +3194,8 @@ the same coding systems as Emacs."
   (setq TeX-parse-self t)
   (setq-default TeX-master nil)
   (setq TeX-PDF-mode t)
-  
-  
+
+
   (use-package ebib
     :disabled  t
     :load-path "site-lisp/ebib"
@@ -3143,7 +3230,7 @@ the same coding systems as Emacs."
 
   (defun my-latex-mode-hook ()
     (company-mode t)
-    (LaTeX-math-mode t)  
+    (LaTeX-math-mode t)
     (smartparens-mode t)
     (flycheck-mode t)
     )
@@ -3218,14 +3305,36 @@ the same coding systems as Emacs."
   (use-package visual-regexp-steroids
     :load-path "site-lisp/visual-regexp-steroids"))
 
+(use-package visual-indentation-mode
+  :disabled t
+  :load-path "site-lisp/visual-indentation-mode"
+  :hook ( (python-mode) . visual-indentation-mode)
+  )
+
 (use-package web-mode
   :defer t
   :load-path "site-lisp/web-mode"
   :mode (("\\.html\\'" . web-mode)
          ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
+  ;; :preface
+  ;; (require 'pkg-info)
+  ;; (flycheck-define-checker my-php
+  ;;                          "A PHP syntax checker using the PHP command line interpreter.
+
+  ;; See URL `http://php.net/manual/en/features.commandline.php'."
+  ;;                          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+  ;;                                    "-d" "log_errors=0" source)
+  ;;                          :error-patterns
+  ;;                          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+  ;;                                  (message) " in " (file-name) " on line " line line-end))
+  ;;                          :modes (php-mode php+-mode web-mode))
   :config
   (unbind-key "C-c TAB" web-mode-map)
+
+  (add-hook 'web-mode-hook 'smartparens-mode)
+  (add-hook 'web-mode-hook 'company-mode)
+  (flycheck-mode 1)
   ;; make these variables local
   (make-local-variable 'web-mode-code-indent-offset)
   (make-local-variable 'web-mode-markup-indent-offset)
@@ -3235,14 +3344,21 @@ the same coding systems as Emacs."
   (setq web-mode-code-indent-offset 4)
   (setq web-mode-css-indent-offset 4)
   (setq web-mode-markup-indent-offset 4)
-  (smartparens-mode 1)
-  (company-mode 1)
+
+  ;;(flycheck-select-checker 'my-php)
   (add-hook 'web-mode-hook 'flycheck-mode)
-  
+
   (use-package web-completion-data :load-path "site-lisp/web-completion-data")
   (use-package company             :load-path "site-lisp/company-web")
   (use-package company-web-html    :load-path "site-lisp/company-web")
   (use-package company-web-slim    :load-path "site-lisp/company-web")
+
+  (use-package emmet-mode
+    :load-path "site-lisp/emmet-mode"
+    :diminish (emmet-mode)
+    )
+  (add-hook 'web-mode-hook 'emmet-mode)
+
 
   (eval-after-load 'flycheck
     '(flycheck-add-mode 'html-tidy 'web-mode))
@@ -3325,7 +3441,6 @@ the same coding systems as Emacs."
         whitespace-style '(face trailing lines space-before-tab empty)))
 
 (use-package winner
-  :disabled t
   :if (not noninteractive)
   :defer 5
   :bind (("M-N" . winner-redo)
@@ -3385,8 +3500,6 @@ the same coding systems as Emacs."
   :load-path "site-lisp/yasnippet-snippets"
   :after yasnippet)
 
-
-
 ;;; Layout
 
 (defvar display-name
@@ -3437,7 +3550,7 @@ the same coding systems as Emacs."
   (interactive)
   (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-font "-*-Hack-normal-normal-normal-*-16-*-*-*-m-0-iso10646-1")
+  (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
 
 (defun emacs-toggle-size ()
