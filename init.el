@@ -20,7 +20,6 @@
                    gc-cons-percentage 0.6)
              (garbage-collect)) t)
 
-;; (run-with-idle-timer 10 t (lambda () (garbage-collect)))
 (run-with-idle-timer 20 t #'garbage-collect)
 (setq garbage-collection-messages t)
 
@@ -377,10 +376,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                                             . ((substatement-open before after)
+                  . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                                             . ((statement-block-intro . +)
+                  . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -393,7 +392,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                                             . (first c-lineup-topmost-intro-cont
+                      . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . "")))
@@ -404,10 +403,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                                             . ((substatement-open before after)
+                  . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                                             . ((statement-block-intro . +)
+                  . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -420,7 +419,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                                             . (first c-lineup-topmost-intro-cont
+                      . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . "")))
@@ -431,10 +430,10 @@
                  (c-basic-offset             . 2)
                  (c-comment-only-line-offset . (0 . 0))
                  (c-hanging-braces-alist
-                                             . ((substatement-open before after)
+                  . ((substatement-open before after)
                      (arglist-cont-nonempty)))
                  (c-offsets-alist
-                                             . ((statement-block-intro . +)
+                  . ((statement-block-intro . +)
                      (knr-argdecl-intro      . 5)
                      (substatement-open      . 0)
                      (substatement-label     . 0)
@@ -447,7 +446,7 @@
                      (inline-open            . 0)
                      (brace-list-open        . 0)
                      (topmost-intro-cont
-                                             . (first c-lineup-topmost-intro-cont
+                      . (first c-lineup-topmost-intro-cont
                                c-lineup-gnu-DEFUN-intro-cont))))
                  (c-special-indent-hook      . c-gnu-impose-minimum)
                  (c-block-comment-prefix     . ""))))
@@ -459,7 +458,7 @@
   :hook
   ((text-mode prog-mode erc-mode LaTeX-mode) . abbrev-mode)
   (expand-load
-                                             . (lambda ()
+   . (lambda ()
        (add-hook 'expand-expand-hook 'indent-according-to-mode)
        (add-hook 'expand-jump-hook 'indent-according-to-mode)))
   :config
@@ -474,6 +473,8 @@
 (use-package ag
   :commands ag
   :load-path "site-lisp/ag"
+  :config
+  (setq ag-reuse-window 't)
   )
 
 (use-package agda2-mode
@@ -674,6 +675,7 @@
                   "\\(archive/sent/\\|recentf\\`\\)\\)")
           filename)))
 
+  
   ;; (setq backup-each-save-filter-function 'backup-each-save-filter)
 
   (defun my-dont-backup-files-p (filename)
@@ -718,7 +720,8 @@
   :commands company-mode
   :config
   (setq company-dabbrev-downcase 0)
-  (setq company-minimum-prefix-length 0)
+  (setq company-minimum-prefix-length 2)
+  (setq company-idle-delay 1.0)
   ;; From https://github     . com/company-mode/company-mode/issues/87
   ;; See also https://github . com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
@@ -1390,8 +1393,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -1935,11 +1938,11 @@
   :disabled t
   :load-path "site-lisp/swiper"
   :defer 5
-  :diminish ivy-mode
-  :bind (
-         ("C-x b"   . ivy-switch-buffer)
-         ("C-x B"   . ivy-switch-buffer-other-window)
-         ("M-H"     . ivy-resume))
+  ;; :diminish ivy-mode
+  ;; :bind (
+  ;;        ("C-x b"   . ivy-switch-buffer)
+  ;;        ("C-x B"   . ivy-switch-buffer-other-window)
+  ;;        ("M-H"     . ivy-resume))
   ;; :bind (:map ivy-minibuffer-map
   ;;             ("C-r" . ivy-previous-line-or-history)
   ;;             ("M-r" . ivy-reverse-i-search))
@@ -2118,8 +2121,8 @@
 
 (use-package langtool
   :load-path "site-lisp/langtool"
-  :config
-  (setq langtool-language-tool-jar "~/Documents/src/langtool/languagetool-commandline.jar"))
+  :commands (langtool-check)
+  )
 
 (use-package lisp-mode
   :defer t
@@ -2193,9 +2196,10 @@
   :interpreter ("lua" . lua-mode))
 
 (use-package lusty-explorer
+  :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ;; ("C-x b" . lusty-buffer-explorer)
+         ("C-x b" . lusty-buffer-explorer)
          )
   :preface
   (defun lusty-read-directory ()
@@ -2358,18 +2362,7 @@
     :config
     (remove-hook 'server-switch-hook 'magit-commit-diff))
 
-  (use-package git-gutter+
-    :disabled
-    :load-path "site-lisp/git-gutter-plus"
-    :diminish git-gutter+-mode
-    :config
-    (git-gutter+-mode t)
-    ;; (setq git-gutter+-window-width 2)
-    ;; (setq git-gutter+-modified-sign "☁")
-    ;; (setq git-gutter+-added-sign "☀")
-    ;; (setq git-gutter+-deleted-sign "☂")
-    ;;
-    )
+
 
   (diminish 'magit-wip-after-save-local-mode)
   (diminish 'magit-wip-after-apply-mode)
@@ -2507,6 +2500,8 @@
          ("<C-m> M-("   . mc/mark-all-like-this-in-defun)
          ("<C-m> ["     . mc/vertical-align-with-space)
          ("<C-m> {"     . mc/vertical-align)
+         ("<C-m> >"     . mc/skip-to-next-like-this)
+         ("<C-m> <"     . mc/skip-to-previous-like-this)
 
          ("S-<down-mouse-1>")
          ("S-<mouse-1>" . mc/add-cursor-on-click))
@@ -2567,20 +2562,7 @@
 			  (unbind-key "M-s" paredit-mode-map)))
   :config
   (use-package paredit-ext
-    :after paredit)
-  )
-
-
-
-(use-package php-mode
-  ;; Configure php-mode
-  :load-path "site-lisp/php-mode"
-  :mode ("\\.php\\'" . php-mode)
-  :config
-  (add-hook 'php-mode-hook '(lambda ()
-                              (setq tab-width 4
-				    indent-tabs-mode t)
-                              (c-set-style "symfony2"))))
+    :after paredit))
 
 (use-package mic-paren
   :defer 5
@@ -2598,10 +2580,6 @@
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
 
-  (defun my-find-user-init-file ()
-    "Edit the `user-init-file', in another window."
-    (interactive)
-    (find-file user-init-file))
 
 
   :config
@@ -2652,6 +2630,7 @@
              ("C-c f"           . flush-lines)
              ("C-c k"           . keep-lines)
              ("C-c m"           . emacs-toggle-size)
+             ("C-c M"           . emacs-right)
              ("C-c n"           . insert-user-timestamp)
              ("C-c q"           . fill-region)
              ("C-c r"           . replace-regexp)
@@ -2662,14 +2641,9 @@
              ("C-c ="           . count-matches)
              ("C-;"             . comment-line)
              ("C-c ;"           . comment-or-uncomment-region)
-
-
              ("C-c C-z"         . delete-to-end-of-buffer)
              ("C-c C-0"         . copy-current-buffer-name)
-             ("C-c M-q"         . unfill-paragraph)
-
-             ("M-S-<up>"        . move-region-up)
-             ("M-S-<down>"      . move-region-down))
+             ("C-c M-q"         . unfill-paragraph))
 
 
   (bind-keys ("C-h e a"         . apropos-value)
@@ -2696,16 +2670,19 @@
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
-  :disabled t
   :load-path "site-lisp/projectile"
   :defer 10
-  :diminish
   :bind-keymap ("C-c p" . projectile-command-map)
+  :diminish
   :config
+  (use-package helm-projectile
+    :load-path "site-lisp/helm-projectile"
+    :config
+    (helm-projectile-on)
+    )
   (setq projectile-indexing-method 'native)
   (setq projectile-completion-method 'helm)
-
-  (projectile-global-mode))
+  (projectile-global-mode 1))
 
 
 (use-package python
@@ -2725,7 +2702,7 @@
 
   (defvar python-prettify-symbols-alist
     '(("::"     . ?∷)
-      ("for" . ?∀)
+      ("forall" . ?∀)
       ("exists" . ?∃)
       ("->"     . ?→)
       ("<-"     . ?←)
@@ -2738,19 +2715,19 @@
       ("not"    . ?¬)
       ("&&"     . ?∧)
       ("||"     . ?∨)
-      ("/="     . ?≠)
+      ("!="     . ?≠)
       ("<="     . ?≤)
       (">="     . ?≥)
       ("<<<"    . ?⋘)
       (">>>"    . ?⋙)
       ("lambda" . ?λ)
-      ("int" .      #x2124)
-      ("float" .    #x211d)
-      ("str" .      #x1d54a)
-      ("True" .     #x1d54b)
-      ("False" .    #x1d53d)
+      ;; ("int" .      #x2124)
+      ;; ("float" .    #x211d)
+      ;; ("str" .      #x1d54a)
+      ;; ("True" .     #x1d54b)
+      ;; ("False" .    #x1d53d)
 
-      ("`elem`"             . ?∈)
+      ("`in`"             . ?∈)
       ("`notElem`"          . ?∉)
       ("`member`"           . ?∈)
       ("`notMember`"        . ?∉)
@@ -2881,17 +2858,9 @@ the same coding systems as Emacs."
   :commands regex-tool
   :load-path "lisp/regex-tool")
 
-(use-package repeat-insert
-  :disabled t
-  :commands (insert-patterned
-             insert-patterned-2
-             insert-patterned-3
-             insert-patterned-4))
-
 (use-package restart-emacs
   :load-path "site-lisp/restart-emacs"
   :commands restart-emacs)
-
 
 (use-package restclient
   :disabled t
@@ -2935,21 +2904,6 @@ the same coding systems as Emacs."
     (bind-key "C-h C-i" #'helm-yari ruby-mode-map))
 
   (add-hook 'ruby-mode-hook 'my-ruby-mode-hook))
-
-(use-package sky-color-clock
-  :disabled
-  :load-path "site-lisp/sky-color-clock"
-  :config
-  (require 'solar)
-  (sky-color-clock-initialize 56.16156)
-
-  (defvar my-sky-color-string "")
-  (put 'my-sky-color-string 'risky-local-variable t)
-  (defun update-my-sky-color-string ()
-    (setq my-sky-color-string (sky-color-clock)))
-  (run-at-time 0 60 #'update-my-sky-color-string)
-  (push '(:eval my-sky-color-string) (default-value 'mode-line-format))
-  )
 
 (use-package selected
   :load-path "site-lisp/selected"
@@ -3011,11 +2965,6 @@ the same coding systems as Emacs."
   (run-with-idle-timer 60 t 'save-information)
   (add-hook 'after-init-hook 'session-initialize t))
 
-(use-package sgml-mode
-  :after web-mode
-  :config
-  )
-
 (use-package sh-script
   :defer t
   :init
@@ -3033,19 +2982,12 @@ the same coding systems as Emacs."
 (use-package sh-toggle
   :bind ("C-. C-z" . shell-toggle))
 
-(use-package skewer-mode
-  :disabled t
-  :load-path "site-lisp/skewer-mode"
-  :config
-  (add-hook 'js2-mode-hook 'skewer-mode)
-  (add-hook 'css-mode-hook 'skewer-css-mode)
-  (add-hook 'html-mode-hook 'skewer-html-mode))
-
 (use-package slime
+  :disabled t
   :load-path "site-lisp/slime"
   :commands slime
   :init
-  (setq inferior-lisp-program "/Users/johnw/.nix-profile/bin/sbcl"
+  (setq inferior-lisp-program "/Users/hfn/.nix-profile/bin/sbcl"
         slime-contribs '(slime-fancy)))
 
 (use-package smart-mode-line
@@ -3124,15 +3066,15 @@ the same coding systems as Emacs."
   :disabled t
   :after ivy
   :load-path "site-lisp/swiper"
-  :bind ("C-s" . swiper)
-  :bind (:map swiper-map
-              ("M-y" . yank)
-              ("M-%" . swiper-query-replace)
-              ("C-." . swiper-avy)
-              ;; ("M-c" . swiper-mc)
-              ("M-c" . haba/swiper-mc-fixed))
-  :bind (:map isearch-mode-map
-              ("C-o" . swiper-from-isearch))
+  ;; :bind ("C-s" . swiper)
+  ;; :bind (:map swiper-map
+  ;;             ("M-y" . yank)
+  ;;             ("M-%" . swiper-query-replace)
+  ;;             ("C-." . swiper-avy)
+  ;;             ;; ("M-c" . swiper-mc)
+  ;;             ("M-c" . haba/swiper-mc-fixed))
+  ;; :bind (:map isearch-mode-map
+  ;;             ("C-o" . swiper-from-isearch))
   :config
   (defun haba/swiper-mc-fixed ()
     (interactive)
@@ -3291,8 +3233,9 @@ the same coding systems as Emacs."
   :load-path "site-lisp/emacs-vdiff")
 
 (use-package vimish-fold
-  :disabled t
+  :defer 10
   :commands vimish-fold
+  :bind ("C-c <tab>" . vimish-fold-toggle)
   :load-path "site-lisp/vimish-fold")
 
 (use-package visual-regexp
@@ -3305,48 +3248,45 @@ the same coding systems as Emacs."
   (use-package visual-regexp-steroids
     :load-path "site-lisp/visual-regexp-steroids"))
 
-(use-package visual-indentation-mode
-  :disabled t
-  :load-path "site-lisp/visual-indentation-mode"
-  :hook ( (python-mode) . visual-indentation-mode)
-  )
 
 (use-package web-mode
+  ;; hfn (2018-09-17) reconfigure: 
   :defer t
   :load-path "site-lisp/web-mode"
   :mode (("\\.html\\'" . web-mode)
          ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
-  ;; :preface
-  ;; (require 'pkg-info)
-  ;; (flycheck-define-checker my-php
-  ;;                          "A PHP syntax checker using the PHP command line interpreter.
-
-  ;; See URL `http://php.net/manual/en/features.commandline.php'."
-  ;;                          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-  ;;                                    "-d" "log_errors=0" source)
-  ;;                          :error-patterns
-  ;;                          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-  ;;                                  (message) " in " (file-name) " on line " line line-end))
-  ;;                          :modes (php-mode php+-mode web-mode))
   :config
-  (unbind-key "C-c TAB" web-mode-map)
+  
 
-  (add-hook 'web-mode-hook 'smartparens-mode)
-  (add-hook 'web-mode-hook 'company-mode)
-  (flycheck-mode 1)
-  ;; make these variables local
-  (make-local-variable 'web-mode-code-indent-offset)
-  (make-local-variable 'web-mode-markup-indent-offset)
-  (make-local-variable 'web-mode-css-indent-offset)
-
-  ;; set indentation, can set different indentation level for different code type
-  (setq web-mode-code-indent-offset 4)
-  (setq web-mode-css-indent-offset 4)
-  (setq web-mode-markup-indent-offset 4)
+  (defun my-web-mode-hook ()
+    (unbind-key "C-c TAB" web-mode-map)
+    (add-hook 'web-mode-hook 'smartparens-mode)
+    (add-hook 'web-mode-hook 'company-mode)
+    (add-hook 'web-mode-hook 'flycheck-mode)
+    ;; make these variables local
+    (make-local-variable 'web-mode-code-indent-offset)
+    (make-local-variable 'web-mode-markup-indent-offset)
+    (make-local-variable 'web-mode-css-indent-offset)
+    ;; set indentation, can set different indentation level for different code type
+    (setq web-mode-code-indent-offset 4)
+    (setq web-mode-css-indent-offset 4)
+    (setq web-mode-markup-indent-offset 4)
+    (flycheck-mode 1)
+    (whitespace-mode 1)
+    (add-hook 'web-mode-hook 'flycheck-mode)
+    )
+  (add-hook 'my-web-mode-hook 'web-mode-hook)
+  
+  
 
   ;;(flycheck-select-checker 'my-php)
-  (add-hook 'web-mode-hook 'flycheck-mode)
+
+
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (add-hook 'after-save-hook 'indent-buffer)))
+
 
   (use-package web-completion-data :load-path "site-lisp/web-completion-data")
   (use-package company             :load-path "site-lisp/company-web")
@@ -3356,13 +3296,16 @@ the same coding systems as Emacs."
   (use-package emmet-mode
     :load-path "site-lisp/emmet-mode"
     :diminish (emmet-mode)
-    )
-  (add-hook 'web-mode-hook 'emmet-mode)
+    :hook ((web-mode-hook) . emmet-mode)
+    :config
+    (unbind-key "C-<return>" emmet-mode-keymap))
 
-
+  
   (eval-after-load 'flycheck
-    '(flycheck-add-mode 'html-tidy 'web-mode))
-  )
+    '(progn
+       (flycheck-add-mode 'html-tidy 'web-mode)
+       (flycheck-add-mode 'php-phpmd 'web-mode))))
+
 
 (use-package which-key
   :load-path "site-lisp/which-key"
@@ -3370,8 +3313,7 @@ the same coding systems as Emacs."
   :defer 10
   :config
   (which-key-mode)
-  (setq which-key-idle-delay 2.0)
-  )
+  (setq which-key-idle-delay 2.0))
 
 
 (use-package whitespace
@@ -3441,6 +3383,7 @@ the same coding systems as Emacs."
         whitespace-style '(face trailing lines space-before-tab empty)))
 
 (use-package winner
+  :disabled t
   :if (not noninteractive)
   :defer 5
   :bind (("M-N" . winner-redo)
@@ -3552,6 +3495,17 @@ the same coding systems as Emacs."
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
   (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
+
+(defun emacs-right ()
+  (interactive)
+  (set-frame-parameter nil 'width 82)
+  (set-frame-parameter nil 'fullscreen 'fullheight)
+  (set-frame-parameter (selected-frame) 'top emacs-min-top)
+  (set-frame-font "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
+  (set-frame-parameter (selected-frame) 'left (- 1200 emacs-min-width))
+  (set-frame-parameter (selected-frame) 'height emacs-min-height)
+  (set-frame-parameter (selected-frame) 'width emacs-min-width))
+
 
 (defun emacs-toggle-size ()
   (interactive)
