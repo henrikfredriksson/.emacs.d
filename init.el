@@ -84,10 +84,24 @@
                     (add-to-list 'load-path share))))
           (nix-read-environment emacs-environment)))
 
+
   (require 'use-package)
 
-  (defconst load-path-reject-re "/\\.emacs\\.d/\\(lib\\|site-lisp\\)/"
-    "Regexp matching `:load-path' values to be rejected.")
+  ;; (defconst load-path-reject-re "/\\.emacs\\.d/\\(lib\\|site-lisp\\)/"
+  ;;   "Regexp matching `:load-path' values to be rejected.")
+
+  ;; (defun load-path-handler-override (orig-func name keyword args rest state)
+  ;;   (if (cl-some (apply-partially #'string-match load-path-reject-re) args)
+  ;;       (use-package-process-keywords name rest state)
+  ;;     (let ((body (use-package-process-keywords name rest state)))
+  ;;       (use-package-concat
+  ;;        (mapcar #'(lambda (path)
+  ;;                    `(eval-and-compile (add-to-list 'load-path ,path t)))
+  ;;                args)
+  ;;        body))))
+
+  ;; (advice-add 'use-package-handler/:load-path
+  ;;             :around #'load-path-handler-override)
 
   (if init-file-debug
       (setq use-package-verbose t
@@ -115,6 +129,7 @@
 
 (defvar running-alternate-emacs nil)
 (defvar running-development-emacs nil)
+
 
 (defvar user-data-directory (emacs-path "data"))
 
@@ -165,7 +180,7 @@
   (add-to-list 'load-path (expand-file-name "lib" user-emacs-directory)))
 
 (use-package alert          :defer  t  :load-path "lisp/alert")
-(use-package anaphora       :demand t  :load-path "lib/anaphora")
+(use-package anaphora       :defer  t  :load-path "lib/anaphora")
 (use-package apiwrap        :defer  t  :load-path "lib/apiwrap")
 (use-package asoc           :defer  t  :load-path "lib/asoc")
 (use-package async          :defer  t  :load-path "lisp/emacs-async")
@@ -211,7 +226,7 @@
 (use-package pkg-info       :defer  t  :load-path "lib/pkg-info")
 (use-package popup          :defer  t  :load-path "lib/popup-el")
 (use-package popup-pos-tip  :defer  t  :load-path "lib")
-(use-package popwin         :defer  t  :load-path "site-lisp/popwin")
+(use-package popwin         :defer  t  :load-path "lib/popwin")
 (use-package pos-tip        :defer  t  :load-path "lib")
 (use-package pythonic       :defer  t  :load-path "site-lisp/pythonic")
 (use-package request        :defer  t  :load-path "lib/emacs-request")
@@ -509,9 +524,8 @@
 
 (use-package aggressive-indent
   :load-path "site-lisp/aggressive-indent-mode"
-  :defer
   :diminish
-  :hook ((emacs-lisp-mode) . aggressive-indent-mode))
+  :hook (emacs-lisp-mode . aggressive-indent-mode))
 
 (use-package alert
   :load-path "lisp/alert"
@@ -675,7 +689,7 @@
                   "\\(archive/sent/\\|recentf\\`\\)\\)")
           filename)))
 
-  
+
   ;; (setq backup-each-save-filter-function 'backup-each-save-filter)
 
   (defun my-dont-backup-files-p (filename)
@@ -719,9 +733,15 @@
   :diminish company-mode
   :commands company-mode
   :config
+  (setq company-tooltip-limit 20)                      ; bigger popup window
+  ;;(setq company-tooltip-align-annotations 't)          ; align annotations to the right tooltip border
+  (setq company-idle-delay 0.1)                         ; decrease delay before autocompletion popup shows
+  ;;(setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+  ;;(global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
   (setq company-dabbrev-downcase 0)
   (setq company-minimum-prefix-length 2)
-  (setq company-idle-delay 1.0)
+
+
   ;; From https://github     . com/company-mode/company-mode/issues/87
   ;; See also https://github . com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
@@ -753,15 +773,88 @@
            (append (if (consp backend) backend (list backend))
                    '(:with company-yasnippet))))
        (setq company-backends
-             (mapcar #'company-mode/backend-with-yas company-backends)))))
+             (mapcar #'company-mode/backend-with-yas company-backends))))
+  )
+
+
+(use-package company-web
+  :after (company web-mode)
+  :load-path "site-lisp/company-web"
+  :config
+  (use-package web-completion-data
+    :after (company web-mode)
+    :load-path "site-lisp/web-completion-data" )
+
+  (use-package company-web-html
+    :after (company web-mode)
+    :load-path "site-lisp/company-web")
+
+  (use-package company-web-slim
+    :after (company web-mode)
+    :load-path "site-lisp/company-web")
+  (make-local-variable 'company-backends)
+  (add-to-list 'company-backends 'company-web-html)
+  (add-to-list 'company-backends 'company-web-jade)
+  (add-to-list 'company-backends 'company-web-slim))
+
 
 (use-package company-php
-  :after company
+  :after (company web-mode)
   :load-path "site-lisp/ac-php"
   :config
   (ac-php-core-eldoc-setup)
   (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-ac-php-backend))
+
+
+(use-package company-jedi
+  ;; hfn (2018-09-11):
+  ;; Not really working. Needs configuration
+
+  :load-path "site-lisp/emacs-company-jedi"
+  :after (company python-mode)
+  :config
+  (setq jedi:server-command (list "python" jedi:server-script))
+  (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
+  (setq jedi:complete-on-dot t)
+  (setq jedi:use-shortcuts t)
+  (setq jedi:server-args
+        '("--sys-path" "/usr/local/lib/python3.7/site-packages/"))
+  ;; (defun config/enable-company-jedi ()
+  ;;   (add-to-list 'company-backends 'company-jedi))
+  ;; (add-hook 'python-mode-hook 'config/enable-company-jedi)
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (setq jedi:complete-on-dot t
+        jedi:use-shortcuts t
+        jedi:environment-root "jedi"
+        python-environment-directory "~/.virtualenvs")
+  (add-to-list 'company-backends 'company-jedi)
+  (defun my/python-mode-hook ()
+    (add-to-list 'company-backends 'company-jedi))
+
+  (add-hook 'python-mode-hook 'my/python-mode-hook)
+  )
+
+
+
+(use-package company-math
+  :after (company tex-site)
+  :load-path "site-lisp/company-math"
+  :preface
+  (use-package math-symbol-lists
+    :load-path "site-lisp/math-symbol-lists"
+    :defer t)
+  :config
+  (add-to-list 'company-backends 'company-math-symbols-unicode))
+
+(use-package company-auctex
+  :disabled t
+  :after (company tex-site)
+  :load-path "site-lisp/company-auctex"
+  :config
+  (company-auctex-init))
+
+
 
 (use-package compile
   :disabled t
@@ -887,6 +980,7 @@
     :config
     (unbind-key "M-s f" dired-mode-map))
 
+
   (use-package dired-ranger
     :bind (:map dired-mode-map
                 ("W" . dired-ranger-copy)
@@ -894,7 +988,7 @@
                 ("Y" . dired-ranger-paste)))
 
   (use-package dired-toggle
-    :load-path "site-lisp/site-dired/dired-toggle"
+    :load-path "site-lisp/dired-toggle"
     :bind ("C-. d" . dired-toggle)
     :preface
     (defun my-dired-toggle-mode-hook ()
@@ -931,46 +1025,47 @@
   (defvar dired-omit-regexp-orig (symbol-function 'dired-omit-regexp))
 
   ;; Omit files that Git would ignore
-  (defun dired-omit-regexp ()
-    (let ((file (expand-file-name "                              . git"))
-          parent-dir)
-      (while (and (not (file-exists-p file))
-                  (progn
-                    (setq parent-dir
-                          (file-name-directory
-                           (directory-file-name
-                            (file-name-directory file))))
-                    ;; Give up if we are already at the root dir .
-                    (not (string= (file-name-directory file)
-                                  parent-dir))))
-        ;; Move up to the parent dir and try again               .
-        (setq file (expand-file-name "                           . git" parent-dir)))
-      ;; If we found a change log in a parent, use that          .
-      (if (file-exists-p file)
-          (let ((regexp (funcall dired-omit-regexp-orig))
-                (omitted-files
-                 (shell-command-to-string "git clean -d -x -n")))
-            (if (= 0 (length omitted-files))
-                regexp
-              (concat
-               regexp
-               (if (> (length regexp) 0)
-                   "\\|" "")
-               "\\("
-               (mapconcat
-                #'(lambda (str)
-                    (concat
-                     "^"
-                     (regexp-quote
-                      (substring str 13
-                                 (if (= ?/ (aref str (1- (length str))))
-                                     (1- (length str))
-                                   nil)))
-                     "$"))
-                (split-string omitted-files "\n" t)
-                "\\|")
-               "\\)")))
-        (funcall dired-omit-regexp-orig)))))
+  )
+(defun dired-omit-regexp ()
+  (let ((file (expand-file-name "                              . git"))
+        parent-dir)
+    (while (and (not (file-exists-p file))
+                (progn
+                  (setq parent-dir
+                        (file-name-directory
+                         (directory-file-name
+                          (file-name-directory file))))
+                  ;; Give up if we are already at the root dir .
+                  (not (string= (file-name-directory file)
+                                parent-dir))))
+      ;; Move up to the parent dir and try again               .
+      (setq file (expand-file-name "                           . git" parent-dir)))
+    ;; If we found a change log in a parent, use that          .
+    (if (file-exists-p file)
+        (let ((regexp (funcall dired-omit-regexp-orig))
+              (omitted-files
+               (shell-command-to-string "git clean -d -x -n")))
+          (if (= 0 (length omitted-files))
+              regexp
+            (concat
+             regexp
+             (if (> (length regexp) 0)
+                 "\\|" "")
+             "\\("
+             (mapconcat
+              #'(lambda (str)
+                  (concat
+                   "^"
+                   (regexp-quote
+                    (substring str 13
+                               (if (= ?/ (aref str (1- (length str))))
+                                   (1- (length str))
+                                 nil)))
+                   "$"))
+              (split-string omitted-files "\n" t)
+              "\\|")
+             "\\)")))
+      (funcall dired-omit-regexp-orig))))
 
 (use-package docker
   :disabled t
@@ -1199,8 +1294,6 @@
   :load-path "site-lisp/flycheck-color-mode-line"
   :config
   (flycheck-color-mode-line-mode 1)
-  ;; (set-face-background 'flycheck-color-mode-line-error-face "#FF3333")
-  ;; (set-face-background 'flycheck-color-mode-line-warning-face "#FFFFF0")
   )
 
 
@@ -1694,6 +1787,7 @@
   (use-package hl-line+))
 
 (use-package hydra
+  :disabled t
   :load-path "site-lisp/hydra"
   :defer 10
   :config
@@ -1710,55 +1804,14 @@
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
 (use-package ido
-  ;; :defines (ido-cur-item
-  ;;           ido-require-match
-  ;;           ido-selected
-  ;;           ido-final-text
-  ;;           ido-show-confirm-message)
   :bind (("C-x b" . ido-switch-buffer)
          ("C-x B" . ido-switch-buffer-other-window))
-  ;; :preface
-  ;; (eval-when-compile
-  ;;   (defvar ido-require-match)
-  ;;   (defvar ido-cur-item)
-  ;;   (defvar ido-show-confirm-message)
-  ;;   (defvar ido-selected)
-  ;;   (defvar ido-final-text))
-
-  ;; (defun ido-smart-select-text ()
-  ;;   "Select the current completed item.  Do NOT descend into directories."
-  ;;   (interactive)
-  ;;   (when (and (or (not ido-require-match)
-  ;;                  (if (memq ido-require-match
-  ;;                            '(confirm confirm-after-completion))
-  ;;                      (if (or (eq ido-cur-item 'dir)
-  ;;                              (eq last-command this-command))
-  ;;                          t
-  ;;                        (setq ido-show-confirm-message t)
-  ;;                        nil))
-  ;;                  (ido-existing-item-p))
-  ;;              (not ido-incomplete-regexp))
-  ;;     (when ido-current-directory
-  ;;       (setq ido-exit 'takeprompt)
-  ;;       (unless (and ido-text (= 0 (length ido-text)))
-  ;;         (let ((match (ido-name (car ido-matches))))
-  ;;           (throw 'ido
-  ;;                  (setq ido-selected
-  ;;                        (if match
-  ;;                            (replace-regexp-in-string "/\\'" "" match)
-  ;;                          ido-text)
-  ;;                        ido-text ido-selected
-  ;;                        ido-final-text ido-text)))))
-  ;;     (exit-minibuffer)))
-
   :config
-  ;; (ido-mode 'buffer)
+  (ido-mode 'buffer)
   (ido-mode 1)
-  ;; (setq ido-enable-flex-matching t)
-  ;; (setq ido-everywhere t)
-  ;; (setq ido-max-work-file-list 100)
-  ;; )
-  )
+  (setq ido-enable-flex-matching t)
+  (setq ido-everywhere t)
+  (setq ido-max-work-file-list 100))
 
 (use-package ido-grid-mode
   :disabled t
@@ -1804,8 +1857,6 @@
                           ido-file-completion-map))))
 
 (use-package iedit
-  :disabled t
-  :defer t
   :load-path "site-lisp/iedit")
 
 (use-package ielm
@@ -2199,7 +2250,7 @@
   :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ("C-x b" . lusty-buffer-explorer)
+         ;; ("Ca-x b" . lusty-buffer-explorer)
          )
   :preface
   (defun lusty-read-directory ()
@@ -2810,28 +2861,6 @@ the same coding systems as Emacs."
               (font-lock-add-keywords nil
                                       '(("\\[\\|\\]" . 'paren-face)))
               ))
-  (use-package company-jedi
-    ;; hfn (2018-09-11):
-    ;; Not really working. Needs configuration
-
-    :load-path "site-lisp/emacs-company-jedi"
-    :config
-    (setq jedi:server-command (list "python" jedi:server-script))
-    (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
-    (setq jedi:complete-on-dot t)
-    (setq jedi:use-shortcuts t)
-    (setq jedi:server-args
-          '("--sys-path" "/usr/local/lib/python3.7/site-packages/"))
-    ;; (defun config/enable-company-jedi ()
-    ;;   (add-to-list 'company-backends 'company-jedi))
-    ;; (add-hook 'python-mode-hook 'config/enable-company-jedi)
-    (add-hook 'python-mode-hook 'jedi:setup)
-    (setq jedi:complete-on-dot t
-          jedi:use-shortcuts t
-          jedi:environment-root "jedi"
-          python-environment-directory "~/.virtualenvs")
-    (add-to-list 'company-backends 'company-jedi))
-
   )
 
 (use-package recentf
@@ -3117,21 +3146,6 @@ the same coding systems as Emacs."
               (add-to-list 'latex-help-cmd-alist (cons key value))))))
     latex-help-cmd-alist)
 
-  (use-package company-math
-    :load-path "site-lisp/site-company/company-math"
-    :after company-mode
-    :preface
-    (use-package math-symbol-lists
-      :load-path "site-lisp/math-symbol-lists"
-      :defer t))
-
-  (use-package company-auctex
-    :disabled t
-    :load-path "site-lisp/company-auctex"
-    :after company-mode
-    :config
-    (company-auctex-init))
-
   (setq TeX-auto-save nil)
   (setq TeX-parse-self t)
   (setq-default TeX-master nil)
@@ -3248,63 +3262,52 @@ the same coding systems as Emacs."
   (use-package visual-regexp-steroids
     :load-path "site-lisp/visual-regexp-steroids"))
 
+(use-package emmet-mode
+  :load-path "site-lisp/emmet-mode"
+  :diminish (emmet-mode)
+  :hook ((web-mode-hook) . emmet-mode)
+  :config
+  (emmet-mode)
+  (unbind-key "C-<return>" emmet-mode-keymap))
+
 
 (use-package web-mode
-  ;; hfn (2018-09-17) reconfigure: 
-  :defer t
+  :defer 5
   :load-path "site-lisp/web-mode"
   :mode (("\\.html\\'" . web-mode)
          ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
+  :init
   :config
-  
+  (add-hook 'web-mode-hook 'smartparens-mode)
+  (add-hook 'web-mode-hook 'flycheck-mode)
+  (add-hook 'web-mode-hook 'whitespace-mode)
+  (add-hook 'web-mode-hook 'company-mode)
 
-  (defun my-web-mode-hook ()
-    (unbind-key "C-c TAB" web-mode-map)
-    (add-hook 'web-mode-hook 'smartparens-mode)
-    (add-hook 'web-mode-hook 'company-mode)
-    (add-hook 'web-mode-hook 'flycheck-mode)
-    ;; make these variables local
-    (make-local-variable 'web-mode-code-indent-offset)
-    (make-local-variable 'web-mode-markup-indent-offset)
-    (make-local-variable 'web-mode-css-indent-offset)
-    ;; set indentation, can set different indentation level for different code type
-    (setq web-mode-code-indent-offset 4)
-    (setq web-mode-css-indent-offset 4)
-    (setq web-mode-markup-indent-offset 4)
-    (flycheck-mode 1)
-    (whitespace-mode 1)
-    (add-hook 'web-mode-hook 'flycheck-mode)
-    )
-  (add-hook 'my-web-mode-hook 'web-mode-hook)
-  
-  
+  (add-hook 'auto-save-hook 'indent-buffer)
+  (add-hook 'before-save-hook 'indent-buffer)
 
-  ;;(flycheck-select-checker 'my-php)
+  (add-hook 'auto-save-hook 'whitespace-cleanup)
+  (add-hook 'before-save-hook 'whitespace-cleanup)
 
 
-  (add-hook 'web-mode-hook
-            (lambda ()
-              (add-hook 'after-save-hook 'indent-buffer)))
-
-
-  (use-package web-completion-data :load-path "site-lisp/web-completion-data")
-  (use-package company             :load-path "site-lisp/company-web")
-  (use-package company-web-html    :load-path "site-lisp/company-web")
-  (use-package company-web-slim    :load-path "site-lisp/company-web")
-
-  (use-package emmet-mode
-    :load-path "site-lisp/emmet-mode"
-    :diminish (emmet-mode)
-    :hook ((web-mode-hook) . emmet-mode)
-    :config
-    (unbind-key "C-<return>" emmet-mode-keymap))
-
-  
   (eval-after-load 'flycheck
     '(progn
        (flycheck-add-mode 'html-tidy 'web-mode)
-       (flycheck-add-mode 'php-phpmd 'web-mode))))
+       (flycheck-add-mode 'php-phpmd 'web-mode)))
+
+  (setq web-mode-engines-alist '(("php" . "\\.html\\'")))
+  (setq indicate-empty-lines t)
+  (make-local-variable 'web-mode-code-indent-offset)
+  (make-local-variable 'web-mode-markup-indent-offset)
+  (make-local-variable 'web-mode-css-indent-offset)
+
+  (setq web-mode-code-indent-offset 4)
+  (setq web-mode-css-indent-offset 4)
+  (setq web-mode-markup-indent-offset 4)
+
+
+  (unbind-key "C-c TAB" web-mode-map))
 
 
 (use-package which-key
