@@ -205,7 +205,7 @@
 (use-package ghub           :defer  t  :load-path "lib/ghub")
 (use-package ghub+          :defer  t  :load-path "lib/ghub-plus")
 (use-package ht             :defer  t  :load-path "lib/ht-el")
-(use-package jedi-core      :demand t  :load-path "site-lisp/jedi")
+(use-package jedi-core      :defer  t  :load-path "site-lisp/jedi")
 (use-package kv             :defer  t  :load-path "lib/kv")
 (use-package list-utils     :defer  t  :load-path "lib/list-utils")
 (use-package logito         :defer  t  :load-path "lib/logito")
@@ -733,13 +733,10 @@
   :diminish company-mode
   :commands company-mode
   :config
-  (setq company-tooltip-limit 20)                      ; bigger popup window
-  ;;(setq company-tooltip-align-annotations 't)          ; align annotations to the right tooltip border
-  (setq company-idle-delay 0.1)                         ; decrease delay before autocompletion popup shows
-  ;;(setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
-  ;;(global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
+  (setq company-tooltip-limit 20)
+  (setq company-idle-delay 0.1)
   (setq company-dabbrev-downcase 0)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 1)
 
 
   ;; From https://github     . com/company-mode/company-mode/issues/87
@@ -775,7 +772,6 @@
        (setq company-backends
              (mapcar #'company-mode/backend-with-yas company-backends))))
   )
-
 
 (use-package company-web
   :after (company web-mode)
@@ -828,12 +824,12 @@
         jedi:use-shortcuts t
         jedi:environment-root "jedi"
         python-environment-directory "~/.virtualenvs")
+  (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-jedi)
   (defun my/python-mode-hook ()
     (add-to-list 'company-backends 'company-jedi))
 
-  (add-hook 'python-mode-hook 'my/python-mode-hook)
-  )
+  (add-hook 'python-mode-hook 'my/python-mode-hook))
 
 
 
@@ -845,6 +841,7 @@
     :load-path "site-lisp/math-symbol-lists"
     :defer t)
   :config
+  (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-math-symbols-unicode))
 
 (use-package company-auctex
@@ -853,6 +850,12 @@
   :load-path "site-lisp/company-auctex"
   :config
   (company-auctex-init))
+
+(use-package company-quickhelp
+  :after (company)
+  :load-path "site-lisp/company-quickhelp"
+  :config
+  (company-quickhelp-mode))
 
 
 
@@ -1486,8 +1489,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                            (regexp       . ,(cdr x))
-                            (modes quote (haskell-mode literate-haskell-mode))))
+                       (regexp       . ,(cdr x))
+                       (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -3114,7 +3117,7 @@ the same coding systems as Emacs."
   :mode ("\\.td\\'" . tablegen-mode))
 
 (use-package tex-site
-  :defer 10
+  :defer 5
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode)
@@ -3264,7 +3267,7 @@ the same coding systems as Emacs."
 
 (use-package emmet-mode
   :load-path "site-lisp/emmet-mode"
-  :diminish (emmet-mode)
+  :diminish emmet-mode
   :hook ((web-mode-hook) . emmet-mode)
   :config
   (emmet-mode)
@@ -3272,12 +3275,10 @@ the same coding systems as Emacs."
 
 
 (use-package web-mode
-  :defer 5
   :load-path "site-lisp/web-mode"
   :mode (("\\.html\\'" . web-mode)
          ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
-  :init
   :config
   (add-hook 'web-mode-hook 'smartparens-mode)
   (add-hook 'web-mode-hook 'flycheck-mode)
@@ -3296,18 +3297,28 @@ the same coding systems as Emacs."
        (flycheck-add-mode 'html-tidy 'web-mode)
        (flycheck-add-mode 'php-phpmd 'web-mode)))
 
-  (setq web-mode-engines-alist '(("php" . "\\.html\\'")))
-  (setq indicate-empty-lines t)
-  (make-local-variable 'web-mode-code-indent-offset)
-  (make-local-variable 'web-mode-markup-indent-offset)
-  (make-local-variable 'web-mode-css-indent-offset)
+  (defvar web-mode-initialized nil)
 
-  (setq web-mode-code-indent-offset 4)
-  (setq web-mode-css-indent-offset 4)
-  (setq web-mode-markup-indent-offset 4)
+  (defun my-web-mode-hook ()
+    (unless web-mode-initialized
+      (setq web-mode-initialized t)
 
 
-  (unbind-key "C-c TAB" web-mode-map))
+      (setq web-mode-engines-alist '(("php" . "\\.html\\'")))
+      (setq indicate-empty-lines t)
+      (make-local-variable 'web-mode-code-indent-offset)
+      (make-local-variable 'web-mode-markup-indent-offset)
+      (make-local-variable 'web-mode-css-indent-offset)
+
+      (setq web-mode-code-indent-offset 4)
+      (setq web-mode-css-indent-offset 4)
+      (setq web-mode-markup-indent-offset 4)
+
+
+      (unbind-key "C-c TAB" web-mode-map)
+      )
+    (add-hook 'web-mode-hook 'my-web-mode-hook)))
+
 
 
 (use-package which-key
