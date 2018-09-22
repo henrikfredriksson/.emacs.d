@@ -735,8 +735,8 @@
   :config
   (setq company-tooltip-limit 20)
   (setq company-idle-delay 0.1)
-  (setq company-dabbrev-downcase 0)
   (setq company-minimum-prefix-length 1)
+
 
 
   ;; From https://github     . com/company-mode/company-mode/issues/87
@@ -1489,8 +1489,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -2153,6 +2153,14 @@
 (use-package ert
   :bind ("C-c e t" . ert-run-tests-interactively))
 
+(use-package hardcore-mode
+  :load-path "site-lisp/hardcore-mode"
+  :preface
+  (setq too-hardcore-backspace t)
+  (setq too-hardcore-return t)
+  :config
+  (global-hardcore-mode))
+
 (use-package highlight-cl
   :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
 
@@ -2714,6 +2722,7 @@
              ("C-c e f"         . emacs-lisp-byte-compile-and-load)
              ;; ("C-c e i"         . crux-find-user-init-file)
              ("C-c e i"         . my-find-user-init-file)
+             ;; ("c-c e o"         . my-todo-file)
              ("C-c e j"         . emacs-lisp-mode)
              ("C-c e P"         . check-papers)
              ("C-c e r"         . do-eval-region)
@@ -2853,6 +2862,9 @@ the same coding systems as Emacs."
     (bind-key "C-c C-z" #'python-shell python-mode-map)
     (unbind-key "C-c c" python-mode-map))
 
+  (add-hook 'auto-save-hook 'whitespace-cleanup)
+  (add-hook 'before-save-hook 'whitespace-cleanup)
+
 
   (add-hook 'python-mode-hook 'my-python-mode-hook)
   (add-hook 'python-mode-hook
@@ -2864,6 +2876,8 @@ the same coding systems as Emacs."
               (font-lock-add-keywords nil
                                       '(("\\[\\|\\]" . 'paren-face)))
               ))
+
+
   )
 
 (use-package recentf
@@ -3030,8 +3044,10 @@ the same coding systems as Emacs."
   (sml/setup)
   (sml/apply-theme 'light)
   (add-to-list 'sml/replacer-regexp-list '("^~/src/" ":src:") t)
+  (delete  '("^~/\\.emacs\\.d/" ":ED:") sml/replacer-regexp-list)
   (add-to-list 'sml/replacer-regexp-list '("^~/dbwebb-kurser/" ":dbwebb:"))
-  (remove-hook 'display-time-hook 'sml/propertize-time-string))
+  (add-to-list 'sml/replacer-regexp-list '("^~/\\.emacs\\.d/" ":dot-emacs:"))
+  (add-hook 'display-time-hook 'sml/propertize-time-string))
 
 (use-package smart-tabs-mode
   :commands smart-tabs-mode

@@ -208,7 +208,7 @@
    (quote
     (("/Volumes/Files/" . "/Volumes/Files/.backups")
      ("\\(recentf\\|archive/sent\\)" . "/tmp")
-     (".*" . "~/.backups"))))
+     (".*" . "~/Documents/.backup/.emacs-backup"))))
  '(backward-delete-char-untabify-method (quote untabify))
  '(bbdb-default-country "")
  '(bbdb-file "~/doc/tasks/bbdb" t)
