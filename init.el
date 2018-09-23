@@ -2155,6 +2155,7 @@
 
 (use-package hardcore-mode
   :load-path "site-lisp/hardcore-mode"
+  :diminish (hardcore-mode)
   :preface
   (setq too-hardcore-backspace t)
   (setq too-hardcore-return t)
