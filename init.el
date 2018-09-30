@@ -585,118 +585,24 @@
 (use-package backup-each-save
   :commands backup-each-save
   :preface
-  (defun show-backups ()
-    (interactive)
-    (require 'find-dired)
-    (let* ((file (make-backup-file-name (buffer-file-name)))
-           (dir (file-name-directory file))
-           (args (concat "-iname '" (file-name-nondirectory file)
-                         "                                . ~*~'"))
-           (dired-buffers dired-buffers)
-           (find-ls-option '("-print0 | xargs -0 ls -lta" . "-lta")))
-      ;; Check that it's really a directory               .
-      (or (file-directory-p dir)
-          (error "Backup directory does not exist: %s" dir))
-      (with-current-buffer (get-buffer-create "*Backups*")
-        (let ((find (get-buffer-process (current-buffer))))
-          (when find
-            (if (or (not (eq (process-status find) 'run))
-                    (yes-or-no-p "A `find' process is running; kill it? "))
-                (condition-case nil
-                    (progn
-                      (interrupt-process find)
-                      (sit-for 1)
-                      (delete-process find))
-                  (error nil))
-              (error "Cannot have two processes in `%s' at once"
-                     (buffer-name)))))
-
-        (widen)
-        (kill-all-local-variables)
-        (setq buffer-read-only nil)
-        (erase-buffer)
-        (setq default-directory dir
-              args (concat
-                    find-program "                                            . "
-                    (if (string= args "")
-                        ""
-                      (concat
-                       (shell-quote-argument "(")
-                       " " args " "
-                       (shell-quote-argument ")")
-                       " "))
-                    (if (string-match "\\`\\(                        . *\\) {} \\(\\\\;\\|+\\)\\'"
-                                      (car find-ls-option))
-                        (format "%s %s %s"
-                                (match-string 1 (car find-ls-option))
-                                (shell-quote-argument "{}")
-                                find-exec-terminator)
-                      (car find-ls-option))))
-        ;; Start the find process                                    .
-        (message "Looking for backup files                           .        . .")
-        (shell-command (concat args "&") (current-buffer))
-        ;; The next statement will bomb in classic dired (no optional arg
-        ;; allowed)
-        (dired-mode dir (cdr find-ls-option))
-        (let ((map (make-sparse-keymap)))
-          (set-keymap-parent map (current-local-map))
-          (define-key map "\C-c\C-k" 'kill-find)
-          (use-local-map map))
-        (make-local-variable 'dired-sort-inhibit)
-        (setq dired-sort-inhibit t)
-        (set (make-local-variable 'revert-buffer-function)
-             `(lambda (ignore-auto noconfirm)
-                (find-dired ,dir ,find-args)))
-        ;; Set subdir-alist so that Tree Dired will work:
-        (if (fboundp 'dired-simple-subdir-alist)
-            ;; will work even with nested dired format (dired-nstd   . el,v 1 . 15
-            ;; and later)
-            (dired-simple-subdir-alist)
-          ;; else we have an ancient tree dired (or classic dired, where
-          ;; this does no harm)
-          (set (make-local-variable 'dired-subdir-alist)
-               (list (cons default-directory (point-min-marker)))))
-        (set (make-local-variable 'dired-subdir-switches)
-             find-ls-subdir-switches)
-        (setq buffer-read-only nil)
-        ;; Subdir headlerline must come first because the first marker in
-        ;; subdir-alist points there                                 .
-        (insert "  " dir ":\n")
-        ;; Make second line a ``find'' line in analogy to the ``total'' or
-        ;; ``wildcard'' line                                                  .
-        (insert "  " args "\n")
-        (setq buffer-read-only t)
-        (let ((proc (get-buffer-process (current-buffer))))
-          (set-process-filter proc (function find-dired-filter))
-          (set-process-sentinel proc (function find-dired-sentinel))
-          ;; Initialize the process marker; it is used by the filter          .
-          (move-marker (process-mark proc) 1 (current-buffer)))
-        (setq mode-line-process '(":%s")))))
-
-  (bind-key "C-x ~" #'show-backups)
-
-  :init
   (defun my-make-backup-file-name (file)
-    (make-backup-file-name-1 (file-truename file)))
+    (make-backup-file-name-1 (expand-file-name (file-truename file))))
 
-  (add-hook 'after-save-hook 'backup-each-save)
-
-  :config
   (defun backup-each-save-filter (filename)
     (not (string-match
-          (concat "\\(^/tmp\\|\\ . emacs\\.d/data\\(-alt\\)?/"
-                  "\\|\\ . newsrc\\(\\.eld\\)?\\|"
+          (concat "\\(^/tmp\\|\\.emacs\\.d/data\\(-alt\\)?/"
+                  "\\|\\.newsrc\\(\\.eld\\)?\\|"
                   "\\(archive/sent/\\|recentf\\`\\)\\)")
           filename)))
-
-
-  ;; (setq backup-each-save-filter-function 'backup-each-save-filter)
 
   (defun my-dont-backup-files-p (filename)
     (unless (string-match filename "\\(archive/sent/\\|recentf\\`\\)")
       (normal-backup-enable-predicate filename)))
 
-  (setq backup-enable-predicate 'my-dont-backup-files-p))
+  :hook after-save
+  :config
+  (setq backup-each-save-filter-function 'backup-each-save-filter
+        backup-enable-predicate 'my-dont-backup-files-p))
 
 (use-package bug-reference-github
   :disabled t
@@ -1554,8 +1460,9 @@
 
 (use-package helm-swoop
   :load-path "site-lisp/helm-swoop"
-  :bind (("C-c C-s" . helm-swoop )
-         ("C-s"     . helm-swoop-without-pre-input)))
+  :bind (("M-s M-s" . helm-swoop )
+         ("M-s S"     . helm-swoop-without-pre-input)
+         ("M-s s" . helm-swoop-from-isearch)))
 
 (use-package hi-lock
   :bind (("M-o l" . highlight-lines-matching-regexp)
@@ -2166,12 +2073,13 @@
   :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
 
 (use-package indent-guide
-  :disabled t
   :load-path "site-lisp/indent-guide"
+  :diminish (indent-guide-mode)
   :hook (python-mode . indent-guide-mode)
   :config
   (set-face-background 'indent-guide-face "white")
-  (setq indent-guide-char ":"))
+  (set-face-foreground 'indent-guide-face "grey")
+  (setq indent-guide-char "|"))
 
 (use-package info-lookmore
   :load-path "site-lisp/info-lookmore"
@@ -2656,6 +2564,8 @@
   (set-clipboard-coding-system 'utf-8)
   (set-buffer-file-coding-system 'utf-8)
 
+  (bind-keys ("M-D" . mark-defun))
+
   (bind-keys ("C-z"             . delete-other-windows)
              ("C-*"             . goto-matching-parens)
 
@@ -2748,14 +2658,23 @@
   (setq projectile-completion-method 'helm)
   (projectile-global-mode 1))
 
+(use-package processing-mode
+  ;; hfn (2018-09-29): fix processing-location
+  :load-path "site-lisp/processing2-emacs"
+  :config
+  (setq processing-location "/usr/local/bin/processing-java")
+  (setq processing-application-dir "/Applications/Processing.app")
+  (setq processing-sketchbook-dir "~/Documents/Processing"))
 
+
+;; python-nav-beginning-of-block
+;; python-nav-end-of-block
 (use-package python
   :defer t
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python3" . python-mode)
   :bind (:map inferior-python-mode-map
-              ("M-k" . comint-clear-buffer)
-              )
+              ("M-k" . comint-clear-buffer))
   :preface
   (defface paren-face
     '((((class color) (background dark))
@@ -2777,7 +2696,7 @@
       ("msum"   . ?⨁)
       ("not"    . ?¬)
       ("&&"     . ?∧)
-      ("and"     . ?∧)
+      ("and"    . ?∧)
       ("||"     . ?∨)
       ("or"     . ?∨)
       ("!="     . ?≠)
@@ -2793,7 +2712,7 @@
       ;; ("False" .    #x1d53d)
 
       ("`in`"             . ?∈)
-      ("`notElem`"          . ?∉)
+      ("`not in`"          . ?∉)
       ("`member`"           . ?∈)
       ("`notMember`"        . ?∉)
       ("`union`"            . ?∪)
@@ -2848,7 +2767,7 @@ the same coding systems as Emacs."
               (format "%s.%s" (match-string 2 item)
                       (match-string 1 item)))))))))
 
-    (setq indicate-empty-lines t)
+    (setq indicate-empty-lines nil)
     (set (make-local-variable 'parens-require-spaces) nil)
     (setq indent-tabs-mode nil)
     (setq python-indent-offset 4)
@@ -3270,8 +3189,15 @@ the same coding systems as Emacs."
 (use-package vimish-fold
   :defer 10
   :commands vimish-fold
-  :bind ("C-c <tab>" . vimish-fold-toggle)
-  :load-path "site-lisp/vimish-fold")
+  :bind (("C-c v" . vimish-fold)
+         ("C-c x" . vimish-fold-delete)
+         ("C-+" . vimish-fold-toggle)
+         ("C--" . vimish-fold-unfold))
+  :load-path "site-lisp/vimish-fold"
+  :config
+  (set-face-background 'vimish-fold-overlay "#f8f8ff")
+  (set-face-foreground 'vimish-fold-overlay "gray")
+  )
 
 (use-package visual-regexp
   :load-path "site-lisp/visual-regexp"
@@ -3309,11 +3235,22 @@ the same coding systems as Emacs."
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
+  ;; (flycheck-define-checker my-php
+  ;;   "A PHP syntax checker using the PHP command line interpreter.
+
+  ;; See URL `http://php.net/manual/en/features.commandline.php'."
+  ;;   :command ("phpmd" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+  ;;             "-d" "log_errors=0" source)
+  ;;   :error-patterns
+  ;;   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+  ;;           (message) " in " (file-name) " on line " line line-end))
+  ;;   :modes (php-mode php+-mode web-mode))
+
+  ;; (flycheck-select-checker 'my-php)
 
   (eval-after-load 'flycheck
     '(progn
-       (flycheck-add-mode 'html-tidy 'web-mode)
-       (flycheck-add-mode 'php-phpmd 'web-mode)))
+       (flycheck-add-mode 'html-tidy 'web-mode)))
 
   (defvar web-mode-initialized nil)
 
