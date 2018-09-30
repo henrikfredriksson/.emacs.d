@@ -1461,8 +1461,8 @@
 (use-package helm-swoop
   :load-path "site-lisp/helm-swoop"
   :bind (("M-s M-s" . helm-swoop )
-         ("M-s S"     . helm-swoop-without-pre-input)
-         ("M-s s" . helm-swoop-from-isearch)))
+         ("M-s S"   . helm-swoop-without-pre-input)
+         ("M-s s"   . helm-swoop-from-isearch)))
 
 (use-package hi-lock
   :bind (("M-o l" . highlight-lines-matching-regexp)
@@ -2072,15 +2072,6 @@
 (use-package highlight-cl
   :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
 
-(use-package indent-guide
-  :load-path "site-lisp/indent-guide"
-  :diminish (indent-guide-mode)
-  :hook (python-mode . indent-guide-mode)
-  :config
-  (set-face-background 'indent-guide-face "white")
-  (set-face-foreground 'indent-guide-face "grey")
-  (setq indent-guide-char "|"))
-
 (use-package info-lookmore
   :load-path "site-lisp/info-lookmore"
   :after info-look
@@ -2093,7 +2084,8 @@
 (use-package langtool
   :load-path "site-lisp/langtool"
   :commands (langtool-check)
-  )
+  :config
+  (setq langtool-language- tool-jar "~/src/langtool/languagetool-commandline.jar"))
 
 (use-package lisp-mode
   :defer t
@@ -2603,7 +2595,9 @@
              ("C-c f"           . flush-lines)
              ("C-c k"           . keep-lines)
              ("C-c m"           . emacs-toggle-size)
-             ("C-c M"           . emacs-right)
+             ("C-M-<return>"    . emacs-fullscreen)
+             ("M-p"    . enlarge-window)
+             ("M-n"    . shrink-window)
              ("C-c n"           . insert-user-timestamp)
              ("C-c q"           . fill-region)
              ("C-c r"           . replace-regexp)
@@ -3460,20 +3454,22 @@ the same coding systems as Emacs."
 
 (defun emacs-max ()
   (interactive)
+  (set-frame-parameter (selected-frame) 'fullscreen 'nil)
+  (set-frame-parameter (selected-frame) 'height 1920)
+  (set-frame-parameter (selected-frame) 'width 173)
+  (set-frame-parameter (selected-frame) 'top 0)
+  (set-frame-parameter (selected-frame) 'left 0)
+  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
+  (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
+  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
+
+(defun emacs-fullscreen ()
+  (interactive)
   (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
   (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
 
-(defun emacs-right ()
-  (interactive)
-  (set-frame-parameter nil 'width 82)
-  (set-frame-parameter nil 'fullscreen 'fullheight)
-  (set-frame-parameter (selected-frame) 'top emacs-min-top)
-  (set-frame-font "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
-  (set-frame-parameter (selected-frame) 'left (- 1200 emacs-min-width))
-  (set-frame-parameter (selected-frame) 'height emacs-min-height)
-  (set-frame-parameter (selected-frame) 'width emacs-min-width))
 
 
 (defun emacs-toggle-size ()
