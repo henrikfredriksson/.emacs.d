@@ -886,13 +886,13 @@
 
   (use-package dired-x)
   (use-package dired+
+    :disabled t
     :config
     (unbind-key "M-s f" dired-mode-map))
 
 
   (use-package dired-ranger
-    :bind (:map dired-mode-map
-                ("W" . dired-ranger-copy)
+    :bind (:map dired-mode-map ("W" . dired-ranger-copy)
                 ("X" . dired-ranger-move)
                 ("Y" . dired-ranger-paste)))
 
@@ -1220,6 +1220,13 @@
   :config
   (unbind-key "C-     . " flyspell-mode-map))
 
+(use-package flx
+  :load-path "site-lisp/flx")
+(use-package flx-isearch
+  :load-path "site-lisp/flx-isearch"
+  :bind (("M-s S" . flx-isearch-forward)
+         ("M-s R" . flx-isearch-backward)))
+
 (use-package gist
   :disabled t
   :load-path "site-lisp/gist"
@@ -1395,8 +1402,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                            (regexp       . ,(cdr x))
-                            (modes quote (haskell-mode literate-haskell-mode))))
+                       (regexp       . ,(cdr x))
+                       (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -2325,8 +2332,6 @@
     :config
     (remove-hook 'server-switch-hook 'magit-commit-diff))
 
-
-
   (diminish 'magit-wip-after-save-local-mode)
   (diminish 'magit-wip-after-apply-mode)
   (diminish 'magit-wip-before-change-mode)
@@ -2409,8 +2414,6 @@
   :disabled t
   :bind ("C-!" . mf/mirror-region-in-multifile)
   :load-path "site-lisp/multifiles-el")
-
-
 
 (use-package mc-extras
   :after multiple-cursors
@@ -2546,6 +2549,9 @@
 
 
   :config
+  (setq split-height-threshold 0)
+  (setq split-width-threshold nil)
+
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
   (prefer-coding-system 'utf-8)
   (set-default-coding-systems 'utf-8)
@@ -2556,7 +2562,7 @@
   (set-clipboard-coding-system 'utf-8)
   (set-buffer-file-coding-system 'utf-8)
 
-  (bind-keys ("M-D" . mark-defun))
+  (bind-keys ("M-D" . dired))
 
   (bind-keys ("C-z"             . delete-other-windows)
              ("C-*"             . goto-matching-parens)
@@ -2568,13 +2574,13 @@
              ("M-j"             . delete-indentation-forward)
              ("M-J"             . delete-indentation)
              ("M-L"             . mark-line)
-             ;;("M-S"           . mark-sentence)
              ("M-<return>"      . open-line-above)
              ("C-,"             . pop-global-mark)
 
              ("M-g c"           . goto-char)
 
              ("<C-M-backspace>" . backward-kill-sexp)
+             ("C-M-<return>"    . emacs-fullscreen)
 
              ("C-h v"           . describe-variable)
 
@@ -2595,9 +2601,9 @@
              ("C-c f"           . flush-lines)
              ("C-c k"           . keep-lines)
              ("C-c m"           . emacs-toggle-size)
-             ("C-M-<return>"    . emacs-fullscreen)
-             ("M-p"    . enlarge-window)
-             ("M-n"    . shrink-window)
+
+             ("C-x +"           . enlarge-window)
+             ("C-x -"           . shrink-window)
              ("C-c n"           . insert-user-timestamp)
              ("C-c q"           . fill-region)
              ("C-c r"           . replace-regexp)
@@ -2625,9 +2631,7 @@
              ("C-c e d"         . debug-on-entry)
              ("C-c e e"         . toggle-debug-on-error)
              ("C-c e f"         . emacs-lisp-byte-compile-and-load)
-             ;; ("C-c e i"         . crux-find-user-init-file)
-             ("C-c e i"         . my-find-user-init-file)
-             ;; ("c-c e o"         . my-todo-file)
+             ("C-c e i"         . crux-find-user-init-file)
              ("C-c e j"         . emacs-lisp-mode)
              ("C-c e P"         . check-papers)
              ("C-c e r"         . do-eval-region)
@@ -2661,8 +2665,6 @@
   (setq processing-sketchbook-dir "~/Documents/Processing"))
 
 
-;; python-nav-beginning-of-block
-;; python-nav-end-of-block
 (use-package python
   :defer t
   :mode ("\\.py\\'" . python-mode)
@@ -2688,7 +2690,7 @@
       ("<~"     . ?⇜)
       ("<>"     . ?⨂)
       ("msum"   . ?⨁)
-      ("not"    . ?¬)
+      ;; ("not"    . ?¬)
       ("&&"     . ?∧)
       ("and"    . ?∧)
       ("||"     . ?∨)
@@ -2699,6 +2701,9 @@
       ("<<<"    . ?⋘)
       (">>>"    . ?⋙)
       ("lambda" . ?λ)
+      ("sqrt"   . ?√)
+      ("pi"     . ?π)
+      ("sum"    . ?∑)
       ;; ("int" .      #x2124)
       ;; ("float" .    #x211d)
       ;; ("str" .      #x1d54a)
@@ -2716,6 +2721,7 @@
       ("undefined"          . ?⊥)))
 
   :config
+  (setq prettify-symbols-unprettify-at-point t)
   (setq-local prettify-symbols-alist python-prettify-symbols-alist)
 
   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
@@ -2743,7 +2749,6 @@ the same coding systems as Emacs."
 
   (defvar python-mode-initialized nil)
 
-  (add-hook 'before-save-hook 'whitespace-cleanup)
   (defun my-python-mode-hook ()
     (unless python-mode-initialized
       (setq python-mode-initialized t)
