@@ -208,7 +208,7 @@
    (quote
     (("/Volumes/Files/" . "/Volumes/Files/.backups")
      ("\\(recentf\\|archive/sent\\)" . "/tmp")
-     (".*" . "~/Documents/.backup/.emacs-backup"))))
+     (".*" . "~/.backups"))))
  '(backward-delete-char-untabify-method (quote untabify))
  '(bbdb-default-country "")
  '(bbdb-file "~/doc/tasks/bbdb" t)
@@ -1209,7 +1209,7 @@ SCHEDULED: %t
  '(persistent-scratch-backup-directory "~/.backups")
  '(persistent-scratch-file-name "~/.emacs.d/data-other-other-other/persistent-scratch")
  '(persistent-scratch-save-file
-   "/Users/johnw/.emacs.d/data-other-other-other/persistent-scratch")
+   "/Users/hfn/.emacs.d/data-other-other-other/persistent-scratch")
  '(pp^L-^L-string "                                            ")
  '(projectile-cache-file "~/.emacs.d/data-other-other-other/projectile.cache")
  '(projectile-completion-system (quote ivy))

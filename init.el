@@ -1007,13 +1007,13 @@
 (use-package dot-org
   :load-path ("site-lisp/org-mode/contrib/lisp"
               "site-lisp/org-mode/lisp")
-  :mode (("\\                                            . org\\'" . org-mode)
-         ("\\                                            . txt\\'" . org-mode))
+  :mode (("\\. org\\'" . org-mode)
+         ("\\. txt\\'" . org-mode))
   :commands my-org-startup
-  :bind (("M-C"                                                    . jump-to-org-agenda)
-         ("M-m"                                          . org-smart-capture)
-         ("M-M"                                                    . org-inline-note)
-         ("C-c a"                                        . org-agenda)
+  :bind (("M-C"   . jump-to-org-agenda)
+         ("M-m"   . org-smart-capture)
+         ("M-M"   . org-inline-note)
+         ("C-c a" . org-agenda)
          ("C-c S" . org-store-link)
          ("C-c l" . org-insert-link)
          ("C-. n" . org-velocity-read))
@@ -1198,14 +1198,6 @@
   :config
   (defalias 'flycheck-show-error-at-point-soon 'flycheck-show-error-at-point))
 
-(use-package flycheck-color-mode-line
-  :after flycheck
-  :load-path "site-lisp/flycheck-color-mode-line"
-  :config
-  (flycheck-color-mode-line-mode 1)
-  )
-
-
 (use-package flyspell
   :bind (("C-c i b"   . flyspell-buffer)
          ("C-c i f"   . flyspell-mode))
@@ -1218,10 +1210,11 @@
            ("C-c i r" . ispell-region)
            ("C-c i w" . ispell-word)))
   :config
-  (unbind-key "C-     . " flyspell-mode-map))
+  (unbind-key "C-. " flyspell-mode-map))
 
 (use-package flx
   :load-path "site-lisp/flx")
+
 (use-package flx-isearch
   :load-path "site-lisp/flx-isearch"
   :bind (("M-s S" . flx-isearch-forward)
@@ -1330,7 +1323,7 @@
                              "server" "--local" "--port=8687")))
       (message "Starting local Hoogle server on port 8687     . ..done"))
     (browse-url
-     (format "http://127                                  . 0 . 0.1:8687/?hoogle=%s"
+     (format "http://127.0.0.1:8687/?hoogle=%s"
              (replace-regexp-in-string
               " " "+" (replace-regexp-in-string "\\+" "%2B" query)))))
 
@@ -2089,10 +2082,11 @@
   (info-lookmore-apropos-elisp))
 
 (use-package langtool
+  ;; hfn (2018-10-03): not working fix
   :load-path "site-lisp/langtool"
   :commands (langtool-check)
-  :config
-  (setq langtool-language- tool-jar "~/src/langtool/languagetool-commandline.jar"))
+  :preface
+  (setq langtool-language-tool-jar "~src/langtool/languagetool-commandline.jar"))
 
 (use-package lisp-mode
   :defer t
@@ -2721,8 +2715,8 @@
       ("undefined"          . ?⊥)))
 
   :config
-  (setq prettify-symbols-unprettify-at-point t)
   (setq-local prettify-symbols-alist python-prettify-symbols-alist)
+  (setq prettify-symbols-unprettify-at-point 'left-edge)
 
   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
     "List of environment variables \\[universal-coding-system-argument] should set")
@@ -3219,6 +3213,7 @@ the same coding systems as Emacs."
 
 (use-package web-mode
   :load-path "site-lisp/web-mode"
+  :defer t
   :mode (("\\.html\\'" . web-mode)
          ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
@@ -3247,6 +3242,17 @@ the same coding systems as Emacs."
 
   ;; (flycheck-select-checker 'my-php)
 
+  ;;   (flycheck-define-checker web-mode-php
+  ;;     "This is the same as the default php checker except just for web-mode.
+  ;; It continues checking for javascript errors if there are no more PHP errors."
+  ;;     :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+  ;;          "-d" "log_errors=0" source)
+  ;;     :error-patterns
+  ;;     ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+  ;;        (message) " in " (file-name) " on line " line line-end))
+  ;;     :modes (web-mode))
+
+
   (eval-after-load 'flycheck
     '(progn
        (flycheck-add-mode 'html-tidy 'web-mode)))
@@ -3256,21 +3262,15 @@ the same coding systems as Emacs."
   (defun my-web-mode-hook ()
     (unless web-mode-initialized
       (setq web-mode-initialized t)
-
-
       (setq web-mode-engines-alist '(("php" . "\\.html\\'")))
       (setq indicate-empty-lines t)
       (make-local-variable 'web-mode-code-indent-offset)
       (make-local-variable 'web-mode-markup-indent-offset)
       (make-local-variable 'web-mode-css-indent-offset)
-
       (setq web-mode-code-indent-offset 4)
       (setq web-mode-css-indent-offset 4)
       (setq web-mode-markup-indent-offset 4)
-
-
-      (unbind-key "C-c TAB" web-mode-map)
-      )
+      (unbind-key "C-c TAB" web-mode-map))
     (add-hook 'web-mode-hook 'my-web-mode-hook)))
 
 
