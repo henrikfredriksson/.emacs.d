@@ -2625,7 +2625,7 @@
              ("C-c e d"         . debug-on-entry)
              ("C-c e e"         . toggle-debug-on-error)
              ("C-c e f"         . emacs-lisp-byte-compile-and-load)
-             ("C-c e i"         . crux-find-user-init-file)
+             ("C-c e I"         . crux-find-user-init-file)
              ("C-c e j"         . emacs-lisp-mode)
              ("C-c e P"         . check-papers)
              ("C-c e r"         . do-eval-region)
