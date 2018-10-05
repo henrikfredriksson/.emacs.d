@@ -2658,6 +2658,27 @@
   (setq processing-application-dir "/Applications/Processing.app")
   (setq processing-sketchbook-dir "~/Documents/Processing"))
 
+(use-package py-autopep8
+  :load-path "site-lisp/py-autopep8"
+  :preface
+  (defcustom python-autopep8-path (executable-find "autopep8")
+    "autopep8 executable path."
+    :group 'python
+    :type 'string)
+
+  (defun python-autopep8 ()
+    (interactive)
+    "Automatically formats Python code to conform to the PEP 8 style guide.
+$ autopep8 --in-place --aggressive --aggressive <filename>"
+    (interactive)
+    (when (eq major-mode 'python-mode)
+      (shell-command
+       (format "%s --in-place --aggressive --aggressive %s" python-autopep8-path
+               (shell-quote-argument (buffer-file-name))))
+      (revert-buffer t t t)))
+  ;; :config
+  ;; (setq py-autopep8-options '("--aggressive --aggressive"))
+  )
 
 (use-package python
   :defer t
@@ -2778,6 +2799,8 @@ the same coding systems as Emacs."
 
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
+  (add-hook 'auto-save-hook 'python-autopep8)
+  (add-hook 'before-save-hook 'python-autopep8)
 
 
   (add-hook 'python-mode-hook 'my-python-mode-hook)
@@ -2790,8 +2813,6 @@ the same coding systems as Emacs."
               (font-lock-add-keywords nil
                                       '(("\\[\\|\\]" . 'paren-face)))
               ))
-
-
   )
 
 (use-package recentf
