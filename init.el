@@ -2660,6 +2660,7 @@
 
 (use-package py-autopep8
   :load-path "site-lisp/py-autopep8"
+  :after python
   :preface
   (defcustom python-autopep8-path (executable-find "autopep8")
     "autopep8 executable path."
