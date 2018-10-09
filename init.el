@@ -1,7 +1,7 @@
-;; (require 'profiler)
-;; (profiler-start 'cpu+mem)
+                                        ; ; (require 'profiler)
+                                        ; ; (profiler-start 'cpu+mem)
 
-(defconst emacs-start-time (current-time))
+(defconst emacs-start-time(current-time))
 
 (defvar file-name-handler-alist-old file-name-handler-alist)
 
@@ -20,37 +20,33 @@
                    gc-cons-percentage 0.6)
              (garbage-collect)) t)
 
-(run-with-idle-timer 20 t #'garbage-collect)
+(run-with-idle-timer 20 t 'garbage-collect)
 (setq garbage-collection-messages t)
 
-;;; Functions
+;; ; Functions
 
 (eval-and-compile
-  (defsubst emacs-path (path)
+  (defsubst emacs-path(path)
     (expand-file-name path user-emacs-directory))
 
-  (defsubst add-load-path (path)
-    (add-to-list 'load-path (emacs-path path)))
+  (defsubst add-load-path(path)
+    (add-to-list 'load-path(emacs-path path)))
 
-  (defsubst lookup-password (host user port)
+  (defsubst lookup-password(host user port)
     (require 'auth-source)
-    (funcall (plist-get (car (auth-source-search :host host :user user
-                                                 :type 'netrc :port port))
-                        :secret)))
+    (funcall(plist-get(car(auth-source-search: host host: user user: type 'netrc: port port)): secret)))
 
-  (defun get-jobhours-string ()
-    (with-current-buffer (get-buffer-create "*scratch*")
-      (let ((str (shell-command-to-string "jobhours")))
+  (defun get-jobhours-string()
+    (with-current-buffer(get-buffer-create "*scratch*")
+      (let((str(shell-command-to-string "jobhours")))
         (require 'ansi-color)
-        (ansi-color-apply (substring str 0 (1- (length str))))))))
+        (ansi-color-apply(substring str 0 (1 - (length str))))))))
 
-(defun save-all ()
+(defun save-all()
   (interactive)
-  (save-some-buffers t))
+  (save-some-buffers t));; (add-hook 'focus-out-hook 'save-all)
 
-;; (add-hook 'focus-out-hook 'save-all)
-
-;;; Environment
+;; ; Environment
 
 (eval-when-compile
   (require 'cl))
@@ -58,31 +54,31 @@
 (eval-and-compile
   (require 'seq)
 
-  (defconst emacs-environment (getenv "NIX_MYENV_NAME"))
+  (defconst emacs-environment(getenv "NIX_MYENV_NAME"))
 
-  (mapc #'add-load-path
-        (append (directory-files (emacs-path "site-lisp") t
-                                 "site-[A-Z0-9a-z-]+\\'")
+  (mapc  #'add-load-path
+         (append(directory-files(emacs-path "site-lisp") t
+                                "site-[A-Z0-9a-z-]+\\'")
                 '("site-lisp" "lisp/use-package" "lisp" "")))
 
-  (defun nix-read-environment (name)
+  (defun nix-read-environment(name)
     (with-temp-buffer
       (insert-file-contents-literally
        (with-temp-buffer
          (insert-file-contents-literally
-          (executable-find (concat "load-env-" name)))
+          (executable-find(concat "load-env-" name)))
          (and (re-search-forward "^source \\(.+\\)$" nil t)
               (match-string 1))))
       (and (or (re-search-forward "^  nativeBuildInputs=\"\\(.+?\\)\"" nil t)
                (re-search-forward "^  buildInputs=\"\\(.+?\\)\"" nil t))
-           (split-string (match-string 1)))))
+           (split-string(match-string 1)))))
 
-  (when (executable-find "nix-env")
-    (mapc #'(lambda (path)
-              (let ((share (expand-file-name "share/emacs/site-lisp" path)))
-                (if (file-directory-p share)
-                    (add-to-list 'load-path share))))
-          (nix-read-environment emacs-environment)))
+  (when(executable-find "nix-env")
+    (mapc  #'(lambda (path)
+               (let((share(expand-file-name "share/emacs/site-lisp" path)))
+                 (if (file-directory-p share)
+                     (add-to-list 'load-path share))))
+           (nix-read-environment emacs-environment)))
 
 
   (require 'use-package)
@@ -604,6 +600,9 @@
   (setq backup-each-save-filter-function 'backup-each-save-filter
         backup-enable-predicate 'my-dont-backup-files-p))
 
+(use-package browse-kill-ring
+  :commands browse-kill-ring)
+
 (use-package bug-reference-github
   :disabled t
   :load-path "site-lisp/bug-reference-github"
@@ -642,8 +641,6 @@
   (setq company-tooltip-limit 20)
   (setq company-idle-delay 0.1)
   (setq company-minimum-prefix-length 1)
-
-
 
   ;; From https://github     . com/company-mode/company-mode/issues/87
   ;; See also https://github . com/company-mode/company-mode/issues/123
@@ -1395,8 +1392,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -2543,8 +2540,8 @@
 
 
   :config
-  (setq split-height-threshold 0)
-  (setq split-width-threshold nil)
+  ;; (setq split-height-threshold 0)
+  ;; (setq split-width-threshold nil)
 
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
   (prefer-coding-system 'utf-8)
@@ -2636,6 +2633,7 @@
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
+  :disabled t
   :load-path "site-lisp/projectile"
   :defer 10
   :bind-keymap ("C-c p" . projectile-command-map)
@@ -2651,6 +2649,7 @@
   (projectile-global-mode 1))
 
 (use-package processing-mode
+  :disabled t
   ;; hfn (2018-09-29): fix processing-location
   :load-path "site-lisp/processing2-emacs"
   :config
@@ -2661,25 +2660,21 @@
 (use-package py-autopep8
   :load-path "site-lisp/py-autopep8"
   :after python
+  :bind ("C-c P" . python-autopep8)
   :preface
   (defcustom python-autopep8-path (executable-find "autopep8")
     "autopep8 executable path."
     :group 'python
     :type 'string)
-
+  :config
   (defun python-autopep8 ()
     (interactive)
-    "Automatically formats Python code to conform to the PEP 8 style guide.
-$ autopep8 --in-place --aggressive --aggressive <filename>"
     (interactive)
     (when (eq major-mode 'python-mode)
       (shell-command
        (format "%s --in-place --aggressive --aggressive %s" python-autopep8-path
                (shell-quote-argument (buffer-file-name))))
-      (revert-buffer t t t)))
-  ;; :config
-  ;; (setq py-autopep8-options '("--aggressive --aggressive"))
-  )
+      (revert-buffer t t t))))
 
 (use-package python
   :defer t
@@ -2800,9 +2795,6 @@ the same coding systems as Emacs."
 
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
-  (add-hook 'auto-save-hook 'python-autopep8)
-  (add-hook 'before-save-hook 'python-autopep8)
-
 
   (add-hook 'python-mode-hook 'my-python-mode-hook)
   (add-hook 'python-mode-hook
@@ -2899,6 +2891,8 @@ the same coding systems as Emacs."
   (bind-key "d" #'downcase-region selected-keymap)
   (bind-key "r" #'reverse-region selected-keymap)
   (bind-key "s" #'sort-lines selected-keymap)
+  (bind-key "C-<tab>" #'indent-shift-right)
+  (bind-key "S-<tab>" #'indent-shift-left)
   (bind-key "u" #'upcase-region selected-keymap))
 
 (use-package session
@@ -3280,6 +3274,7 @@ the same coding systems as Emacs."
        (flycheck-add-mode 'html-tidy 'web-mode)))
 
   (defvar web-mode-initialized nil)
+
 
   (defun my-web-mode-hook ()
     (unless web-mode-initialized
