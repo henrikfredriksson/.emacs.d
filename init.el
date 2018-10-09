@@ -1,7 +1,7 @@
                                         ; ; (require 'profiler)
                                         ; ; (profiler-start 'cpu+mem)
 
-(defconst emacs-start-time(current-time))
+(defconst emacs-start-time (current-time))
 
 (defvar file-name-handler-alist-old file-name-handler-alist)
 
@@ -23,18 +23,18 @@
 (run-with-idle-timer 20 t 'garbage-collect)
 (setq garbage-collection-messages t)
 
-;; ; Functions
+;;; Functions
 
 (eval-and-compile
-  (defsubst emacs-path(path)
+  (defsubst emacs-path (path)
     (expand-file-name path user-emacs-directory))
 
-  (defsubst add-load-path(path)
+  (defsubst add-load-path (path)
     (add-to-list 'load-path(emacs-path path)))
 
-  (defsubst lookup-password(host user port)
+  (defsubst lookup-password (host user port)
     (require 'auth-source)
-    (funcall(plist-get(car(auth-source-search: host host: user user: type 'netrc: port port)): secret)))
+    (funcall (plist-get (car (auth-source-search: host host: user user: type 'netrc: port port)): secret)))
 
   (defun get-jobhours-string()
     (with-current-buffer(get-buffer-create "*scratch*")
@@ -119,7 +119,7 @@
   (with-current-buffer (get-buffer "*scratch*")
     (let ((str (shell-command-to-string "jobhours")))
       (require 'ansi-color)
-      (ansi-color-apply (substring str 0 (1- (length str)))))))
+      (ansi-color-apply (substring str 0 (1 - (length str)))))))
 
 ;;; Load customization settings
 
@@ -128,34 +128,35 @@
 
 
 (defvar user-data-directory (emacs-path "data"))
+(load (expand-file-name "settings" user-emacs-directory))
 
-(if (string= "emacs26" emacs-environment)
-    (load (expand-file-name "settings" user-emacs-directory))
-  (let ((settings
-         (with-temp-buffer
-           (insert-file-contents
-            (expand-file-name "settings.el" user-emacs-directory))
-           (goto-char (point-min))
-           (read (current-buffer))))
-        (suffix (cond ;; ((string= "emacs25alt" emacs-environment) "alt")
-		 ((string= "emacsHEAD" emacs-environment) "alt")
-		 (t "other"))))
-    (setq running-development-emacs (string= suffix "dev")
-          running-alternate-emacs (string= suffix "alt")
-          user-data-directory
-          (replace-regexp-in-string "/data" (format "/data-%s" suffix)
-                                    user-data-directory))
-    (dolist (setting settings)
-      (let ((value (and (listp setting)
-                        (nth 1 (nth 1 setting)))))
-        (if (and (stringp value)
-                 (string-match "/\\.emacs\\.d/data" value))
-            (setcar (nthcdr 1 (nth 1 setting))
-                    (replace-regexp-in-string
-                     "/\\.emacs\\.d/data"
-                     (format "/.emacs.d/data-%s" suffix)
-                     value)))))
-    (eval settings)))
+;; (if (string= "emacs26" emacs-environment)
+;;     (load (expand-file-name "settings" user-emacs-directory))
+;;   (let ((settings
+;;          (with-temp-buffer
+;;            (insert-file-contents
+;;             (expand-file-name "settings.el" user-emacs-directory))
+;;            (goto-char (point-min))
+;;            (read (current-buffer))))
+;;         (suffix (cond ;; ((string= "emacs25alt" emacs-environment) "alt")
+;;               ((string= "emacsHEAD" emacs-environment) "alt")
+;;               (t "other"))))
+;;     (setq running-development-emacs (string= suffix "dev")
+;;           running-alternate-emacs (string= suffix "alt")
+;;           user-data-directory
+;;           (replace-regexp-in-string "/data" (format "/data-%s" suffix)
+;;                                     user-data-directory))
+;;     (dolist (setting settings)
+;;       (let ((value (and (listp setting)
+;;                         (nth 1 (nth 1 setting)))))
+;;         (if (and (stringp value)
+;;                  (string-match "/\\.emacs\\.d/data" value))
+;;             (setcar (nthcdr 1 (nth 1 setting))
+;;                     (replace-regexp-in-string
+;;                      "/\\.emacs\\.d/data"
+;;                      (format "/.emacs.d/data-%s" suffix)
+;;                      value)))))
+;;     (eval settings)))
 
 (setq Info-directory-list
       (mapcar
@@ -1392,8 +1393,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                            (regexp       . ,(cdr x))
-                            (modes quote (haskell-mode literate-haskell-mode))))
+                       (regexp       . ,(cdr x))
+                       (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
