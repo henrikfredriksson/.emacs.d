@@ -1393,8 +1393,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -3432,6 +3432,9 @@ the same coding systems as Emacs."
 (use-package yasnippet-snippets
   :load-path "site-lisp/yasnippet-snippets"
   :after yasnippet)
+
+(use-package whole-line-or-region
+  :config (whole-line-or-region-global-mode 1))
 
 ;;; Layout
 
