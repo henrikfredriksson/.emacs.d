@@ -1,5 +1,5 @@
-                                        ; ; (require 'profiler)
-                                        ; ; (profiler-start 'cpu+mem)
+;;; (require 'profiler)
+;;; (profiler-start 'cpu+mem)
 
 (defconst emacs-start-time (current-time))
 
