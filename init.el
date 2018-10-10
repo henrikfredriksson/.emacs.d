@@ -3430,6 +3430,7 @@ the same coding systems as Emacs."
   :after yasnippet)
 
 (use-package whole-line-or-region
+  :diminish (whole-line-or-region-local-mode)
   :config (whole-line-or-region-global-mode 1))
 
 ;;; Layout
