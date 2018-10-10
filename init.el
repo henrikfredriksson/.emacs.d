@@ -3231,7 +3231,6 @@ the same coding systems as Emacs."
   (emmet-mode)
   (unbind-key "C-<return>" emmet-mode-keymap))
 
-
 (use-package web-mode
   :load-path "site-lisp/web-mode"
   :defer t
@@ -3280,7 +3279,6 @@ the same coding systems as Emacs."
 
   (defvar web-mode-initialized nil)
 
-
   (defun my-web-mode-hook ()
     (unless web-mode-initialized
       (setq web-mode-initialized t)
@@ -3294,8 +3292,6 @@ the same coding systems as Emacs."
       (setq web-mode-markup-indent-offset 4)
       (unbind-key "C-c TAB" web-mode-map))
     (add-hook 'web-mode-hook 'my-web-mode-hook)))
-
-
 
 (use-package which-key
   :load-path "site-lisp/which-key"
