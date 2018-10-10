@@ -2151,6 +2151,11 @@
               ("C-2"     . lispy-arglist-inline)
               ("C-c C-j" . lispy-goto)))
 
+(use-package loccur
+  :load-path "site-lisp/loccur"
+  :defer 10
+  :commands loccur)
+
 (use-package lua-mode
   :disabled t
   :load-path "site-lisp/lua-mode"
@@ -2161,7 +2166,7 @@
   :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ;; ("Ca-x b" . lusty-buffer-explorer)
+         ;; ("C-x b" . lusty-buffer-explorer)
          )
   :preface
   (defun lusty-read-directory ()
@@ -2734,7 +2739,6 @@
 
   :config
   (setq-local prettify-symbols-alist python-prettify-symbols-alist)
-  (setq prettify-symbols-unprettify-at-point 'left-edge)
 
   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
     "List of environment variables \\[universal-coding-system-argument] should set")
