@@ -1192,7 +1192,6 @@
              flycheck-previous-error)
   ;; :bind (("M-n" . flycheck-next-error)
   ;;        ("M-p" . flycheck-previous-error))
-
   :config
   (defalias 'flycheck-show-error-at-point-soon 'flycheck-show-error-at-point))
 
@@ -3249,30 +3248,6 @@ the same coding systems as Emacs."
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
-  ;; (flycheck-define-checker my-php
-  ;;   "A PHP syntax checker using the PHP command line interpreter.
-
-  ;; See URL `http://php.net/manual/en/features.commandline.php'."
-  ;;   :command ("phpmd" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-  ;;             "-d" "log_errors=0" source)
-  ;;   :error-patterns
-  ;;   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-  ;;           (message) " in " (file-name) " on line " line line-end))
-  ;;   :modes (php-mode php+-mode web-mode))
-
-  ;; (flycheck-select-checker 'my-php)
-
-  ;;   (flycheck-define-checker web-mode-php
-  ;;     "This is the same as the default php checker except just for web-mode.
-  ;; It continues checking for javascript errors if there are no more PHP errors."
-  ;;     :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-  ;;          "-d" "log_errors=0" source)
-  ;;     :error-patterns
-  ;;     ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-  ;;        (message) " in " (file-name) " on line " line line-end))
-  ;;     :modes (web-mode))
-
-
   (eval-after-load 'flycheck
     '(progn
        (flycheck-add-mode 'html-tidy 'web-mode)))
@@ -3430,6 +3405,7 @@ the same coding systems as Emacs."
   :after yasnippet)
 
 (use-package whole-line-or-region
+  :defer 10
   :diminish (whole-line-or-region-local-mode)
   :config (whole-line-or-region-global-mode 1))
 
