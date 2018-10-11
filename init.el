@@ -239,7 +239,6 @@
 (use-package xml-rpc        :defer  t  :load-path "lib")
 (use-package zoutline       :defer  t  :load-path "lib/zoutline")
 
-
 ;;; Keybindings
 
 (eval-when-compile
@@ -274,6 +273,7 @@
   (setq mac-right-option-modifier 'none))
 
 ;;; Packages
+
 
 (use-package ggtags
   :load-path "site-lisp/ggtags"
@@ -2736,7 +2736,13 @@
       ("`isProperSubsetOf`" . ?⊂)
       ("undefined"          . ?⊥)))
 
+
+  (defun wrap-print ()
+    (interactive)
+    (wrap-region-with-fun "print"))
   :config
+  (bind-key "M-P"  #'wrap-region-with-fun)
+  (bind-key "M-p"  #'wrap-print)
   (setq-local prettify-symbols-alist python-prettify-symbols-alist)
 
   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
@@ -3250,6 +3256,7 @@ the same coding systems as Emacs."
 
   (eval-after-load 'flycheck
     '(progn
+       (flycheck-add-mode 'php-phpmd 'web-mode)
        (flycheck-add-mode 'html-tidy 'web-mode)))
 
   (defvar web-mode-initialized nil)
@@ -3458,10 +3465,10 @@ the same coding systems as Emacs."
 (defun emacs-max ()
   (interactive)
   (set-frame-parameter (selected-frame) 'fullscreen 'nil)
-  (set-frame-parameter (selected-frame) 'height 1920)
-  (set-frame-parameter (selected-frame) 'width 173)
-  (set-frame-parameter (selected-frame) 'top 0)
-  (set-frame-parameter (selected-frame) 'left 0)
+  (set-frame-parameter (selected-frame) 'height 50)
+  (set-frame-parameter (selected-frame) 'width 150)
+  (set-frame-parameter (selected-frame) 'top emacs-min-top)
+  (set-frame-parameter (selected-frame) 'left 150)
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
   (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
@@ -3472,8 +3479,6 @@ the same coding systems as Emacs."
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
   (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
-
-
 
 (defun emacs-toggle-size ()
   (interactive)

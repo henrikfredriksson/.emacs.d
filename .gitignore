@@ -1,3 +1,6 @@
+GPATH
+GRTAGS
+GTAGS
 *.elc
 *~
 /.python-environments/
@@ -18,4 +21,3 @@ Makefile
 mutt-init.el
 recentf
 .session
-
