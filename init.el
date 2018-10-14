@@ -57,9 +57,9 @@
   (defconst emacs-environment(getenv "NIX_MYENV_NAME"))
 
   (mapc  #'add-load-path
-         (append(directory-files(emacs-path "site-lisp") t
-                                "site-[A-Z0-9a-z-]+\\'")
-                '("site-lisp" "lisp/use-package" "lisp" "")))
+         (append (directory-files (emacs-path "site-lisp") t
+                                  "site-[A-Z0-9a-z-]+\\'")
+                 '("site-lisp" "lisp/use-package" "lisp" "")))
 
   (defun nix-read-environment(name)
     (with-temp-buffer
@@ -83,22 +83,6 @@
 
   (require 'use-package)
 
-  ;; (defconst load-path-reject-re "/\\.emacs\\.d/\\(lib\\|site-lisp\\)/"
-  ;;   "Regexp matching `:load-path' values to be rejected.")
-
-  ;; (defun load-path-handler-override (orig-func name keyword args rest state)
-  ;;   (if (cl-some (apply-partially #'string-match load-path-reject-re) args)
-  ;;       (use-package-process-keywords name rest state)
-  ;;     (let ((body (use-package-process-keywords name rest state)))
-  ;;       (use-package-concat
-  ;;        (mapcar #'(lambda (path)
-  ;;                    `(eval-and-compile (add-to-list 'load-path ,path t)))
-  ;;                args)
-  ;;        body))))
-
-  ;; (advice-add 'use-package-handler/:load-path
-  ;;             :around #'load-path-handler-override)
-
   (if init-file-debug
       (setq use-package-verbose t
             use-package-expand-minimally nil
@@ -112,8 +96,8 @@
 
 ;;; Utility macros and functions
 
-(defsubst hook-into-modes (func &rest modes)
-  (dolist (mode-hook modes) (add-hook mode-hook func)))
+;; (defsubst hook-into-modes (func &rest modes)
+;;   (dolist (mode-hook modes) (add-hook mode-hook func)))
 
 (defun get-jobhours-string ()
   (with-current-buffer (get-buffer "*scratch*")
@@ -129,34 +113,6 @@
 
 (defvar user-data-directory (emacs-path "data"))
 (load (expand-file-name "settings" user-emacs-directory))
-
-;; (if (string= "emacs26" emacs-environment)
-;;     (load (expand-file-name "settings" user-emacs-directory))
-;;   (let ((settings
-;;          (with-temp-buffer
-;;            (insert-file-contents
-;;             (expand-file-name "settings.el" user-emacs-directory))
-;;            (goto-char (point-min))
-;;            (read (current-buffer))))
-;;         (suffix (cond ;; ((string= "emacs25alt" emacs-environment) "alt")
-;;               ((string= "emacsHEAD" emacs-environment) "alt")
-;;               (t "other"))))
-;;     (setq running-development-emacs (string= suffix "dev")
-;;           running-alternate-emacs (string= suffix "alt")
-;;           user-data-directory
-;;           (replace-regexp-in-string "/data" (format "/data-%s" suffix)
-;;                                     user-data-directory))
-;;     (dolist (setting settings)
-;;       (let ((value (and (listp setting)
-;;                         (nth 1 (nth 1 setting)))))
-;;         (if (and (stringp value)
-;;                  (string-match "/\\.emacs\\.d/data" value))
-;;             (setcar (nthcdr 1 (nth 1 setting))
-;;                     (replace-regexp-in-string
-;;                      "/\\.emacs\\.d/data"
-;;                      (format "/.emacs.d/data-%s" suffix)
-;;                      value)))))
-;;     (eval settings)))
 
 (setq Info-directory-list
       (mapcar
@@ -824,6 +780,13 @@
   :config
   (add-to-list 'dash-at-point-mode-alist '(haskell-mode . "haskell")))
 
+(use-package dbwebb
+  :load-path "site-lisp/dbwebb"
+  :bind (("C-c d b v" . dbwebb-validate)
+         ("C-c d b i" . dbwebb-inspect)
+         ("C-c d b u" . dbwebb-update)
+         ))
+
 (use-package debbugs-gnu
   :disabled t
   :load-path "elpa/packages/debbugs"
@@ -881,6 +844,9 @@
   (bind-key "<tab>" #'my-dired-switch-window dired-mode-map)
   (bind-key "M-!" #'async-shell-command dired-mode-map)
   (unbind-key "M-G" dired-mode-map)
+
+  (when (string= system-type "darwin")
+    (setq dired-use-ls-dired nil))
 
   (use-package dired-x)
   (use-package dired+
@@ -1764,6 +1730,7 @@
                           ido-file-completion-map))))
 
 (use-package iedit
+  :disabled t
   :load-path "site-lisp/iedit")
 
 (use-package ielm
@@ -2736,7 +2703,6 @@
       ("`isProperSubsetOf`" . ?⊂)
       ("undefined"          . ?⊥)))
 
-
   (defun wrap-print ()
     (interactive)
     (wrap-region-with-fun "print"))
@@ -2968,6 +2934,11 @@ the same coding systems as Emacs."
 (use-package sh-toggle
   :bind ("C-. C-z" . shell-toggle))
 
+(use-package shrink-whitespace
+  :load-path "site-lisp/shrink-whitespace"
+  :commands shrink-whitespace
+  :bind ("C-c SPC" . shrink-whitespace))
+
 (use-package slime
   :disabled t
   :load-path "site-lisp/slime"
@@ -2977,6 +2948,7 @@ the same coding systems as Emacs."
         slime-contribs '(slime-fancy)))
 
 (use-package smart-mode-line
+  :disabled t
   :load-path "site-lisp/smart-mode-line"
   :defer 5
   :config
@@ -2984,7 +2956,7 @@ the same coding systems as Emacs."
   (sml/setup)
   (sml/apply-theme 'light)
   (add-to-list 'sml/replacer-regexp-list '("^~/src/" ":src:") t)
-  (delete  '("^~/\\.emacs\\.d/" ":ED:") sml/replacer-regexp-list)
+  (delete '("^~/\\.emacs\\.d/" ":ED:") sml/replacer-regexp-list)
   (add-to-list 'sml/replacer-regexp-list '("^~/dbwebb-kurser/" ":dbwebb:"))
   (add-to-list 'sml/replacer-regexp-list '("^~/\\.emacs\\.d/" ":dot-emacs:"))
   (add-hook 'display-time-hook 'sml/propertize-time-string))
@@ -3418,73 +3390,61 @@ the same coding systems as Emacs."
 
 ;;; Layout
 
-(defvar display-name
-  (let ((width (display-pixel-width)))
-    (cond ((>= width 2560) 'retina-imac)
-          ((= width 1920) 'macbook-pro-vga)
-          ((= width 1680) 'macbook-pro)
-          ((= width 1440) 'retina-macbook-pro))))
+(defconst display-name
+  (pcase (display-pixel-width)
+    (`3840 'dell-wide)
+    (`2560 'imac)
+    (`1920 'macbook-pro-vga)
+    (`1680 'macbook-pro)))
 
 (defconst emacs-min-width 100)
-(defconst emacs-min-top 40)
+(defconst emacs-min-top 50)
 (defconst emacs-min-left 550)
+;; (defconst emacs-min-left (-  emacs-min-width (/ emacs-min-width 2)))
 
+(defvar emacs-min-height
+  (pcase display-name
+    (`dell-wide                64)
+    (`imac                     57)
+    (`macbook-pro-vga          67)
+    (`macbook-pro              47)))
 
-(defconst emacs-min-height
-  (cond (running-alternate-emacs 57)
-        ((eq display-name 'retina-imac) 57)
-        ((eq display-name 'macbook-pro-vga) 67)
-        ((eq display-name 'macbook-pro) 47)
-        (t 44)))
+(defconst emacs-min-font
+  "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
 
+(defconst emacs-max-font
+  "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
 
-(let ((frame-alist
-       (list (cons 'top    emacs-min-top)
-             (cons 'left   emacs-min-left)
-             (cons 'height emacs-min-height)
-             (cons 'width  emacs-min-width)
-             ))
-      )
-  (setq initial-frame-alist frame-alist))
 
 (defun emacs-min ()
   (interactive)
-  (set-frame-parameter (selected-frame) 'fullscreen nil)
-  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
-  (set-frame-font "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
-  (set-frame-parameter (selected-frame) 'top emacs-min-top)
-  (set-frame-parameter (selected-frame) 'left emacs-min-left)
-  (set-frame-parameter (selected-frame) 'height emacs-min-height)
-  (set-frame-parameter (selected-frame) 'width emacs-min-width)
-  )
-
-(if window-system
-    (add-hook 'after-init-hook 'emacs-min))
+  (cl-flet ((set-param (p v) (set-frame-parameter (selected-frame) p v)))
+    (set-param 'fullscreen nil)
+    (set-param 'vertical-scroll-bars nil)
+    (set-param 'horizontal-scroll-bars nil))
+  (set-frame-position (selected-frame) emacs-min-left emacs-min-top)
+  (set-frame-height (selected-frame) emacs-min-height)
+  (set-frame-width (selected-frame) emacs-min-width)
+  (set-frame-font emacs-min-font))
 
 (defun emacs-max ()
-  (interactive)
-  (set-frame-parameter (selected-frame) 'fullscreen 'nil)
-  (set-frame-parameter (selected-frame) 'height 50)
-  (set-frame-parameter (selected-frame) 'width 150)
-  (set-frame-parameter (selected-frame) 'top emacs-min-top)
-  (set-frame-parameter (selected-frame) 'left 150)
-  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
-
-(defun emacs-fullscreen ()
   (interactive)
   (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
   (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil))
+  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
+  (set-frame-font emacs-max-font))
+
+
 
 (defun emacs-toggle-size ()
   (interactive)
-  (if (> (cdr (assq 'width (frame-parameters))) 100)
+  (if (alist-get 'fullscreen (frame-parameters))
       (emacs-min)
     (emacs-max)))
+
+(add-hook 'emacs-startup-hook #'emacs-min t)
+
 
 ;;; Finalization
 
