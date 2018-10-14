@@ -1358,8 +1358,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                            (regexp       . ,(cdr x))
-                            (modes quote (haskell-mode literate-haskell-mode))))
+                       (regexp       . ,(cdr x))
+                       (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -2498,6 +2498,28 @@
   :config
   (paren-activate))
 
+(use-package php-mode
+  :load-path "site-lisp/php-mode"
+  :mode ("\\.php\\'"  . php-mode)
+  :config
+  (add-hook 'php-mode-hook 'smartparens-mode)
+  (add-hook 'php-mode-hook 'flycheck-mode)
+  (add-hook 'php-mode-hook 'whitespace-mode)
+  (add-hook 'php-mode-hook 'company-mode)
+
+  (add-hook 'auto-save-hook 'indent-buffer)
+  (add-hook 'before-save-hook 'indent-buffer)
+
+  (add-hook 'auto-save-hook 'whitespace-cleanup)
+  (add-hook 'before-save-hook 'whitespace-cleanup)
+
+  (eval-after-load 'flycheck
+    '(progn
+       (flycheck-add-mode 'php-phpmd 'php-mode)))
+
+
+  )
+
 (use-package personal
   :after crux
   :preface
@@ -3082,7 +3104,6 @@ the same coding systems as Emacs."
   (setq-default TeX-master nil)
   (setq TeX-PDF-mode t)
 
-
   (use-package ebib
     :disabled  t
     :load-path "site-lisp/ebib"
@@ -3203,16 +3224,15 @@ the same coding systems as Emacs."
 (use-package emmet-mode
   :load-path "site-lisp/emmet-mode"
   :diminish emmet-mode
-  :hook ((web-mode-hook) . emmet-mode)
+  :hook ((php-mode-hook) . emmet-mode)
   :config
   (emmet-mode)
   (unbind-key "C-<return>" emmet-mode-keymap))
 
 (use-package web-mode
-  :load-path "site-lisp/web-mode"
+  :load-path "site-lisp/web-mode3"
   :defer t
   :mode (("\\.html\\'" . web-mode)
-         ("\\.php\\'"  . web-mode)
          ("\\.css\\'"  . web-mode))
   :config
   (add-hook 'web-mode-hook 'smartparens-mode)
