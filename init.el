@@ -655,7 +655,7 @@
 
 
 (use-package company-php
-  :after (company web-mode)
+  :after (company web-mode php-mode)
   :load-path "site-lisp/ac-php"
   :config
   (ac-php-core-eldoc-setup)
@@ -1375,10 +1375,12 @@
               ("A-v"   . helm-previous-page))
   :config
   (use-package helm-config
-    :disabled t
-    :bind (("M-x" . helm-M-x)))
+    :bind (("C-c h" . helm-apropos)
+           ;; ("M-x" . helm-M-x))
+           )
+    :config
+    (helm-autoresize-mode 1)))
 
-  (helm-autoresize-mode 1))
 
 (use-package helm-ag
   :after helm
@@ -2499,9 +2501,13 @@
   (paren-activate))
 
 (use-package php-mode
+  :defer
   :load-path "site-lisp/php-mode"
   :mode ("\\.php\\'"  . php-mode)
   :config
+  (use-package php-ext
+    :load-path "site-lisp/php-mode/skeleton")
+
   (add-hook 'php-mode-hook 'smartparens-mode)
   (add-hook 'php-mode-hook 'flycheck-mode)
   (add-hook 'php-mode-hook 'whitespace-mode)
@@ -2515,10 +2521,7 @@
 
   (eval-after-load 'flycheck
     '(progn
-       (flycheck-add-mode 'php-phpmd 'php-mode)))
-
-
-  )
+       (flycheck-add-mode 'php-phpmd 'php-mode))))
 
 (use-package personal
   :after crux
@@ -2530,9 +2533,6 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
-
-
-
   :config
   ;; (setq split-height-threshold 0)
   ;; (setq split-width-threshold nil)
@@ -3224,14 +3224,14 @@ the same coding systems as Emacs."
 (use-package emmet-mode
   :load-path "site-lisp/emmet-mode"
   :diminish emmet-mode
-  :hook ((php-mode-hook) . emmet-mode)
+  :hook ((web-mode-hook) . emmet-mode)
   :config
   (emmet-mode)
   (unbind-key "C-<return>" emmet-mode-keymap))
 
 (use-package web-mode
-  :load-path "site-lisp/web-mode3"
-  :defer t
+  :load-path "site-lisp/web-mode"
+  :defer 10
   :mode (("\\.html\\'" . web-mode)
          ("\\.css\\'"  . web-mode))
   :config
@@ -3248,7 +3248,6 @@ the same coding systems as Emacs."
 
   (eval-after-load 'flycheck
     '(progn
-       (flycheck-add-mode 'php-phpmd 'web-mode)
        (flycheck-add-mode 'html-tidy 'web-mode)))
 
   (defvar web-mode-initialized nil)
@@ -3420,17 +3419,18 @@ the same coding systems as Emacs."
 (defconst emacs-min-width 100)
 (defconst emacs-min-top 50)
 (defconst emacs-min-left 550)
-;; (defconst emacs-min-left (-  emacs-min-width (/ emacs-min-width 2)))
+(defconst emacs-min-height 67)
 
-(defvar emacs-min-height
-  (pcase display-name
-    (`dell-wide                64)
-    (`imac                     57)
-    (`macbook-pro-vga          67)
-    (`macbook-pro              47)))
+
+;; (defvar emacs-min-height
+;;   (pcase display-name
+;;     (`dell-wide                64)
+;;     (`imac                     57)
+;;     (`macbook-pro-vga          67)
+;;     (`macbook-pro              47)))
 
 (defconst emacs-min-font
-  "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
+  "-*-Hack-normal-normal-normal-*-12-*-*-*-m-0-iso10646-1")
 
 (defconst emacs-max-font
   "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
@@ -3455,15 +3455,13 @@ the same coding systems as Emacs."
   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
   (set-frame-font emacs-max-font))
 
-
-
 (defun emacs-toggle-size ()
   (interactive)
   (if (alist-get 'fullscreen (frame-parameters))
       (emacs-min)
     (emacs-max)))
 
-(add-hook 'emacs-startup-hook #'emacs-min t)
+;;(add-hook 'emacs-startup-hook #'emacs-min t)
 
 
 ;;; Finalization

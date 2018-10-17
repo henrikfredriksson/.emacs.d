@@ -11,7 +11,8 @@
 ;;(require 'org-crypt)
 ;;(require 'org-bbdb)
 ;;(require 'org-devonthink)
-;; (require 'org-mac-link)
+(require 'org-mac-link)
+;; (require 'org-mac-message)
 ;; (require 'org-magit)
 ;; (require 'org-velocity)
 (setq org-startup-with-inline-images t)
@@ -244,7 +245,7 @@
 ;;   "Intended to be used by `gnus-mark-article-hook'."
 ;;   (let ((mark (gnus-summary-article-mark)))
 ;;     (when (or (gnus-unread-mark-p mark)
-;; 	      (gnus-read-mark-p mark))
+;;            (gnus-read-mark-p mark))
 ;;       (ignore-errors
 ;;         (gnus-summary-mark-article gnus-current-article
 ;;                                    (or new-mark gnus-read-mark))))))
