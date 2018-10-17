@@ -1375,9 +1375,8 @@
               ("A-v"   . helm-previous-page))
   :config
   (use-package helm-config
-    :bind (("C-c h" . helm-apropos)
-           ;; ("M-x" . helm-M-x))
-           )
+    :bind (("C-h v" . helm-apropos)
+           ("C-h f" . helm-apropos))
     :config
     (helm-autoresize-mode 1)))
 
@@ -3418,7 +3417,7 @@ the same coding systems as Emacs."
 
 (defconst emacs-min-width 100)
 (defconst emacs-min-top 50)
-(defconst emacs-min-left 550)
+(defconst emacs-min-left 650)
 (defconst emacs-min-height 67)
 
 
@@ -3442,17 +3441,17 @@ the same coding systems as Emacs."
     (set-param 'fullscreen nil)
     (set-param 'vertical-scroll-bars nil)
     (set-param 'horizontal-scroll-bars nil))
+  (set-frame-font emacs-min-font)
   (set-frame-position (selected-frame) emacs-min-left emacs-min-top)
   (set-frame-height (selected-frame) emacs-min-height)
-  (set-frame-width (selected-frame) emacs-min-width)
-  (set-frame-font emacs-min-font))
+  (set-frame-width (selected-frame) emacs-min-width))
 
 (defun emacs-max ()
   (interactive)
-  (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
-  (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-  (set-frame-font "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
-  (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
+  (cl-flet ((set-param (p v) (set-frame-parameter (selected-frame) p v)))
+    (set-param 'fullscreen 'fullboth)
+    (set-param 'vertical-scroll-bars nil)
+    (set-param 'horizontal-scroll-bars nil))
   (set-frame-font emacs-max-font))
 
 (defun emacs-toggle-size ()
@@ -3461,7 +3460,35 @@ the same coding systems as Emacs."
       (emacs-min)
     (emacs-max)))
 
-;;(add-hook 'emacs-startup-hook #'emacs-min t)
+;; (defun emacs-min ()
+;;   (interactive)
+;;   (set-frame-size (selected-frame) emacs-min-width emacs-min-height)
+;;   (set-frame-position (selected-frame)  emacs-min-left emacs-min-top)
+;;   (set-frame-width (selected-frame) emacs-min-width)
+;;   (set-frame-parameter nil 'fullscreen 'fullheight)
+;;   (set-frame-font emacs-min-font))
+
+;; (defun emacs-max ()
+;;   (interactive)
+;;   (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
+;;   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
+;;   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
+;;   (set-frame-font emacs-max-font))
+
+
+;; (defun emacs-toggle-size ()
+;;   (interactive)
+;;   (if (alist-get 'fullscreen (frame-parameters))
+;;       (emacs-min)
+;;     (emacs-max)))
+
+;; (defun emacs-toggle-size ()
+;;   (interactive)
+;;   (if (eq (frame-parameter (selected-frame) 'fullscreen) 'fullboth)
+;;       (emacs-min)
+;;     (emacs-max)))
+
+(add-hook 'emacs-startup-hook #'emacs-min t)
 
 
 ;;; Finalization
