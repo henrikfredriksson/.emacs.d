@@ -1543,4 +1543,5 @@ SCHEDULED: %t
  '(org-habit-ready-future-face ((((background light)) (:background "#acfca9"))))
  '(org-headline-done ((t nil)))
  '(org-scheduled ((((class color) (min-colors 88) (background light)) nil)))
- '(org-upcoming-deadline ((((class color) (min-colors 88) (background light)) (:foreground "Brown")))))
+ '(org-upcoming-deadline ((((class color) (min-colors 88) (background light)) (:foreground "Brown"))))
+ '(region ((t (:background "#CDE7F0")))))

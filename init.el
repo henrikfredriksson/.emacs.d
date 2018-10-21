@@ -54,12 +54,12 @@
 (eval-and-compile
   (require 'seq)
 
-  (defconst emacs-environment(getenv "NIX_MYENV_NAME"))
+  (defconst emacs-environment (getenv "NIX_MYENV_NAME"))
 
-  (mapc  #'add-load-path
-         (append (directory-files (emacs-path "site-lisp") t
-                                  "site-[A-Z0-9a-z-]+\\'")
-                 '("site-lisp" "lisp/use-package" "lisp" "")))
+  (mapc #'add-load-path
+        (append (directory-files (emacs-path "site-lisp") t
+                                 "site-[A-Z0-9a-z-]+\\'")
+                '("site-lisp" "lisp/use-package" "lisp" "")))
 
   (defun nix-read-environment(name)
     (with-temp-buffer
@@ -126,74 +126,73 @@
           "~/share/info")
         "~/.nix-profile/share/info")))
 
-
 ;;; Configure libraries
 
 (eval-and-compile
   (add-to-list 'load-path (expand-file-name "lib" user-emacs-directory)))
 
-(use-package alert          :defer  t  :load-path "lisp/alert")
-(use-package anaphora       :defer  t  :load-path "lib/anaphora")
-(use-package apiwrap        :defer  t  :load-path "lib/apiwrap")
-(use-package asoc           :defer  t  :load-path "lib/asoc")
-(use-package async          :defer  t  :load-path "lisp/emacs-async")
-(use-package button-lock    :defer  t  :load-path "lib/button-lock")
-(use-package crux           :demand t  :load-path "lib/crux")
-(use-package ctable         :defer  t  :load-path "lib/emacs-ctable")
-(use-package dash           :defer  t  :load-path "lib/dash-el")
-(use-package deferred       :defer  t  :load-path "lib/emacs-deferred")
-(use-package difflib        :defer  t  :load-path "lib/difflib")
-(use-package diminish       :demand t  :load-path "lib/diminish")
-(use-package el-mock        :defer  t  :load-path "lib")
-(use-package elisp-refs     :defer  t  :load-path "lib/elisp-refs")
-(use-package emojify        :defer  t  :load-path "lib/emacs-emojify")
-(use-package epc            :defer  t  :load-path "lib/emacs-epc")
-(use-package epl            :defer  t  :load-path "lib/epl")
-(use-package esxml          :defer  t  :load-path "lib/esxml")
-(use-package f              :defer  t  :load-path "lib/f-el")
-(use-package fn             :defer  t  :load-path "lib/fn-el")
-(use-package fringe-helper  :defer  t  :load-path "lib/fringe-helper-el")
-(use-package fuzzy          :defer  t  :load-path "lib/fuzzy-el")
-(use-package gh             :defer  t  :load-path "lib/gh-el")
-(use-package ghub           :defer  t  :load-path "lib/ghub")
-(use-package ghub+          :defer  t  :load-path "lib/ghub-plus")
-(use-package ht             :defer  t  :load-path "lib/ht-el")
-(use-package jedi-core      :defer  t  :load-path "site-lisp/jedi")
-(use-package kv             :defer  t  :load-path "lib/kv")
-(use-package list-utils     :defer  t  :load-path "lib/list-utils")
-(use-package logito         :defer  t  :load-path "lib/logito")
-(use-package loop           :defer  t  :load-path "lib/loop")
-(use-package m-buffer       :defer  t  :load-path "lib/m-buffer")
-(use-package makey          :defer  t  :load-path "lib/makey")
-(use-package marshal        :defer  t  :load-path "lib/marshal-el")
-(use-package names          :defer  t  :load-path "lib/names")
-(use-package noflet         :defer  t  :load-path "lib/noflet")
-(use-package oauth2         :defer  t  :load-path "lib/oauth2")
-(use-package ov             :defer  t  :load-path "lib/ov-el")
-(use-package parent-mode    :defer  t  :load-path "lib/parent-mode")
-(use-package parsebib       :defer  t  :load-path "lib/parsebib")
-(use-package parsec         :defer  t  :load-path "lib/parsec")
-(use-package pcache         :defer  t  :load-path "lib/pcache")
-(use-package peval          :defer  t  :load-path "lib/peval")
-(use-package pfuture        :defer  t  :load-path "lib/pfuture")
-(use-package pkg-info       :defer  t  :load-path "lib/pkg-info")
-(use-package popup          :defer  t  :load-path "lib/popup-el")
-(use-package popup-pos-tip  :defer  t  :load-path "lib")
-(use-package popwin         :defer  t  :load-path "lib/popwin")
-(use-package pos-tip        :defer  t  :load-path "lib")
-(use-package pythonic       :defer  t  :load-path "site-lisp/pythonic")
-(use-package request        :defer  t  :load-path "lib/emacs-request")
-(use-package rich-minority  :defer  t  :load-path "lib/rich-minority")
-(use-package s              :defer  t  :load-path "lib/s-el")
-(use-package spinner        :defer  t  :load-path "lib/spinner")
-(use-package tablist        :defer  t  :load-path "lib/tablist")
-(use-package uuidgen        :defer  t  :load-path "lib/uuidgen-el")
-(use-package web            :defer  t  :load-path "lib/emacs-web")
-(use-package web-server     :defer  t  :load-path "lib/emacs-web-server")
-(use-package websocket      :defer  t  :load-path "lib/emacs-websocket")
-(use-package with-editor    :defer  t  :load-path "lib/with-editor")
-(use-package xml-rpc        :defer  t  :load-path "lib")
-(use-package zoutline       :defer  t  :load-path "lib/zoutline")
+(use-package alert         :defer  t  :load-path "lisp/alert")
+(use-package anaphora      :defer  t  :load-path "lib/anaphora")
+(use-package apiwrap       :defer  t  :load-path "lib/apiwrap")
+(use-package asoc          :defer  t  :load-path "lib/asoc")
+(use-package async         :defer  t  :load-path "lisp/emacs-async")
+(use-package button-lock   :defer  t  :load-path "lib/button-lock")
+(use-package crux          :demand t  :load-path "lib/crux")
+(use-package ctable        :defer  t  :load-path "lib/emacs-ctable")
+(use-package dash          :defer  t  :load-path "lib/dash-el")
+(use-package deferred      :defer  t  :load-path "lib/emacs-deferred")
+(use-package difflib       :defer  t  :load-path "lib/difflib")
+(use-package diminish      :demand t  :load-path "lib/diminish")
+(use-package el-mock       :defer  t  :load-path "lib")
+(use-package elisp-refs    :defer  t  :load-path "lib/elisp-refs")
+(use-package emojify       :defer  t  :load-path "lib/emacs-emojify")
+(use-package epc           :defer  t  :load-path "lib/emacs-epc")
+(use-package epl           :defer  t  :load-path "lib/epl")
+(use-package esxml         :defer  t  :load-path "lib/esxml")
+(use-package f             :defer  t  :load-path "lib/f-el")
+(use-package fn            :defer  t  :load-path "lib/fn-el")
+(use-package fringe-helper :defer  t  :load-path "lib/fringe-helper-el")
+(use-package fuzzy         :defer  t  :load-path "lib/fuzzy-el")
+(use-package gh            :defer  t  :load-path "lib/gh-el")
+(use-package ghub          :defer  t  :load-path "lib/ghub")
+(use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
+(use-package ht            :defer  t  :load-path "lib/ht-el")
+(use-package jedi-core     :defer  t  :load-path "site-lisp/jedi")
+(use-package kv            :defer  t  :load-path "lib/kv")
+(use-package list-utils    :defer  t  :load-path "lib/list-utils")
+(use-package logito        :defer  t  :load-path "lib/logito")
+(use-package loop          :defer  t  :load-path "lib/loop")
+(use-package m-buffer      :defer  t  :load-path "lib/m-buffer")
+(use-package makey         :defer  t  :load-path "lib/makey")
+(use-package marshal       :defer  t  :load-path "lib/marshal-el")
+(use-package names         :defer  t  :load-path "lib/names")
+(use-package noflet        :defer  t  :load-path "lib/noflet")
+(use-package oauth2        :defer  t  :load-path "lib/oauth2")
+(use-package ov            :defer  t  :load-path "lib/ov-el")
+(use-package parent-mode   :defer  t  :load-path "lib/parent-mode")
+(use-package parsebib      :defer  t  :load-path "lib/parsebib")
+(use-package parsec        :defer  t  :load-path "lib/parsec")
+(use-package pcache        :defer  t  :load-path "lib/pcache")
+(use-package peval         :defer  t  :load-path "lib/peval")
+(use-package pfuture       :defer  t  :load-path "lib/pfuture")
+(use-package pkg-info      :defer  t  :load-path "lib/pkg-info")
+(use-package popup         :defer  t  :load-path "lib/popup-el")
+(use-package popup-pos-tip :defer  t  :load-path "lib")
+(use-package popwin        :defer  t  :load-path "lib/popwin")
+(use-package pos-tip       :defer  t  :load-path "lib")
+(use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
+(use-package request       :defer  t  :load-path "lib/emacs-request")
+(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
+(use-package s             :defer  t  :load-path "lib/s-el")
+(use-package spinner       :defer  t  :load-path "lib/spinner")
+(use-package tablist       :defer  t  :load-path "lib/tablist")
+(use-package uuidgen       :defer  t  :load-path "lib/uuidgen-el")
+(use-package web           :defer  t  :load-path "lib/emacs-web")
+(use-package web-server    :defer  t  :load-path "lib/emacs-web-server")
+(use-package websocket     :defer  t  :load-path "lib/emacs-websocket")
+(use-package with-editor   :defer  t  :load-path "lib/with-editor")
+(use-package xml-rpc       :defer  t  :load-path "lib")
+(use-package zoutline      :defer  t  :load-path "lib/zoutline")
 
 ;;; Keybindings
 
@@ -436,14 +435,13 @@
 
 (use-package ace-window
   :load-path "site-lisp/ace-window"
-  :bind ("<C-return>" . ace-window))
+  :bind* ("<C-return>" . ace-window))
 
 (use-package ag
   :commands ag
   :load-path "site-lisp/ag"
   :config
-  (setq ag-reuse-window 't)
-  )
+  (setq ag-reuse-window 't))
 
 (use-package agda2-mode
   :disabled t
@@ -476,6 +474,7 @@
   (char-mapping "A-=" " ≡ "))
 
 (use-package aggressive-indent
+  :defer 5
   :load-path "site-lisp/aggressive-indent-mode"
   :diminish
   :hook (emacs-lisp-mode . aggressive-indent-mode))
@@ -517,6 +516,7 @@
       (ascii-on))))
 
 (use-package auto-yasnippet
+  :defer 5
   :load-path "site-lisp/auto-yasnippet"
   :bind (("C-. w" . aya-create)
          ("C-. y" . aya-expand)
@@ -529,8 +529,8 @@
   (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1))))
 
 (use-package avy
-  :load-path "site-lisp/avy"
   :defer 10
+  :load-path "site-lisp/avy"
   :bind ("M-h" . avy-goto-char)
   :config
   (avy-setup-default))
@@ -653,7 +653,6 @@
   (add-to-list 'company-backends 'company-web-jade)
   (add-to-list 'company-backends 'company-web-slim))
 
-
 (use-package company-php
   :after (company web-mode php-mode)
   :load-path "site-lisp/ac-php"
@@ -662,11 +661,19 @@
   (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-ac-php-backend))
 
+(use-package company-tern
+  :after (company js2-mode tern)
+  :load-path "site-lisp/company-tern"
+  :config
+  (setq company-tern-property-marker nil)
+  (add-to-list 'company-backends 'company-tern)
+  (define-key tern-mode-keymap (kbd "M-.") nil)
+  (define-key tern-mode-keymap (kbd "M-,") nil))
+
 
 (use-package company-jedi
   ;; hfn (2018-09-11):
   ;; Not really working. Needs configuration
-
   :load-path "site-lisp/emacs-company-jedi"
   :after (company python-mode)
   :config
@@ -691,8 +698,6 @@
 
   (add-hook 'python-mode-hook 'my/python-mode-hook))
 
-
-
 (use-package company-math
   :after (company tex-site)
   :load-path "site-lisp/company-math"
@@ -716,8 +721,6 @@
   :load-path "site-lisp/company-quickhelp"
   :config
   (company-quickhelp-mode))
-
-
 
 (use-package compile
   :disabled t
@@ -969,11 +972,12 @@
         gnus-home-directory "~/Messages/Gnus/"))
 
 (use-package dot-org
+  :defer 20
   :load-path ("site-lisp/org-mode/contrib/lisp"
               "site-lisp/org-mode/lisp")
   :mode (("\\. org\\'" . org-mode)
          ("\\. txt\\'" . org-mode))
-  :commands my-org-startup
+  :commands my-org-startupk
   :bind (("M-C"   . jump-to-org-agenda)
          ("M-m"   . org-smart-capture)
          ("M-M"   . org-inline-note)
@@ -981,14 +985,8 @@
          ("C-c S" . org-store-link)
          ("C-c l" . org-insert-link)
          ("C-. n" . org-velocity-read))
-  :defer 10
-  :config
-  ;; (when (and nil
-  ;;            (not running-alternate-emacs)
-  ;;            (not running-development-emacs))
-  ;;   (run-with-idle-timer 300 t 'jump-to-org-agenda)
-  ;;   (my-org-startup))
   )
+
 
 (use-package doxymacs
   :disabled t
@@ -1104,10 +1102,8 @@
 (use-package exec-path-from-shell
   :demand t
   :config
-  (setq exec-path-from-shell-arguments '("-l"))
   (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize))
-  )
+    (exec-path-from-shell-initialize)))
 
 (use-package etags
   :disabled t
@@ -1174,14 +1170,6 @@
            ("C-c i w" . ispell-word)))
   :config
   (unbind-key "C-. " flyspell-mode-map))
-
-(use-package flx
-  :load-path "site-lisp/flx")
-
-(use-package flx-isearch
-  :load-path "site-lisp/flx-isearch"
-  :bind (("M-s S" . flx-isearch-forward)
-         ("M-s R" . flx-isearch-backward)))
 
 (use-package gist
   :disabled t
@@ -1358,8 +1346,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -1451,7 +1439,7 @@
 
   (defun my-hippie-expand-completions (&optional hippie-expand-function)
     "Return the full list of possible completions generated by `hippie-expand'.
-   The optional argument can be generated with `make-hippie-expand-function'."
+The optional argument can be generated with `make-hippie-expand-function'."
     (let ((this-command 'my-hippie-expand-completions)
           (last-command last-command)
           (buffer-modified (buffer-modified-p))
@@ -1470,7 +1458,7 @@
 
   (defmacro my-ido-hippie-expand-with (hippie-expand-function)
     "Generate an interactively-callable function that offers ido-based
-  completion using the specified hippie-expand function."
+completion using the specified hippie-expand function."
     `(call-interactively
       (lambda (&optional selection)
         (interactive
@@ -1509,9 +1497,9 @@
           (if old (he-reset-string))
           ())
       (progn
-	(he-substitute-string (car he-expand-list))
-	(setq he-expand-list (cdr he-expand-list))
-	t)))
+        (he-substitute-string (car he-expand-list))
+        (setq he-expand-list (cdr he-expand-list))
+        t)))
 
   (defun he-tag-beg ()
     (save-excursion
@@ -1575,14 +1563,14 @@
 
   (defun try-expand-flexible-abbrev (old)
     "Try to complete word using flexible matching.
-  Flexible matching works by taking the search string and then
-  interspersing it with a regexp for any character. So, if you try
-  to do a flexible match for `foo' it will match the word
-  `findOtherOtter' but also `fixTheBoringOrange' and
-  `ifthisisboringstopreadingnow'.
-  The argument OLD has to be nil the first call of this function, and t
-  for subsequent calls (for further possible completions of the same
-  string).  It returns t if a new completion is found, nil otherwise."
+Flexible matching works by taking the search string and then
+interspersing it with a regexp for any character. So, if you try
+to do a flexible match for `foo' it will match the word
+`findOtherOtter' but also `fixTheBoringOrange' and
+`ifthisisboringstopreadingnow'.
+The argument OLD has to be nil the first call of this function, and t
+for subsequent calls (for further possible completions of the same
+string).  It returns t if a new completion is found, nil otherwise."
     (if (not old)
         (progn
           (he-init-string (he-lisp-symbol-beg) (point))
@@ -1599,14 +1587,14 @@
           (if old (he-reset-string))
           ())
       (progn
-	(he-substitute-string (car he-expand-list))
-	(setq he-expand-list (cdr he-expand-list))
-	t)))
+        (he-substitute-string (car he-expand-list))
+        (setq he-expand-list (cdr he-expand-list))
+        t)))
 
   (defun he-flexible-abbrev-collect (str)
     "Find and collect all words that flex-matches STR.
-  See docstring for `try-expand-flexible-abbrev' for information
-  about what flexible matching means in this context."
+See docstring for `try-expand-flexible-abbrev' for information
+about what flexible matching means in this context."
     (let ((collection nil)
           (regexp (he-flexible-abbrev-create-regexp str)))
       (save-excursion
@@ -1619,8 +1607,8 @@
 
   (defun he-flexible-abbrev-create-regexp (str)
     "Generate regexp for flexible matching of STR.
-  See docstring for `try-expand-flexible-abbrev' for information
-  about what flexible matching means in this context."
+See docstring for `try-expand-flexible-abbrev' for information
+about what flexible matching means in this context."
     (concat "\\b" (mapconcat (lambda (x) (concat "\\w*" (list x))) str "")
             "\\w*" "\\b"))
 
@@ -1950,28 +1938,45 @@
 (use-package js2-mode
   :load-path "site-lisp/js2-mode"
   :mode "\\.js\\'"
+  :interpreter "node"
   :config
-  (setq flycheck-disabled-checkers
-        (append flycheck-disabled-checkers
-                '(javascript-jshint)))
+  (define-key js2-mode-map (kbd "M-.") nil)
+  ;; (setq flycheck-disabled-checkers
+  ;;       (append flycheck-disabled-checkers
+  ;;               '(javascript-jshint)))
+  (defvar js2-mode-initialized nil)
 
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (flycheck-mode 1)
+  (defun my-js2-mode-hook ()
+    (unless js2-mode-initialized
+      (setq js2-mode-initialized t))
+    (setq indent-tabs-mode nil)
+    (tern-mode 1)
+    (flycheck-mode 1)
+    (add-to-list 'flycheck-disabled-checkers #'javascript-jshint)
+    (flycheck-add-mode 'javascript-eslint 'js2-mode)
+    (prettify-symbols-mode)
+    (company-mode 1)
+    (smartparens-mode 1)
+    (whitespace-mode 1))
+
+  (add-hook 'js2-mode-hook #'my-js2-mode-hook)
+
 
   (bind-key "M-n" #'flycheck-next-error js2-mode-map)
   (bind-key "M-p" #'flycheck-previous-error js2-mode-map)
 
-  ;; (use-package js2-refactor
-  ;;   :load-path "site-lisp/js2-refactor"
-  ;;   :config
-  ;;   (add-hook 'js2-mode-hook #'js2-refactor-mode))
+  (use-package js2-refactor
+    :load-path "site-lisp/js2-refactor"
+    :diminish
+    :config
+    (add-hook 'js2-mode-hook #'js2-refactor-mode))
 
-  ;; (use-package xref-js2
-  ;;   :load-path "site-lisp/xref-js2"
-  ;;   :config
-  ;;   (add-hook 'js2-mode-hook #'js2-refactor-mode)
-  ;;   (add-hook 'js2-mode-hook (lambda ()
-  ;;                              (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t))))
+  (use-package xref-js2
+    :load-path "site-lisp/xref-js2"
+    :config
+    (add-hook 'js2-mode-hook #'js2-refactor-mode)
+    (add-hook 'js2-mode-hook (lambda ()
+                               (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t))))
 
   )
 
@@ -2026,6 +2031,7 @@
   :bind ("C-c e t" . ert-run-tests-interactively))
 
 (use-package hardcore-mode
+  :defer 5
   :load-path "site-lisp/hardcore-mode"
   :diminish (hardcore-mode)
   :preface
@@ -2201,7 +2207,7 @@
 
   (defun lusty-open-this ()
     "Open the given file/directory/buffer, creating it if not
-    already present."
+already present."
     (interactive)
     (when lusty--active-mode
       (ecase lusty--active-mode
@@ -2453,6 +2459,12 @@
     (interactive)
     (activate-mark)))
 
+(use-package nyan-mode
+  :disabled t
+  :load-path "site-lisp/nyan-mode"
+  :config
+  (nyan-mode 1))
+
 (use-package phi-search
   :load-path "site-lisp/phi-search"
   :defer 5)
@@ -2469,27 +2481,27 @@
   :diminish paredit-mode
   :hook ((lisp-mode emacs-lisp-mode) . paredit-mode)
   :bind (:map paredit-mode-map
-	      (")"     . paredit-close-round-and-newline)
-	      ("M-)"   . paredit-close-round)
-	      ("M-k"   . paredit-raise-sexp)
-	      ("M-I"   . paredit-splice-sexp)
-	      ("C-M-l" . paredit-recentre-on-sexp)
+              (")"     . paredit-close-round-and-newline)
+              ("M-)"   . paredit-close-round)
+              ("M-k"   . paredit-raise-sexp)
+              ("M-I"   . paredit-splice-sexp)
+              ("C-M-l" . paredit-recentre-on-sexp)
 
-	      ("C-. D" . paredit-forward-down)
-	      ("C-. B" . paredit-splice-sexp-killing-backward)
-	      ("C-. C" . paredit-convolute-sexp)
-	      ("C-. f" . paredit-splice-sexp-killing-forward)
-	      ("C-. a" . paredit-add-to-next-list)
-	      ("C-. A" . paredit-add-to-previous-list)
-	      ("C-. j" . paredit-join-with-next-list)
-	      ("C-. J" . paredit-join-with-previous-list))
+              ("C-. D" . paredit-forward-down)
+              ("C-. B" . paredit-splice-sexp-killing-backward)
+              ("C-. C" . paredit-convolute-sexp)
+              ("C-. f" . paredit-splice-sexp-killing-forward)
+              ("C-. a" . paredit-add-to-next-list)
+              ("C-. A" . paredit-add-to-previous-list)
+              ("C-. j" . paredit-join-with-next-list)
+              ("C-. J" . paredit-join-with-previous-list))
   :bind (:map lisp-mode-map
-	      ("<return>" . paredit-newline))
+              ("<return>" . paredit-newline))
   :bind (:map emacs-lisp-mode-map
-	      ("<return>" . paredit-newline))
+              ("<return>" . paredit-newline))
   :hook (paredit-mode . (lambda ()
-			  (unbind-key "M-r" paredit-mode-map)
-			  (unbind-key "M-s" paredit-mode-map)))
+                          (unbind-key "M-r" paredit-mode-map)
+                          (unbind-key "M-s" paredit-mode-map)))
   :config
   (use-package paredit-ext
     :after paredit))
@@ -2502,7 +2514,7 @@
 (use-package php-mode
   :defer
   :load-path "site-lisp/php-mode"
-  :mode ("\\.php\\'"  . php-mode)
+  ;; :mode ("\\.php\\'"  . php-mode)
   :config
   (use-package php-ext
     :load-path "site-lisp/php-mode/skeleton")
@@ -2519,8 +2531,7 @@
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
   (eval-after-load 'flycheck
-    '(progn
-       (flycheck-add-mode 'php-phpmd 'php-mode))))
+    '(flycheck-add-mode 'php-phpmd 'php-mode)))
 
 (use-package personal
   :after crux
@@ -2528,25 +2539,19 @@
   ;; hfn (2018-09-03):
   ;; Move these in settings.el
   (setq disabled-command-function nil)
-  (set-face-attribute 'region nil :background "#CDE7F0")
   (fset 'yes-or-no-p 'y-or-n-p)
   (global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
   :config
-  ;; (setq split-height-threshold 0)
-  ;; (setq split-width-threshold nil)
-
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (set-file-name-coding-system 'utf-8)
-  (set-clipboard-coding-system 'utf-8)
-  (set-buffer-file-coding-system 'utf-8)
-
-  (bind-keys ("M-D" . dired))
+  ;; (prefer-coding-system 'utf-8)
+  ;; (set-default-coding-systems 'utf-8)
+  ;; (set-terminal-coding-system 'utf-8)
+  ;; (set-keyboard-coding-system 'utf-8)
+  ;; (set-selection-coding-system 'utf-8)
+  ;; (set-file-name-coding-system 'utf-8)
+  ;; (set-clipboard-coding-system 'utf-8)
+  ;; (set-buffer-file-coding-system 'utf-8)
 
   (bind-keys ("C-z"             . delete-other-windows)
              ("C-*"             . goto-matching-parens)
@@ -2557,6 +2562,7 @@
              ("M-`"             . other-frame)
              ("M-j"             . delete-indentation-forward)
              ("M-J"             . delete-indentation)
+             ("M-D" . dired)
              ("M-L"             . mark-line)
              ("M-<return>"      . open-line-above)
              ("C-,"             . pop-global-mark)
@@ -2568,6 +2574,8 @@
 
              ("C-h v"           . describe-variable)
 
+             ("C-x +"           . enlarge-window)
+             ("C-x -"           . shrink-window)
              ("C-x d"           . delete-whitespace-rectangle)
              ("C-x t"           . toggle-truncate-lines)
              ("C-x K"           . delete-current-buffer-file)
@@ -2586,8 +2594,7 @@
              ("C-c k"           . keep-lines)
              ("C-c m"           . emacs-toggle-size)
 
-             ("C-x +"           . enlarge-window)
-             ("C-x -"           . shrink-window)
+
              ("C-c n"           . insert-user-timestamp)
              ("C-c q"           . fill-region)
              ("C-c r"           . replace-regexp)
@@ -2601,7 +2608,6 @@
              ("C-c C-z"         . delete-to-end-of-buffer)
              ("C-c C-0"         . copy-current-buffer-name)
              ("C-c M-q"         . unfill-paragraph))
-
 
   (bind-keys ("C-h e a"         . apropos-value)
              ("C-h e e"         . view-echo-area-messages)
@@ -3023,6 +3029,7 @@ the same coding systems as Emacs."
 
 (use-package smex
   :load-path "site-lisp/smex"
+  :commands smex
   :bind ("M-x" . smex))
 
 (use-package sort-words
@@ -3038,6 +3045,11 @@ the same coding systems as Emacs."
 (use-package stopwatch
   :disabled t
   :bind ("<f8>" . stopwatch))
+
+(use-package string-inflection
+  :defer 10
+  :load-path "site-lisp/string-inflection"
+  :bind ("C-c C-u" . string-inflection-java-style-cycle))
 
 (use-package swap-regions
   :load-path "site-lisp/swap-regions"
@@ -3065,8 +3077,21 @@ the same coding systems as Emacs."
 (use-package tablegen-mode
   :mode ("\\.td\\'" . tablegen-mode))
 
+(use-package tern
+  :load-path "lib/tern/emacs"
+  :diminish
+  :commands (tern-mode)
+  :init
+  (add-hook 'js2-minor-mode-hook 'tern-mode)
+  (add-hook 'js2-mode-hook 'tern-mode)
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (when (string-equal "jsx" (file-name-extension buffer-file-name))
+                (tern-mode-enable))))
+  )
+
 (use-package tex-site
-  :defer 5
+  :defer 10
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode)
@@ -3084,7 +3109,7 @@ the same coding systems as Emacs."
 
   (defun latex-help-get-cmd-alist ()    ;corrected version:
     "Scoop up the commands in the index of the latex info manual.
-   The values are saved in `latex-help-cmd-alist' for speed."
+The values are saved in `latex-help-cmd-alist' for speed."
     ;; mm, does it contain any cached entries
     (if (not (assoc "\\begin" latex-help-cmd-alist))
         (save-window-excursion
@@ -3221,6 +3246,7 @@ the same coding systems as Emacs."
     :load-path "site-lisp/visual-regexp-steroids"))
 
 (use-package emmet-mode
+  :defer 10
   :load-path "site-lisp/emmet-mode"
   :diminish emmet-mode
   :hook ((web-mode-hook) . emmet-mode)
@@ -3232,7 +3258,8 @@ the same coding systems as Emacs."
   :load-path "site-lisp/web-mode"
   :defer 10
   :mode (("\\.html\\'" . web-mode)
-         ("\\.css\\'"  . web-mode))
+         ("\\.css\\'"  . web-mode)
+         ("\\.php\\'"  . web-mode))
   :config
   (add-hook 'web-mode-hook 'smartparens-mode)
   (add-hook 'web-mode-hook 'flycheck-mode)
@@ -3246,8 +3273,7 @@ the same coding systems as Emacs."
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
   (eval-after-load 'flycheck
-    '(progn
-       (flycheck-add-mode 'html-tidy 'web-mode)))
+    '(flycheck-add-mode 'html-tidy 'web-mode))
 
   (defvar web-mode-initialized nil)
 
@@ -3272,7 +3298,6 @@ the same coding systems as Emacs."
   :config
   (which-key-mode)
   (setq which-key-idle-delay 2.0))
-
 
 (use-package whitespace
   :diminish (global-whitespace-mode
@@ -3417,23 +3442,14 @@ the same coding systems as Emacs."
 
 (defconst emacs-min-width 100)
 (defconst emacs-min-top 50)
-(defconst emacs-min-left 650)
+(defconst emacs-min-left 550)
 (defconst emacs-min-height 67)
 
-
-;; (defvar emacs-min-height
-;;   (pcase display-name
-;;     (`dell-wide                64)
-;;     (`imac                     57)
-;;     (`macbook-pro-vga          67)
-;;     (`macbook-pro              47)))
-
 (defconst emacs-min-font
-  "-*-Hack-normal-normal-normal-*-12-*-*-*-m-0-iso10646-1")
+  "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
 
 (defconst emacs-max-font
   "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
-
 
 (defun emacs-min ()
   (interactive)
@@ -3459,34 +3475,6 @@ the same coding systems as Emacs."
   (if (alist-get 'fullscreen (frame-parameters))
       (emacs-min)
     (emacs-max)))
-
-;; (defun emacs-min ()
-;;   (interactive)
-;;   (set-frame-size (selected-frame) emacs-min-width emacs-min-height)
-;;   (set-frame-position (selected-frame)  emacs-min-left emacs-min-top)
-;;   (set-frame-width (selected-frame) emacs-min-width)
-;;   (set-frame-parameter nil 'fullscreen 'fullheight)
-;;   (set-frame-font emacs-min-font))
-
-;; (defun emacs-max ()
-;;   (interactive)
-;;   (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
-;;   (set-frame-parameter (selected-frame) 'vertical-scroll-bars nil)
-;;   (set-frame-parameter (selected-frame) 'horizontal-scroll-bars nil)
-;;   (set-frame-font emacs-max-font))
-
-
-;; (defun emacs-toggle-size ()
-;;   (interactive)
-;;   (if (alist-get 'fullscreen (frame-parameters))
-;;       (emacs-min)
-;;     (emacs-max)))
-
-;; (defun emacs-toggle-size ()
-;;   (interactive)
-;;   (if (eq (frame-parameter (selected-frame) 'fullscreen) 'fullboth)
-;;       (emacs-min)
-;;     (emacs-max)))
 
 (add-hook 'emacs-startup-hook #'emacs-min t)
 
