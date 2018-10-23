@@ -157,7 +157,6 @@
 (use-package ghub          :defer  t  :load-path "lib/ghub")
 (use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
 (use-package ht            :defer  t  :load-path "lib/ht-el")
-(use-package jedi-core     :defer  t  :load-path "site-lisp/jedi")
 (use-package kv            :defer  t  :load-path "lib/kv")
 (use-package list-utils    :defer  t  :load-path "lib/list-utils")
 (use-package logito        :defer  t  :load-path "lib/logito")
@@ -182,7 +181,7 @@
 (use-package pos-tip       :defer  t  :load-path "lib")
 (use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
 (use-package request       :defer  t  :load-path "lib/emacs-request")
-(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
+(use-package rich-minority :disabled  t  :load-path "lib/rich-minority")
 (use-package s             :defer  t  :load-path "lib/s-el")
 (use-package spinner       :defer  t  :load-path "lib/spinner")
 (use-package tablist       :defer  t  :load-path "lib/tablist")
@@ -231,8 +230,8 @@
 
 
 (use-package ggtags
-  :load-path "site-lisp/ggtags"
   :defer
+  :load-path "site-lisp/ggtags"
   :commands ggtags-mode
   :diminish ggtags-mode)
 
@@ -421,6 +420,7 @@
 ;; ;;; PACKAGE CONFIGURATIONS
 
 (use-package abbrev
+  :defer
   :diminish
   :hook
   ((text-mode prog-mode erc-mode LaTeX-mode) . abbrev-mode)
@@ -438,8 +438,8 @@
   :bind* ("<C-return>" . ace-window))
 
 (use-package ag
-  :commands ag
   :load-path "site-lisp/ag"
+  :commands ag
   :config
   (setq ag-reuse-window 't))
 
@@ -478,10 +478,6 @@
   :load-path "site-lisp/aggressive-indent-mode"
   :diminish
   :hook (emacs-lisp-mode . aggressive-indent-mode))
-
-(use-package alert
-  :load-path "lisp/alert"
-  :commands alert)
 
 (use-package align
   :bind (("M-["   . align-code)
@@ -592,27 +588,54 @@
 
 (use-package company
   :load-path "site-lisp/company-mode"
-  :diminish company-mode
-  :commands company-mode
+  :defer 5
+  :diminish
+  :commands (company-mode company-indent-or-complete-common)
+  :init
+  (dolist (hook '(emacs-lisp-mode-hook
+                  c-mode-common-hook))
+    (add-hook hook
+              #'(lambda ()
+                  (local-set-key (kbd "<tab>")
+                                 #'company-indent-or-complete-common))))
   :config
-  (setq company-tooltip-limit 20)
-  (setq company-idle-delay 0.1)
-  (setq company-minimum-prefix-length 1)
-
-  ;; From https://github     . com/company-mode/company-mode/issues/87
-  ;; See also https://github . com/company-mode/company-mode/issues/123
+  ;; From https://github.com/company-mode/company-mode/issues/87
+  ;; See also https://github.com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
       (around only-show-tooltip-when-invoked activate)
     (when (company-explicit-action-p)
       ad-do-it))
 
+  ;; See http://oremacs.com/2017/12/27/company-numbers/
+  (defun ora-company-number ()
+    "Forward to `company-complete-number'.
+  Unless the number is potentially part of the candidate.
+  In that case, insert the number."
+    (interactive)
+    (let* ((k (this-command-keys))
+           (re (concat "^" company-prefix k)))
+      (if (cl-find-if (lambda (s) (string-match re s))
+                      company-candidates)
+          (self-insert-command 1)
+        (company-complete-number (string-to-number k)))))
+
+  (let ((map company-active-map))
+    (mapc
+     (lambda (x)
+       (define-key map (format "%d" x) 'ora-company-number))
+     (number-sequence 0 9))
+    (define-key map " " (lambda ()
+                          (interactive)
+                          (company-abort)
+                          (self-insert-command 1))))
+
   (defun check-expansion ()
     (save-excursion
       (if (outline-on-heading-p t)
           nil
-        (if (looking-at "\\_>") T
+        (if (looking-at "\\_>") t
           (backward-char 1)
-          (if (looking-at "\\ . ") t
+          (if (looking-at "\\.") t
             (backward-char 1)
             (if (looking-at "->") t nil))))))
 
@@ -622,7 +645,7 @@
                           (when (check-expansion)
                             #'company-complete-common))))
 
-  (eval-after-load "yasnippet"
+  (eval-after-load "coq"
     '(progn
        (defun company-mode/backend-with-yas (backend)
          (if (and (listp backend) (member 'company-yasnippet backend))
@@ -631,7 +654,8 @@
                    '(:with company-yasnippet))))
        (setq company-backends
              (mapcar #'company-mode/backend-with-yas company-backends))))
-  )
+
+  (global-company-mode 1))
 
 (use-package company-web
   :after (company web-mode)
@@ -648,6 +672,7 @@
   (use-package company-web-slim
     :after (company web-mode)
     :load-path "site-lisp/company-web")
+
   (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-web-html)
   (add-to-list 'company-backends 'company-web-jade)
@@ -666,37 +691,10 @@
   :load-path "site-lisp/company-tern"
   :config
   (setq company-tern-property-marker nil)
+  (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-tern)
   (define-key tern-mode-keymap (kbd "M-.") nil)
   (define-key tern-mode-keymap (kbd "M-,") nil))
-
-
-(use-package company-jedi
-  ;; hfn (2018-09-11):
-  ;; Not really working. Needs configuration
-  :load-path "site-lisp/emacs-company-jedi"
-  :after (company python-mode)
-  :config
-  (setq jedi:server-command (list "python" jedi:server-script))
-  (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
-  (setq jedi:complete-on-dot t)
-  (setq jedi:use-shortcuts t)
-  (setq jedi:server-args
-        '("--sys-path" "/usr/local/lib/python3.7/site-packages/"))
-  ;; (defun config/enable-company-jedi ()
-  ;;   (add-to-list 'company-backends 'company-jedi))
-  ;; (add-hook 'python-mode-hook 'config/enable-company-jedi)
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (setq jedi:complete-on-dot t
-        jedi:use-shortcuts t
-        jedi:environment-root "jedi"
-        python-environment-directory "~/.virtualenvs")
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-jedi)
-  (defun my/python-mode-hook ()
-    (add-to-list 'company-backends 'company-jedi))
-
-  (add-hook 'python-mode-hook 'my/python-mode-hook))
 
 (use-package company-math
   :after (company tex-site)
@@ -2886,17 +2884,18 @@ the same coding systems as Emacs."
   :load-path "site-lisp/selected"
   :defer 5
   :diminish selected-minor-mode
+  :bind (:map selected-keymap
+              ("["       . align-entire)
+              ("f"       . fill-region)
+              ("U"       . unfill-region)
+              ("d"       . downcase-region)
+              ("r"       . reverse-region)
+              ("s"       . sort-lines)
+              ("C-<tab>" . indent-shift-right)
+              ("S-<tab>" . indent-shift-left)
+              ("u"       . upcase-region))
   :config
-  (selected-global-mode 1)
-  (bind-key "[" #'align-entire selected-keymap)
-  (bind-key "f" #'fill-region selected-keymap)
-  (bind-key "U" #'unfill-region selected-keymap)
-  (bind-key "d" #'downcase-region selected-keymap)
-  (bind-key "r" #'reverse-region selected-keymap)
-  (bind-key "s" #'sort-lines selected-keymap)
-  (bind-key "C-<tab>" #'indent-shift-right)
-  (bind-key "S-<tab>" #'indent-shift-left)
-  (bind-key "u" #'upcase-region selected-keymap))
+  (selected-global-mode 1))
 
 (use-package session
   :disabled t
@@ -2960,6 +2959,13 @@ the same coding systems as Emacs."
 
 (use-package sh-toggle
   :bind ("C-. C-z" . shell-toggle))
+
+(use-package shackle
+  :defer 5
+  :load-path "site-lisp/shackle"
+  :commands shackle-mode
+  :config
+  (shackle-mode 1))
 
 (use-package shrink-whitespace
   :load-path "site-lisp/shrink-whitespace"
@@ -3373,6 +3379,14 @@ The values are saved in `latex-help-cmd-alist' for speed."
          ("M-P" . winner-undo))
   :config
   (winner-mode 1))
+
+(use-package zoom-window
+  :defer 10
+  :load-path "site-lisp/emacs-zoom-window"
+  :config
+  (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
+  (custom-set-variables
+   '(zoom-window-mode-line-color "Lightgrey")))
 
 (use-package workgroups
   :disabled t
