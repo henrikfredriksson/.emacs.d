@@ -157,6 +157,7 @@
 (use-package ghub          :defer  t  :load-path "lib/ghub")
 (use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
 (use-package ht            :defer  t  :load-path "lib/ht-el")
+(use-package jedi-core     :defer  t  :load-path "site-lisp/emacs-jedi")
 (use-package kv            :defer  t  :load-path "lib/kv")
 (use-package list-utils    :defer  t  :load-path "lib/list-utils")
 (use-package logito        :defer  t  :load-path "lib/logito")
@@ -181,7 +182,7 @@
 (use-package pos-tip       :defer  t  :load-path "lib")
 (use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
 (use-package request       :defer  t  :load-path "lib/emacs-request")
-(use-package rich-minority :disabled  t  :load-path "lib/rich-minority")
+(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
 (use-package s             :defer  t  :load-path "lib/s-el")
 (use-package spinner       :defer  t  :load-path "lib/spinner")
 (use-package tablist       :defer  t  :load-path "lib/tablist")
@@ -420,7 +421,7 @@
 ;; ;;; PACKAGE CONFIGURATIONS
 
 (use-package abbrev
-  :defer
+  :defer 10
   :diminish
   :hook
   ((text-mode prog-mode erc-mode LaTeX-mode) . abbrev-mode)
@@ -512,7 +513,7 @@
       (ascii-on))))
 
 (use-package auto-yasnippet
-  :defer 5
+  :defer 30
   :load-path "site-lisp/auto-yasnippet"
   :bind (("C-. w" . aya-create)
          ("C-. y" . aya-expand)
@@ -590,15 +591,23 @@
   :load-path "site-lisp/company-mode"
   :defer 5
   :diminish
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous))
   :commands (company-mode company-indent-or-complete-common)
   :init
   (dolist (hook '(emacs-lisp-mode-hook
-                  c-mode-common-hook))
+                  c-mode-common-hook
+                  python-mode-hook))
     (add-hook hook
               #'(lambda ()
                   (local-set-key (kbd "<tab>")
                                  #'company-indent-or-complete-common))))
   :config
+  (bind-key [remap completion-at-point] #'company-complete company-mode-map)
+  (setq company-idle-delay 0.1)
+  (setq company-auto-complete nil)
+  (setq company-show-numbers t)
   ;; From https://github.com/company-mode/company-mode/issues/87
   ;; See also https://github.com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
@@ -639,11 +648,11 @@
             (backward-char 1)
             (if (looking-at "->") t nil))))))
 
-  (define-key company-mode-map [tab]
-    '(menu-item "maybe-company-expand" nil
-                :filter (lambda (&optional _)
-                          (when (check-expansion)
-                            #'company-complete-common))))
+  ;; (define-key company-mode-map [tab]
+  ;;   '(menu-item "maybe-company-expand" nil
+  ;;               :filter (lambda (&optional _)
+  ;;                         (when (check-expansion)
+  ;;                           #'company-complete-common))))
 
   (eval-after-load "coq"
     '(progn
@@ -685,6 +694,22 @@
   (ac-php-core-eldoc-setup)
   (make-local-variable 'company-backends)
   (add-to-list 'company-backends 'company-ac-php-backend))
+
+(use-package company-jedi
+  :after (company python)
+  :load-path "site-lisp/emacs-company-jedi"
+  :config
+  (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (setq jedi:complete-on-dot t)
+  (make-local-variable 'company-backends)
+  (add-to-list 'company-backends 'company-jedi)
+
+  (dolist (hook '(python-mode-hook))
+    (add-hook hook
+              #'(lambda ()
+                  (local-set-key (kbd "M-p")
+                                 #'company-jedi)))))
 
 (use-package company-tern
   :after (company js2-mode tern)
@@ -2051,11 +2076,10 @@ about what flexible matching means in this context."
   (info-lookmore-apropos-elisp))
 
 (use-package langtool
-  ;; hfn (2018-10-03): not working fix
   :load-path "site-lisp/langtool"
   :commands (langtool-check)
   :preface
-  (setq langtool-language-tool-jar "~src/langtool/languagetool-commandline.jar"))
+  (setq langtool-language-tool-jar "/usr/local/Cellar/languagetool/4.3/libexec/languagetool-commandline.jar"))
 
 (use-package lisp-mode
   :defer t
@@ -2510,9 +2534,8 @@ already present."
   (paren-activate))
 
 (use-package php-mode
-  :defer
+  :defer 10
   :load-path "site-lisp/php-mode"
-  ;; :mode ("\\.php\\'"  . php-mode)
   :config
   (use-package php-ext
     :load-path "site-lisp/php-mode/skeleton")
@@ -2522,11 +2545,16 @@ already present."
   (add-hook 'php-mode-hook 'whitespace-mode)
   (add-hook 'php-mode-hook 'company-mode)
 
-  (add-hook 'auto-save-hook 'indent-buffer)
-  (add-hook 'before-save-hook 'indent-buffer)
+  ;;(add-hook 'auto-save-hook 'indent-buffer)
+  ;;(add-hook 'before-save-hook 'indent-buffer)
 
-  (add-hook 'auto-save-hook 'whitespace-cleanup)
-  (add-hook 'before-save-hook 'whitespace-cleanup)
+  ;;(add-hook 'auto-save-hook 'whitespace-cleanup)
+  ;;(add-hook 'before-save-hook 'whitespace-cleanup)
+  (setq indent-tabs-mode nil)
+  (setq tab-width 0)
+
+  (eval-after-load 'flycheck
+    '(flycheck-add-mode 'php-phpcs 'php-mode))
 
   (eval-after-load 'flycheck
     '(flycheck-add-mode 'php-phpmd 'php-mode)))
@@ -2630,9 +2658,8 @@ already present."
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
-  :disabled t
   :load-path "site-lisp/projectile"
-  :defer 10
+  :defer 30
   :bind-keymap ("C-c p" . projectile-command-map)
   :diminish
   :config
@@ -2736,22 +2763,22 @@ already present."
   (bind-key "M-p"  #'wrap-print)
   (setq-local prettify-symbols-alist python-prettify-symbols-alist)
 
-  (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
-    "List of environment variables \\[universal-coding-system-argument] should set")
+  ;;   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
+  ;;     "List of environment variables \\[universal-coding-system-argument] should set")
 
-  (defadvice universal-coding-system-argument (around provide-env-handler activate)
-    "Augments \\[universal-coding-system-argument] so it also sets environment variables
+  ;;   (defadvice universal-coding-system-argument (around provide-env-handler activate)
+  ;;     "Augments \\[universal-coding-system-argument] so it also sets environment variables
 
-Naively sets all environment variables specified in
-`universal-coding-system-env-list' to the literal string
-representation of the argument `coding-system'.
+  ;; Naively sets all environment variables specified in
+  ;; `universal-coding-system-env-list' to the literal string
+  ;; representation of the argument `coding-system'.
 
-No guarantees are made that the environment variables set by this advice support
-the same coding systems as Emacs."
-    (let ((process-environment (copy-alist process-environment)))
-      (dolist (extra-env universal-coding-system-env-list)
-        (setenv extra-env (symbol-name (ad-get-arg 0))))
-      ad-do-it))
+  ;; No guarantees are made that the environment variables set by this advice support
+  ;; the same coding systems as Emacs."
+  ;;     (let ((process-environment (copy-alist process-environment)))
+  ;;       (dolist (extra-env universal-coding-system-env-list)
+  ;;         (setenv extra-env (symbol-name (ad-get-arg 0))))
+  ;;       ad-do-it))
 
 
   (setq python-python-command "/usr/local/bin/python3")
@@ -2761,43 +2788,52 @@ the same coding systems as Emacs."
 
   (defvar python-mode-initialized nil)
 
-  (defun my-python-mode-hook ()
-    (unless python-mode-initialized
-      (setq python-mode-initialized t)
-      (info-lookup-add-help
-       :mode 'python-mode
-       :regexp "[a-zA-Z_0-9.]+"
-       :doc-spec
-       '(("(python)Python Module Index" )
-         ("(python)Index"
-          (lambda
-            (item)
-            (cond
-             ((string-match
-               "\\([A-Za-z0-9_]+\\)() (in module \\([A-Za-z0-9_.]+\\))" item)
-              (format "%s.%s" (match-string 2 item)
-                      (match-string 1 item)))))))))
+  (info-lookup-add-help
+   :mode 'python-mode
+   :regexp "[a-zA-Z_0-9.]+"
+   :doc-spec
+   '(("(python)Python Module Index" )
+     ("(python)Index"
+      (lambda
+        (item)
+        (cond
+         ((string-match
+           "\\([A-Za-z0-9_]+\\)() (in module \\([A-Za-z0-9_.]+\\))" item)
+          (format "%s.%s" (match-string 2 item)
+                  (match-string 1 item))))))))
 
-    (setq indicate-empty-lines nil)
-    (set (make-local-variable 'parens-require-spaces) nil)
-    (setq indent-tabs-mode nil)
-    (setq python-indent-offset 4)
-    (setq tab-width 4)
-    (set-variable 'py-indent-offset 4)
-    (set-variable 'python-indent-guess-indent-offset nil)
-    (flycheck-mode 1)
-    (prettify-symbols-mode)
-    (company-mode 1)
-    (smartparens-mode 1)
-    (whitespace-mode 1)
-    (setenv "LANG" "UTF-8")
-    (bind-key "C-c C-z" #'python-shell python-mode-map)
-    (unbind-key "C-c c" python-mode-map))
+  (setq indicate-empty-lines nil)
+  (set (make-local-variable 'parens-require-spaces) nil)
+  (setq indent-tabs-mode nil)
+  (setq python-indent-offset 4)
+  (setq tab-width 4)
+  (set-variable 'py-indent-offset 4)
+  (set-variable 'python-indent-guess-indent-offset nil)
+
+  (prettify-symbols-mode)
+  (company-mode 1)
+  (smartparens-mode 1)
+  (whitespace-mode 1)
+  (setenv "LANG" "UTF-8")
+  (bind-key "C-c C-z" #'python-shell python-mode-map)
+  (unbind-key "C-c c" python-mode-map)
+  (setq indent-tabs-mode nil)
+  (setq python-indent-offset 4)
+  (setq tab-width 4)
+  (set-variable 'py-indent-offset 4)
+
+  ;; (eval-after-load 'flycheck
+  ;;   '(flycheck-add-mode 'python-pylint 'python-mode))
+
+  (flycheck-mode 1)
+
+
+  (add-hook 'python-mode-hook #'(lambda () (setq flycheck-checker 'python-pylint)))
+  ;; (flycheck-add-next-checker 'python-flake8 'python-pylint)
 
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
-  (add-hook 'python-mode-hook 'my-python-mode-hook)
   (add-hook 'python-mode-hook
             (lambda ()
               (font-lock-add-keywords nil
@@ -2983,7 +3019,7 @@ the same coding systems as Emacs."
 (use-package smart-mode-line
   :disabled t
   :load-path "site-lisp/smart-mode-line"
-  :defer 5
+  :defer 10
   :config
   (setq mode-line-format (delq 'mode-line-position mode-line-format))
   (sml/setup)
@@ -3036,7 +3072,10 @@ the same coding systems as Emacs."
 (use-package smex
   :load-path "site-lisp/smex"
   :commands smex
-  :bind ("M-x" . smex))
+  :bind ("M-x" . smex)
+  :config
+  (setq smex-save-file "~/.emacs.d/smex-items")
+  (smex-initialize))
 
 (use-package sort-words
   :load-path "site-lisp/sort-words"
@@ -3260,9 +3299,26 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (emmet-mode)
   (unbind-key "C-<return>" emmet-mode-keymap))
 
+(use-package multi-web-mode
+  :disabled t
+  :defer 5
+  :load-path "site-lisp/multi-web-mode"
+  :mode (("\\.html\\'" . web-mode)
+         ("\\.css\\'"  . web-mode)
+         ("\\.php\\'"  . web-mode))
+  :after (php-mode web-mode)
+  :diminish
+  :config
+  (setq mweb-default-major-mode 'web-mode)
+  (setq mweb-tags '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+                    (js-mode "<script +\\(type=\"text/javascript\"\\|language=\"javascript\"\\)[^>]*>" "</script>")
+                    (css-mode "<style +type=\"text/css\"[^>]*>" "</style>")))
+  (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5"))
+  (multi-web-global-mode 1))
+
 (use-package web-mode
+  :defer
   :load-path "site-lisp/web-mode"
-  :defer 10
   :mode (("\\.html\\'" . web-mode)
          ("\\.css\\'"  . web-mode)
          ("\\.php\\'"  . web-mode))
@@ -3272,10 +3328,8 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (add-hook 'web-mode-hook 'whitespace-mode)
   (add-hook 'web-mode-hook 'company-mode)
 
-  (add-hook 'auto-save-hook 'indent-buffer)
-  (add-hook 'before-save-hook 'indent-buffer)
 
-  (add-hook 'auto-save-hook 'whitespace-cleanup)
+  (add-hook 'before-save-hook 'indent-buffer)
   (add-hook 'before-save-hook 'whitespace-cleanup)
 
   (eval-after-load 'flycheck
@@ -3417,7 +3471,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
 
 (use-package yasnippet
   :load-path "site-lisp/yasnippet"
-  :defer 10
+  :defer 30
   :diminish yas-minor-mode
   :bind (("C-c y d" . yas-load-directory)
          ("C-c y i" . yas-insert-snippet)
@@ -3460,7 +3514,13 @@ The values are saved in `latex-help-cmd-alist' for speed."
 (defconst emacs-min-height 67)
 
 (defconst emacs-min-font
-  "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
+  "-*-DejaVu Sans Mono-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
+  ;; "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
+  )
+
+;; (defconst emacs-max-font
+;;   "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
+
 
 (defconst emacs-max-font
   "-*-Hack-normal-normal-normal-*-18-*-*-*-m-0-iso10646-1")
