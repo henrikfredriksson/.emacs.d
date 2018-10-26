@@ -1675,75 +1675,12 @@ about what flexible matching means in this context."
   :config
   (use-package hl-line+))
 
-(use-package hydra
-  :disabled t
-  :load-path "site-lisp/hydra"
-  :defer 10
-  :config
-  (defhydra hydra-zoom (global-map "<f2>")
-    "zoom"
-    ("g" text-scale-increase "in")
-    ("l" text-scale-decrease "out")))
-
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
   :init
   (add-hook 'ibuffer-mode-hook
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
-
-(use-package ido
-  :bind (("C-x b" . ido-switch-buffer)
-         ("C-x B" . ido-switch-buffer-other-window))
-  :config
-  (ido-mode 'buffer)
-  (ido-mode 1)
-  (setq ido-enable-flex-matching t)
-  (setq ido-everywhere t)
-  (setq ido-max-work-file-list 100))
-
-(use-package ido-grid-mode
-  :disabled t
-  :after ido
-  :load-path "site-lisp/ido-grid-mode"
-  :config
-  (ido-grid-mode 1)
-  (setq ido-grid-mode-max-rows 10)
-  (set-face-attribute 'ido-grid-mode-match nil
-                      :background "black"
-                      :foreground "white"))
-
-(use-package ido-hacks
-  :disabled t
-  :after ido
-  :demand t
-  :load-path "site-lisp/ido-hacks"
-  ;;  :bind ("M-x" . my-ido-hacks-execute-extended-command)
-  :bind ("M-x" . ido-hacks-execute-extended-command)
-  :config
-  (ido-hacks-mode 1)
-
-  (defvar ido-hacks-completing-read (symbol-function 'completing-read))
-  (fset 'completing-read ido-hacks-orgin-completing-read-function)
-  (defun my-ido-hacks-execute-extended-command (&optional arg)
-    (interactive "P")
-    (flet ((completing-read
-            (prompt collection &optional predicate require-match
-                    initial-input hist def inherit-input-method)
-            (funcall ido-hacks-completing-read
-                     prompt collection predicate require-match
-                     initial-input hist def inherit-input-method)))
-      (ido-hacks-execute-extended-command arg)))
-
-  (use-package flx-ido
-    :load-path "site-lisp/flx"
-    :config
-    (flx-ido-mode 1))
-
-  (add-hook 'ido-minibuffer-setup-hook
-            #'(lambda ()
-                (bind-key "<return>" #'ido-smart-select-text
-                          ido-file-completion-map))))
 
 (use-package iedit
   :disabled t
@@ -1814,8 +1751,7 @@ about what flexible matching means in this context."
               my-iflipb-ing-internal))))
 
 (use-package image-file
-  :disabled t
-  :defer
+  :defer 5
   :config
   (auto-image-file-mode 1))
 
@@ -1858,22 +1794,23 @@ about what flexible matching means in this context."
   :no-require t
   :bind (("C-M-r" . isearch-backward-other-window)
          ("C-M-s" . isearch-forward-other-window))
+  :bind (:map isearch-mode-map
+              ("C-c" . isearch-toggle-case-fold)
+              ("C-t" . isearch-toggle-regexp)
+              ("C-^" . isearch-edit-string)
+              ("C-i" . isearch-complete))
   :preface
   (defun isearch-backward-other-window ()
     (interactive)
     (split-window-vertically)
+    (other-window 1)
     (call-interactively 'isearch-backward))
 
   (defun isearch-forward-other-window ()
     (interactive)
     (split-window-vertically)
-    (call-interactively 'isearch-forward))
-
-  :config
-  (bind-key "C-c" #'isearch-toggle-case-fold isearch-mode-map)
-  (bind-key "C-t" #'isearch-toggle-regexp isearch-mode-map)
-  (bind-key "C-^" #'isearch-edit-string isearch-mode-map)
-  (bind-key "C-i" #'isearch-complete isearch-mode-map))
+    (other-window 1)
+    (call-interactively 'isearch-forward)))
 
 (use-package ivy
   :disabled t
@@ -2165,7 +2102,7 @@ about what flexible matching means in this context."
   :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ;; ("C-x b" . lusty-buffer-explorer)
+         ("C-x b" . lusty-buffer-explorer)
          )
   :preface
   (defun lusty-read-directory ()
@@ -2662,6 +2599,7 @@ already present."
   (bind-keys ("S-<return>" . open-line-below)))
 
 (use-package projectile
+  :disabled t
   :load-path "site-lisp/projectile"
   :defer 30
   :bind-keymap ("C-c p" . projectile-command-map)
@@ -3048,7 +2986,7 @@ already present."
              ("C-M-<right>"  . sp-backward-barf-sexp)
 
              ("C-d"          . sp-delete-char)
-             ;;("C-k"          . sp-kill-whole-line)
+             ;; ("C-k"          . sp-kill-whole-line)
              ("M-d"          . sp-kill-word)
              ("C-M-f"        . sp-forward-sexp)
              ("C-. D"        . sp-down-sexp)
@@ -3076,10 +3014,7 @@ already present."
 (use-package smex
   :load-path "site-lisp/smex"
   :commands smex
-  :bind ("M-x" . smex)
-  :config
-  (setq smex-save-file "~/.emacs.d/smex-items")
-  (smex-initialize))
+  :bind ("M-x" . smex))
 
 (use-package sort-words
   :load-path "site-lisp/sort-words"
@@ -3212,7 +3147,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (defun my-latex-mode-hook ()
     (company-mode t)
     (LaTeX-math-mode t)
-    (smartparens-mode t)
+    ((set-mark )artparens-mode t)
     (flycheck-mode t)
     )
 
@@ -3281,8 +3216,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   :load-path "site-lisp/vimish-fold"
   :config
   (set-face-background 'vimish-fold-overlay "#f8f8ff")
-  (set-face-foreground 'vimish-fold-overlay "gray")
-  )
+  (set-face-foreground 'vimish-fold-overlay "gray")  )
 
 (use-package visual-regexp
   :load-path "site-lisp/visual-regexp"
@@ -3444,7 +3378,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   :config
   (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
   (custom-set-variables
-   '(zoom-window-mode-line-color "Lightgrey")))
+   '(zoom-window-mode-line-color "Red")))
 
 (use-package workgroups
   :disabled t
@@ -3494,9 +3428,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (yas-load-directory (emacs-path "snippets"))
   (yas-global-mode 1))
 
-(use-package yasnippet-snippets
-  :load-path "site-lisp/yasnippet-snippets"
-  :after yasnippet)
+
 
 (use-package whole-line-or-region
   :defer 10
