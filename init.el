@@ -1194,6 +1194,10 @@
   :config
   (unbind-key "C-. " flyspell-mode-map))
 
+(use-package fzf
+  :load-path "site-lisp/fzf"
+  :bind ("M-s f" . fzf))
+
 (use-package gist
   :disabled t
   :load-path "site-lisp/gist"
@@ -1369,8 +1373,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                            (regexp       . ,(cdr x))
-                            (modes quote (haskell-mode literate-haskell-mode))))
+                       (regexp       . ,(cdr x))
+                       (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
