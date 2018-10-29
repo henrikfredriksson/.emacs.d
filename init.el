@@ -239,9 +239,9 @@
 (use-package cc-mode
   :disabled t
   :load-path "override/cc-mode"
-  :mode (("\\                                  . h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
-         ("\\                                  . m\\'"                   . c-mode)
-         ("\\                         . mm\\'" . c++-mode))
+  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
+         ("\\.m\\'". c-mode)
+         ("\\.mm\\'" . c++-mode))
   :preface
   (defun my-paste-as-check ()
     (interactive)
@@ -268,7 +268,7 @@
     (if t
         (insert (format "std::cerr << \"step %d . .\" << std::endl;\n"
                         (setq printf-index (1+ printf-index))))
-      (insert (format "printf(\"step %d         . .\\n\");\n"
+      (insert (format "printf(\"step %d . .\\n\");\n"
                       (setq printf-index (1+ printf-index)))))
     (forward-line -1)
     (indent-according-to-mode)
@@ -607,7 +607,7 @@
   (bind-key [remap completion-at-point] #'company-complete company-mode-map)
   (setq company-idle-delay 0.1)
   (setq company-auto-complete nil)
-  (setq company-show-numbers t)
+
   ;; From https://github.com/company-mode/company-mode/issues/87
   ;; See also https://github.com/company-mode/company-mode/issues/123
   (defadvice company-pseudo-tooltip-unless-just-one-frontend
@@ -832,13 +832,44 @@
   :commands (diffview-current diffview-region diffview-message))
 
 (use-package dired
-  :bind ("C-c J" . dired-double-jump)
+  :bind (("C-x D" . dired)
+         ("C-c j" . dired-two-pane))
+  :bind (:map dired-mode-map
+              ("j"     . dired)
+              ("z"     . pop-window-configuration)
+              ("e"     . ora-ediff-files)
+              ("l"     . dired-up-directory)
+              ("q"     . dired-up-directory)
+              ("Y"     . ora-dired-rsync)
+              ("M-!"   . async-shell-command)
+              ("<tab>" . dired-next-window)
+              ("M-G")
+              ("M-s f"))
+  :hook (dired-mode . dired-hide-details-mode)
   :preface
+  (defun dired-two-pane ()
+    (interactive)
+    (push-window-configuration)
+    (let ((here default-directory))
+      (delete-other-windows)
+      (dired "~/dl")
+      (split-window-horizontally)
+      (dired here)))
+
+  (defun dired-next-window ()
+    (interactive)
+    (let ((next (car (cl-remove-if-not #'(lambda (wind)
+                                           (with-current-buffer (window-buffer wind)
+                                             (eq major-mode 'dired-mode)))
+                                       (cdr (window-list))))))
+      (when next
+        (select-window next))))
+
   (defvar mark-files-cache (make-hash-table :test #'equal))
 
   (defun mark-similar-versions (name)
     (let ((pat name))
-      (if (string-match "^\\( . +?\\)-[0-9._-]+$" pat)
+      (if (string-match "^\\(.+?\\)-[0-9._-]+$" pat)
           (setq pat (match-string 1 pat)))
       (or (gethash pat mark-files-cache)
           (ignore (puthash pat t mark-files-cache)))))
@@ -848,123 +879,102 @@
     (setq mark-files-cache (make-hash-table :test #'equal))
     (dired-mark-sexp '(mark-similar-versions name)))
 
-  (defun dired-double-jump (first-dir second-dir)
+  (defun ora-dired-rsync (dest)
     (interactive
-     (list (read-directory-name "First directory: "
-                                (expand-file-name "~")
-                                nil nil "Documents/")
-           (read-directory-name "Second directory: "
-                                (expand-file-name "~")
-                                nil nil "Downloads/")))
-    (dired first-dir)
-    (dired-other-window second-dir))
+     (list
+      (expand-file-name
+       (read-file-name "Rsync to: " (dired-dwim-target-directory)))))
+    (let ((files (dired-get-marked-files
+                  nil current-prefix-arg))
+          (tmtxt/rsync-command "rsync -aP "))
+      (dolist (file files)
+        (setq tmtxt/rsync-command
+              (concat tmtxt/rsync-command
+                      (shell-quote-argument file)
+                      " ")))
+      (setq tmtxt/rsync-command
+            (concat tmtxt/rsync-command
+                    (shell-quote-argument dest)))
+      (async-shell-command tmtxt/rsync-command "*rsync*")
+      (other-window 1)))
 
-  (defun my-dired-switch-window ()
+  (defun ora-ediff-files ()
     (interactive)
-    (if (eq major-mode 'sr-mode)
-        (call-interactively #'sr-change-window)
-      (call-interactively #'other-window)))
+    (let ((files (dired-get-marked-files))
+          (wnd (current-window-configuration)))
+      (if (<= (length files) 2)
+          (let ((file1 (car files))
+                (file2 (if (cdr files)
+                           (cadr files)
+                         (read-file-name
+                          "file: "
+                          (dired-dwim-target-directory)))))
+            (if (file-newer-than-file-p file1 file2)
+                (ediff-files file2 file1)
+              (ediff-files file1 file2))
+            (add-hook 'ediff-after-quit-hook-internal
+                      `(lambda ()
+                         (setq ediff-after-quit-hook-internal nil)
+                         (set-window-configuration ,wnd))))
+        (error "no more than 2 files should be marked"))))
 
   :config
-  (bind-key "l" #'dired-up-directory dired-mode-map)
-  (bind-key "<tab>" #'my-dired-switch-window dired-mode-map)
-  (bind-key "M-!" #'async-shell-command dired-mode-map)
-  (unbind-key "M-G" dired-mode-map)
-
-  (when (string= system-type "darwin")
-    (setq dired-use-ls-dired nil))
-
-  (use-package dired-x)
-  (use-package dired+
-    :disabled t
-    :config
-    (unbind-key "M-s f" dired-mode-map))
-
-
-  (use-package dired-ranger
-    :bind (:map dired-mode-map ("W" . dired-ranger-copy)
-                ("X" . dired-ranger-move)
-                ("Y" . dired-ranger-paste)))
-
-  (use-package dired-toggle
-    :load-path "site-lisp/dired-toggle"
-    :bind ("C-. d" . dired-toggle)
-    :preface
-    (defun my-dired-toggle-mode-hook ()
-      (interactive)
-      (visual-line-mode 1)
-      (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
-      (setq-local word-wrap nil))
-    :config
-    (add-hook 'dired-toggle-mode-hook #'my-dired-toggle-mode-hook))
-
-  (defadvice dired-omit-startup (after diminish-dired-omit activate)
-    "Make sure to remove \"Omit\" from the modeline . "
-    (diminish 'dired-omit-mode) dired-mode-map)
-
-  (defadvice dired-next-line (around dired-next-line+ activate)
-    "Replace current buffer if file is a directory . "
-    ad-do-it
-    (while (and  (not  (eobp)) (not ad-return-value))
-      (forward-line)
-      (setq ad-return-value(dired-move-to-filename)))
-    (when (eobp)
-      (forward-line -1)
-      (setq ad-return-value(dired-move-to-filename))))
-
-  (defadvice dired-previous-line (around dired-previous-line+ activate)
-    "Replace current buffer if file is a directory . "
-    ad-do-it
-    (while (and  (not  (bobp)) (not ad-return-value))
-      (forward-line -1)
-      (setq ad-return-value(dired-move-to-filename)))
-    (when (bobp)
-      (call-interactively 'dired-next-line)))
-
   (defvar dired-omit-regexp-orig (symbol-function 'dired-omit-regexp))
 
   ;; Omit files that Git would ignore
-  )
-(defun dired-omit-regexp ()
-  (let ((file (expand-file-name "                              . git"))
-        parent-dir)
-    (while (and (not (file-exists-p file))
-                (progn
-                  (setq parent-dir
-                        (file-name-directory
-                         (directory-file-name
-                          (file-name-directory file))))
-                  ;; Give up if we are already at the root dir .
-                  (not (string= (file-name-directory file)
-                                parent-dir))))
-      ;; Move up to the parent dir and try again               .
-      (setq file (expand-file-name "                           . git" parent-dir)))
-    ;; If we found a change log in a parent, use that          .
-    (if (file-exists-p file)
-        (let ((regexp (funcall dired-omit-regexp-orig))
-              (omitted-files
-               (shell-command-to-string "git clean -d -x -n")))
-          (if (= 0 (length omitted-files))
-              regexp
-            (concat
-             regexp
-             (if (> (length regexp) 0)
-                 "\\|" "")
-             "\\("
-             (mapconcat
-              #'(lambda (str)
-                  (concat
-                   "^"
-                   (regexp-quote
-                    (substring str 13
-                               (if (= ?/ (aref str (1- (length str))))
-                                   (1- (length str))
-                                 nil)))
-                   "$"))
-              (split-string omitted-files "\n" t)
-              "\\|")
-             "\\)")))
-      (funcall dired-omit-regexp-orig))))
+  (defun dired-omit-regexp ()
+    (let ((file (expand-file-name ".git"))
+          parent-dir)
+      (while (and (not (file-exists-p file))
+                  (progn
+                    (setq parent-dir
+                          (file-name-directory
+                           (directory-file-name
+                            (file-name-directory file))))
+                    ;; Give up if we are already at the root dir.
+                    (not (string= (file-name-directory file)
+                                  parent-dir))))
+        ;; Move up to the parent dir and try again.
+        (setq file (expand-file-name ".git" parent-dir)))
+      ;; If we found a change log in a parent, use that.
+      (if (file-exists-p file)
+          (let ((regexp (funcall dired-omit-regexp-orig))
+                (omitted-files
+                 (shell-command-to-string "git clean -d -x -n")))
+            (if (= 0 (length omitted-files))
+                regexp
+              (concat
+               regexp
+               (if (> (length regexp) 0)
+                   "\\|" "")
+               "\\("
+               (mapconcat
+                #'(lambda (str)
+                    (concat
+                     "^"
+                     (regexp-quote
+                      (substring str 13
+                                 (if (= ?/ (aref str (1- (length str))))
+                                     (1- (length str))
+                                   nil)))
+                     "$"))
+                (split-string omitted-files "\n" t)
+                "\\|")
+               "\\)")))
+        (funcall dired-omit-regexp-orig)))))
+
+(use-package dired-toggle
+  :bind ("C-c ~" . dired-toggle)
+  :preface
+  (defun my-dired-toggle-mode-hook ()
+    (interactive)
+    (visual-line-mode 1)
+    (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
+    (setq-local word-wrap nil))
+  :hook (dired-toggle-mode . my-dired-toggle-mode-hook))
+
+(use-package dired-x
+  :after dired)
 
 (use-package docker
   :disabled t
@@ -1196,6 +1206,11 @@
 
 (use-package fzf
   :load-path "site-lisp/fzf"
+  :init
+  (defun fzf-file ()
+    "Starts a fzf session at the root of the curreng hg."
+    (interactive)
+    (fzf/start (buffer-name)))
   :bind ("M-s f" . fzf))
 
 (use-package gist
@@ -1373,8 +1388,8 @@
     '(nconc
       align-rules-list
       (mapcar (lambda (x) `(,(car x)
-                       (regexp       . ,(cdr x))
-                       (modes quote (haskell-mode literate-haskell-mode))))
+                            (regexp       . ,(cdr x))
+                            (modes quote (haskell-mode literate-haskell-mode))))
               '((haskell-types       . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
                 (haskell-assignment  . "\\(\\s-+\\)=\\s-+")
                 (haskell-arrows      . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
@@ -1394,7 +1409,6 @@
            ("C-h f" . helm-apropos))
     :config
     (helm-autoresize-mode 1)))
-
 
 (use-package helm-ag
   :after helm
@@ -1454,194 +1468,6 @@
 (use-package hippie-exp
   :bind (("M-/" . dabbrev-expand)
          ("M-?" . hippie-expand))
-  :preface
-  (autoload 'yas-expand "yasnippet" nil t)
-
-  (defun my-yas-hippie-try-expand (first-time)
-    (if (not first-time)
-        (let ((yas-fallback-behavior 'return-nil))
-          (yas-expand))
-      (undo 1)
-      nil))
-
-  (defun my-hippie-expand-completions (&optional hippie-expand-function)
-    "Return the full list of possible completions generated by `hippie-expand'.
-The optional argument can be generated with `make-hippie-expand-function'."
-    (let ((this-command 'my-hippie-expand-completions)
-          (last-command last-command)
-          (buffer-modified (buffer-modified-p))
-          (hippie-expand-function (or hippie-expand-function 'hippie-expand)))
-      (flet ((ding))        ; avoid the (ding) when hippie-expand exhausts its
-                                        ; options.
-        (while (progn
-                 (funcall hippie-expand-function nil)
-                 (setq last-command 'my-hippie-expand-completions)
-                 (not (equal he-num -1)))))
-      ;; Evaluating the completions modifies the buffer, however we will finish
-      ;; up in the same state that we began.
-      (set-buffer-modified-p buffer-modified)
-      ;; Provide the options in the order in which they are normally generated.
-      (delete he-search-string (reverse he-tried-table))))
-
-  (defmacro my-ido-hippie-expand-with (hippie-expand-function)
-    "Generate an interactively-callable function that offers ido-based
-completion using the specified hippie-expand function."
-    `(call-interactively
-      (lambda (&optional selection)
-        (interactive
-         (let ((options (my-hippie-expand-completions ,hippie-expand-function)))
-           (if options
-               (list
-                ;; (ido-completing-read "Completions: " options)
-                (completing-read "Completions: " options)
-                ))))
-        (if selection
-            (he-substitute-string selection t)
-          (message "No expansion found")))))
-
-  (defun my-ido-hippie-expand ()
-    "Offer ido-based completion for the word at point."
-    (interactive)
-    (my-ido-hippie-expand-with 'hippie-expand))
-
-  (defun my-try-expand-company (old)
-    (require 'company)
-    (unless company-candidates
-      (company-auto-begin))
-    (if (not old)
-        (progn
-          (he-init-string (he-lisp-symbol-beg) (point))
-          (if (not (he-string-member he-search-string he-tried-table))
-              (setq he-tried-table (cons he-search-string he-tried-table)))
-          (setq he-expand-list
-                (and (not (equal he-search-string ""))
-                     company-candidates))))
-    (while (and he-expand-list
-                (he-string-member (car he-expand-list) he-tried-table))
-      (setq he-expand-list (cdr he-expand-list)))
-    (if (null he-expand-list)
-        (progn
-          (if old (he-reset-string))
-          ())
-      (progn
-        (he-substitute-string (car he-expand-list))
-        (setq he-expand-list (cdr he-expand-list))
-        t)))
-
-  (defun he-tag-beg ()
-    (save-excursion
-      (backward-word 1)
-      (point)))
-
-  (defun tags-complete-tag (string predicate what)
-    (save-excursion
-      ;; If we need to ask for the tag table, allow that.
-      (if (eq what t)
-          (all-completions string (tags-completion-table) predicate)
-        (try-completion string (tags-completion-table) predicate))))
-
-  (defun try-expand-tag (old)
-    (when tags-table-list
-      (unless old
-        (he-init-string (he-tag-beg) (point))
-        (setq he-expand-list
-              (sort (all-completions he-search-string 'tags-complete-tag)
-                    'string-lessp)))
-      (while (and he-expand-list
-                  (he-string-member (car he-expand-list) he-tried-table))
-        (setq he-expand-list (cdr he-expand-list)))
-      (if (null he-expand-list)
-          (progn
-            (when old (he-reset-string))
-            ())
-        (he-substitute-string (car he-expand-list))
-        (setq he-expand-list (cdr he-expand-list))
-        t)))
-
-  (defun my-dabbrev-substring-search (pattern &optional reverse limit)
-    (let ((result ())
-          (regpat (cond ((not hippie-expand-dabbrev-as-symbol)
-                         (concat (regexp-quote pattern) "\\sw+"))
-                        ((eq (char-syntax (aref pattern 0)) ?_)
-                         (concat (regexp-quote pattern) "\\(\\sw\\|\\s_\\)+"))
-                        (t
-                         (concat (regexp-quote pattern)
-                                 "\\(\\sw\\|\\s_\\)+")))))
-      (while (and (not result)
-                  (if reverse
-                      (re-search-backward regpat limit t)
-                    (re-search-forward regpat limit t)))
-        (setq result (buffer-substring-no-properties
-                      (save-excursion
-                        (goto-char (match-beginning 0))
-                        (skip-syntax-backward "w_")
-                        (point))
-                      (match-end 0)))
-        (if (he-string-member result he-tried-table t)
-            (setq result nil)))     ; ignore if bad prefix or already in table
-      result))
-
-  (defun try-my-dabbrev-substring (old)
-    (let ((old-fun (symbol-function 'he-dabbrev-search)))
-      (fset 'he-dabbrev-search (symbol-function 'my-dabbrev-substring-search))
-      (unwind-protect
-          (try-expand-dabbrev old)
-        (fset 'he-dabbrev-search old-fun))))
-
-  (defun try-expand-flexible-abbrev (old)
-    "Try to complete word using flexible matching.
-Flexible matching works by taking the search string and then
-interspersing it with a regexp for any character. So, if you try
-to do a flexible match for `foo' it will match the word
-`findOtherOtter' but also `fixTheBoringOrange' and
-`ifthisisboringstopreadingnow'.
-The argument OLD has to be nil the first call of this function, and t
-for subsequent calls (for further possible completions of the same
-string).  It returns t if a new completion is found, nil otherwise."
-    (if (not old)
-        (progn
-          (he-init-string (he-lisp-symbol-beg) (point))
-          (if (not (he-string-member he-search-string he-tried-table))
-              (setq he-tried-table (cons he-search-string he-tried-table)))
-          (setq he-expand-list
-                (and (not (equal he-search-string ""))
-                     (he-flexible-abbrev-collect he-search-string)))))
-    (while (and he-expand-list
-                (he-string-member (car he-expand-list) he-tried-table))
-      (setq he-expand-list (cdr he-expand-list)))
-    (if (null he-expand-list)
-        (progn
-          (if old (he-reset-string))
-          ())
-      (progn
-        (he-substitute-string (car he-expand-list))
-        (setq he-expand-list (cdr he-expand-list))
-        t)))
-
-  (defun he-flexible-abbrev-collect (str)
-    "Find and collect all words that flex-matches STR.
-See docstring for `try-expand-flexible-abbrev' for information
-about what flexible matching means in this context."
-    (let ((collection nil)
-          (regexp (he-flexible-abbrev-create-regexp str)))
-      (save-excursion
-        (goto-char (point-min))
-        (while (search-forward-regexp regexp nil t)
-          ;; Is there a better or quicker way than using `thing-at-point'
-          ;; here?
-          (setq collection (cons (thing-at-point 'word) collection))))
-      collection))
-
-  (defun he-flexible-abbrev-create-regexp (str)
-    "Generate regexp for flexible matching of STR.
-See docstring for `try-expand-flexible-abbrev' for information
-about what flexible matching means in this context."
-    (concat "\\b" (mapconcat (lambda (x) (concat "\\w*" (list x))) str "")
-            "\\w*" "\\b"))
-
-  (defun my-try-expand-dabbrev-visible (old)
-    (save-excursion (try-expand-dabbrev-visible old)))
-
   :config
   (setq hippie-expand-try-functions-list
         '(my-yas-hippie-try-expand
@@ -1664,10 +1490,7 @@ about what flexible matching means in this context."
 
   (bind-key "M-i" #'my-ido-hippie-expand)
 
-  (defadvice he-substitute-string (after he-paredit-fix)
-    "remove extra paren when expanding line in paredit"
-    (if (and paredit-mode (equal (substring str -1) ")"))
-        (progn (backward-delete-char 1) (forward-char)))))
+  )
 
 (use-package hl-line
   :commands hl-line-mode
@@ -1681,6 +1504,28 @@ about what flexible matching means in this context."
   (add-hook 'ibuffer-mode-hook
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
+
+(use-package ido
+  :disabled t
+  :defer
+  :commands ido-switch-buffer
+  :bind ("C-x b" . ido-switch-buffer)
+  :config
+  (setq ido-enable-flex-matching t)
+  (setq ido-everywhere t)
+  (setq ido-create-new-buffer 'always) ; don't confirm to create new buffers
+  (setq ido-vertical-define-keys 'C-n-and-C-p-only)
+  (setq ido-enable-flex-matching t)
+  (setq ido-enable-prefix t)
+  (ido-mode 1)
+
+  (use-package flx-ido
+    :defer
+    :load-path "site-lisp/flx"
+    :config
+    (flx-ido-mode 1)
+    (setq ido-enable-flex-matching t)
+    (setq ido-use-faces t)))
 
 (use-package iedit
   :disabled t
@@ -1900,30 +1745,26 @@ about what flexible matching means in this context."
                '(counsel-find-file . ivys--sort-files-by-date)))
 
 (use-package js2-mode
+  :defer 10
   :load-path "site-lisp/js2-mode"
   :mode "\\.js\\'"
   :interpreter "node"
   :config
   (define-key js2-mode-map (kbd "M-.") nil)
-  ;; (setq flycheck-disabled-checkers
-  ;;       (append flycheck-disabled-checkers
-  ;;               '(javascript-jshint)))
-  (defvar js2-mode-initialized nil)
+  (setq indent-tabs-mode nil)
+  (tern-mode 1)
+  (flycheck-mode 1)
 
-  (defun my-js2-mode-hook ()
-    (unless js2-mode-initialized
-      (setq js2-mode-initialized t))
-    (setq indent-tabs-mode nil)
-    (tern-mode 1)
-    (flycheck-mode 1)
-    (add-to-list 'flycheck-disabled-checkers #'javascript-jshint)
-    (flycheck-add-mode 'javascript-eslint 'js2-mode)
-    (prettify-symbols-mode)
-    (company-mode 1)
-    (smartparens-mode 1)
-    (whitespace-mode 1))
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
 
-  (add-hook 'js2-mode-hook #'my-js2-mode-hook)
+  (flycheck-add-mode 'javascript-eslint 'js2-mode)
+  (setq flycheck-eslintrc "~/.eslintrc.json")
+  (prettify-symbols-mode)
+  (company-mode 1)
+  (smartparens-mode 1)
+  (require 'whitespace)
 
 
   (bind-key "M-n" #'flycheck-next-error js2-mode-map)
@@ -1993,16 +1834,6 @@ about what flexible matching means in this context."
 
 (use-package ert
   :bind ("C-c e t" . ert-run-tests-interactively))
-
-(use-package hardcore-mode
-  :defer 5
-  :load-path "site-lisp/hardcore-mode"
-  :diminish (hardcore-mode)
-  :preface
-  (setq too-hardcore-backspace t)
-  (setq too-hardcore-return t)
-  :config
-  (global-hardcore-mode))
 
 (use-package highlight-cl
   :hook (emacs-lisp-mode . highlight-cl-add-font-lock-keywords))
@@ -2102,7 +1933,7 @@ about what flexible matching means in this context."
   :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ("C-x b" . lusty-buffer-explorer)
+         ;; ("C-x b" . lusty-buffer-explorer)
          )
   :preface
   (defun lusty-read-directory ()
@@ -2505,20 +2336,11 @@ already present."
   :preface
   ;; hfn (2018-09-03):
   ;; Move these in settings.el
-  (setq disabled-command-function nil)
-  (fset 'yes-or-no-p 'y-or-n-p)
-  (global-unset-key (kbd "<C-down-mouse-1>"))
+  ;; (setq disabled-command-function nil)
+  ;;(global-unset-key (kbd "<C-down-mouse-1>"))
   (setq ns-right-alternate-modifier nil)
   :config
   (define-key key-translation-map (kbd "A-TAB") (kbd "C-TAB"))
-  ;; (prefer-coding-system 'utf-8)
-  ;; (set-default-coding-systems 'utf-8)
-  ;; (set-terminal-coding-system 'utf-8)
-  ;; (set-keyboard-coding-system 'utf-8)
-  ;; (set-selection-coding-system 'utf-8)
-  ;; (set-file-name-coding-system 'utf-8)
-  ;; (set-clipboard-coding-system 'utf-8)
-  ;; (set-buffer-file-coding-system 'utf-8)
 
   (bind-keys ("C-z"             . delete-other-windows)
              ("C-*"             . goto-matching-parens)
@@ -2939,6 +2761,7 @@ already present."
   :bind ("C-. C-z" . shell-toggle))
 
 (use-package shackle
+  :disabled t
   :defer 5
   :load-path "site-lisp/shackle"
   :commands shackle-mode
@@ -3072,6 +2895,10 @@ already present."
             (lambda ()
               (when (string-equal "jsx" (file-name-extension buffer-file-name))
                 (tern-mode-enable))))
+
+  (flycheck-mode)
+  (eval-after-load 'flycheck
+    '(flycheck-add-mode 'javascript-jshint 'js2-mode))
   )
 
 (use-package tex-site
@@ -3147,7 +2974,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (defun my-latex-mode-hook ()
     (company-mode t)
     (LaTeX-math-mode t)
-    ((set-mark )artparens-mode t)
+    (smartparens-mode t)
     (flycheck-mode t)
     )
 
