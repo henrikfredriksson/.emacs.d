@@ -919,6 +919,7 @@
         (error "no more than 2 files should be marked"))))
 
   :config
+  (setq dired-dwim-target-directory t)
   (defvar dired-omit-regexp-orig (symbol-function 'dired-omit-regexp))
 
   ;; Omit files that Git would ignore
@@ -1131,7 +1132,6 @@
   (use-package esh-toggle
     :bind ("C-x C-z" . eshell-toggle)))
 
-
 (use-package exec-path-from-shell
   :demand t
   :config
@@ -1205,6 +1205,7 @@
   (unbind-key "C-. " flyspell-mode-map))
 
 (use-package fzf
+  :defer 20
   :load-path "site-lisp/fzf"
   :init
   (defun fzf-file ()
@@ -1749,6 +1750,19 @@
   :load-path "site-lisp/js2-mode"
   :mode "\\.js\\'"
   :interpreter "node"
+  :init
+  (setq-default js2-global-externs '("module"
+                                     "require"
+                                     "setTimeout"
+                                     "clearTimeout"
+                                     "setInterval"
+                                     "clearInterval"
+                                     "location"
+                                     "__dirname"
+                                     "console"
+                                     "JSON"
+                                     "window"
+                                     "process"))
   :config
   (define-key js2-mode-map (kbd "M-.") nil)
   (setq indent-tabs-mode nil)
@@ -1933,8 +1947,7 @@
   :defer 5
   :load-path "site-lisp/lusty-emacs"
   :bind (("C-x C-f" . my-lusty-file-explorer)
-         ;; ("C-x b" . lusty-buffer-explorer)
-         )
+         ("C-x b" . lusty-buffer-explorer))
   :preface
   (defun lusty-read-directory ()
     "Launch the file/directory mode of LustyExplorer."
@@ -2420,6 +2433,16 @@ already present."
 
   (bind-keys ("S-<return>" . open-line-below)))
 
+(use-package prettier-js
+  :load-path "site-lisp/prettier-emacs"
+  :diminish prettier-js-mode
+  :after js2-mode
+  :hook ((js2-mode ) . prettier-js-mode)
+  :config
+  (setq prettier-js-args '("--trailing-comma" "all"
+                           "--bracket-spacing" "false"
+                           "--tab-width" "4")))
+
 (use-package projectile
   :disabled t
   :load-path "site-lisp/projectile"
@@ -2550,8 +2573,6 @@ already present."
   (setq py-python-command "python3")
 
 
-  (defvar python-mode-initialized nil)
-
   (info-lookup-add-help
    :mode 'python-mode
    :regexp "[a-zA-Z_0-9.]+"
@@ -2593,7 +2614,7 @@ already present."
 
 
   (add-hook 'python-mode-hook #'(lambda () (setq flycheck-checker 'python-pylint)))
-  ;; (flycheck-add-next-checker 'python-flake8 'python-pylint)
+
 
   (add-hook 'auto-save-hook 'whitespace-cleanup)
   (add-hook 'before-save-hook 'whitespace-cleanup)
@@ -2606,8 +2627,7 @@ already present."
                                       '(("{\\|}" . 'paren-face)))
               (font-lock-add-keywords nil
                                       '(("\\[\\|\\]" . 'paren-face)))
-              ))
-  )
+              )))
 
 (use-package recentf
   :defer 10
@@ -2782,9 +2802,8 @@ already present."
         slime-contribs '(slime-fancy)))
 
 (use-package smart-mode-line
-  :disabled t
   :load-path "site-lisp/smart-mode-line"
-  :defer 10
+  :defer 30
   :config
   (setq mode-line-format (delq 'mode-line-position mode-line-format))
   (sml/setup)
@@ -3087,7 +3106,51 @@ The values are saved in `latex-help-cmd-alist' for speed."
   :mode (("\\.html\\'" . web-mode)
          ("\\.css\\'"  . web-mode)
          ("\\.php\\'"  . web-mode))
+  :init
+  (defvar web-prettify-symbols-alist
+    '(("::"     . ?∷)
+      ("forall" . ?∀)
+      ("exists" . ?∃)
+      ("->"     . ?→)
+      ("<-"     . ?←)
+      ("=>"     . ?⇒)
+      ("~>"     . ?⇝)
+      ("<~"     . ?⇜)
+      ("<>"     . ?⨂)
+      ("msum"   . ?⨁)
+      ;; ("not"    . ?¬)
+      ("&&"     . ?∧)
+      ("and"    . ?∧)
+      ("||"     . ?∨)
+      ("or"     . ?∨)
+      ("!="     . ?≠)
+      ("<="     . ?≤)
+      (">="     . ?≥)
+      ("<<<"    . ?⋘)
+      (">>>"    . ?⋙)
+      ("lambda" . ?λ)
+      ("sqrt"   . ?√)
+      ("pi"     . ?π)
+      ("sum"    . ?∑)
+      ;; ("int" .      #x2124)
+      ;; ("float" .    #x211d)
+      ;; ("str" .      #x1d54a)
+      ;; ("True" .     #x1d54b)
+      ;; ("False" .    #x1d53d)
+
+      ("`in`"             . ?∈)
+      ("`not in`"          . ?∉)
+      ("`member`"           . ?∈)
+      ("`notMember`"        . ?∉)
+      ("`union`"            . ?∪)
+      ("`intersection`"     . ?∩)
+      ("`isSubsetOf`"       . ?⊆)
+      ("`isProperSubsetOf`" . ?⊂)
+      ("undefined"          . ?⊥)))
+
   :config
+  (setq-local prettify-symbols-alist python-prettify-symbols-alist)
+  (prettify-symbols-mode 1)
   (add-hook 'web-mode-hook 'smartparens-mode)
   (add-hook 'web-mode-hook 'flycheck-mode)
   (add-hook 'web-mode-hook 'whitespace-mode)
