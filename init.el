@@ -30,17 +30,9 @@
     (expand-file-name path user-emacs-directory))
 
   (defsubst add-load-path (path)
-    (add-to-list 'load-path(emacs-path path)))
+    (add-to-list 'load-path (emacs-path path)))
 
-  (defsubst lookup-password (host user port)
-    (require 'auth-source)
-    (funcall (plist-get (car (auth-source-search: host host: user user: type 'netrc: port port)): secret)))
-
-  (defun get-jobhours-string()
-    (with-current-buffer(get-buffer-create "*scratch*")
-      (let((str(shell-command-to-string "jobhours")))
-        (require 'ansi-color)
-        (ansi-color-apply(substring str 0 (1 - (length str))))))))
+  )
 
 (defun save-all()
   (interactive)
@@ -99,11 +91,7 @@
 ;; (defsubst hook-into-modes (func &rest modes)
 ;;   (dolist (mode-hook modes) (add-hook mode-hook func)))
 
-(defun get-jobhours-string ()
-  (with-current-buffer (get-buffer "*scratch*")
-    (let ((str (shell-command-to-string "jobhours")))
-      (require 'ansi-color)
-      (ansi-color-apply (substring str 0 (1 - (length str)))))))
+
 
 ;;; Load customization settings
 
@@ -145,19 +133,19 @@
 (use-package diminish      :demand t  :load-path "lib/diminish")
 (use-package el-mock       :defer  t  :load-path "lib")
 (use-package elisp-refs    :defer  t  :load-path "lib/elisp-refs")
-(use-package emojify       :defer  t  :load-path "lib/emacs-emojify")
+;; (use-package emojify       :defer  t  :load-path "lib/emacs-emojify")
 (use-package epc           :defer  t  :load-path "lib/emacs-epc")
 (use-package epl           :defer  t  :load-path "lib/epl")
 (use-package esxml         :defer  t  :load-path "lib/esxml")
 (use-package f             :defer  t  :load-path "lib/f-el")
 (use-package fn            :defer  t  :load-path "lib/fn-el")
 (use-package fringe-helper :defer  t  :load-path "lib/fringe-helper-el")
-(use-package fuzzy         :defer  t  :load-path "lib/fuzzy-el")
+;;(use-package fuzzy         :defer  t  :load-path "lib/fuzzy-el")
 (use-package gh            :defer  t  :load-path "lib/gh-el")
 (use-package ghub          :defer  t  :load-path "lib/ghub")
 (use-package ghub+         :defer  t  :load-path "lib/ghub-plus")
 (use-package ht            :defer  t  :load-path "lib/ht-el")
-(use-package jedi-core     :defer  t  :load-path "site-lisp/emacs-jedi")
+;; (use-package jedi-core     :defer  t  :load-path "site-lisp/emacs-jedi")
 (use-package kv            :defer  t  :load-path "lib/kv")
 (use-package list-utils    :defer  t  :load-path "lib/list-utils")
 (use-package logito        :defer  t  :load-path "lib/logito")
@@ -178,11 +166,10 @@
 (use-package pkg-info      :defer  t  :load-path "lib/pkg-info")
 (use-package popup         :defer  t  :load-path "lib/popup-el")
 (use-package popup-pos-tip :defer  t  :load-path "lib")
-(use-package popwin        :defer  t  :load-path "lib/popwin")
+;;(use-package popwin        :defer  t  :load-path "lib/popwin")
 (use-package pos-tip       :defer  t  :load-path "lib")
-(use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
+;;(use-package pythonic      :defer  t  :load-path "site-lisp/pythonic")
 (use-package request       :defer  t  :load-path "lib/emacs-request")
-(use-package rich-minority :defer  t  :load-path "lib/rich-minority")
 (use-package s             :defer  t  :load-path "lib/s-el")
 (use-package spinner       :defer  t  :load-path "lib/spinner")
 (use-package tablist       :defer  t  :load-path "lib/tablist")
@@ -191,7 +178,7 @@
 (use-package web-server    :defer  t  :load-path "lib/emacs-web-server")
 (use-package websocket     :defer  t  :load-path "lib/emacs-websocket")
 (use-package with-editor   :defer  t  :load-path "lib/with-editor")
-(use-package xml-rpc       :defer  t  :load-path "lib")
+;;(use-package xml-rpc       :defer  t  :load-path "lib")
 (use-package zoutline      :defer  t  :load-path "lib/zoutline")
 
 ;;; Keybindings
@@ -229,197 +216,6 @@
 
 ;;; Packages
 
-
-(use-package ggtags
-  :defer
-  :load-path "site-lisp/ggtags"
-  :commands ggtags-mode
-  :diminish ggtags-mode)
-
-(use-package cc-mode
-  :disabled t
-  :load-path "override/cc-mode"
-  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
-         ("\\.m\\'". c-mode)
-         ("\\.mm\\'" . c++-mode))
-  :preface
-  (defun my-paste-as-check ()
-    (interactive)
-    (save-excursion
-      (insert "/*\n")
-      (let ((beg (point)) end)
-        (yank)
-        (setq end (point-marker))
-        (goto-char beg)
-        (while (
-
-                (point) end)
-          (forward-char 2)
-          (insert "CHECK: ")
-          (forward-line 1)))
-      (insert "*/\n")))
-
-  (defvar printf-index 0)
-
-  (defun insert-counting-printf (arg)
-    (interactive "P")
-    (if arg
-        (setq printf-index 0))
-    (if t
-        (insert (format "std::cerr << \"step %d . .\" << std::endl;\n"
-                        (setq printf-index (1+ printf-index))))
-      (insert (format "printf(\"step %d . .\\n\");\n"
-                      (setq printf-index (1+ printf-index)))))
-    (forward-line -1)
-    (indent-according-to-mode)
-    (forward-line))
-
-  (defun my-c-mode-common-hook ()
-    ;; (ggtags-mode 1)
-    (eldoc-mode 1)
-    (hs-minor-mode 1)
-    (hide-ifdef-mode 1)
-    ;; (whitespace-mode 1)
-    (which-function-mode 1)
-    (company-mode 1)
-    (bug-reference-prog-mode 1)
-
-    (diminish 'hs-minor-mode)
-    (diminish 'hide-ifdef-mode)
-
-    ;; (bind-key "C-c p" 'insert-counting-printf c-mode-base-map)
-
-    ;;(doxymacs-mode 1)
-    ;;(doxymacs-font-lock)
-
-    (bind-key "<return>" #'newline-and-indent c-mode-base-map)
-
-    (unbind-key "M-j" c-mode-base-map)
-    (bind-key "C-c C-i" #'c-includes-current-file c-mode-base-map)
-    (bind-key "C-c C-y" #'my-paste-as-check c-mode-base-map)
-
-    (set (make-local-variable 'parens-require-spaces) nil)
-    (setq indicate-empty-lines t)
-    (setq fill-column 72)
-
-    (bind-key "M-q" #'c-fill-paragraph c-mode-base-map)
-
-    (let ((bufname (buffer-file-name)))
-      (when bufname
-        (cond
-         ((string-match "/ledger/" bufname)
-          (c-set-style "ledger"))
-         ((string-match "/edg/" bufname)
-          (c-set-style "edg"))
-         (t
-          (c-set-style "clang")))))
-
-    (font-lock-add-keywords 'c++-mode '(("\\\\(assert\\|DEBUG\\)("
-                                         1 font-lock-warning-face t))))
-
-  :config
-  (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-
-  (setq c-syntactic-indentation nil)
-
-  (bind-key "#" #'self-insert-command c-mode-base-map)
-  (bind-key "{" #'self-insert-command c-mode-base-map)
-  (bind-key "}" #'self-insert-command c-mode-base-map)
-  (bind-key "/" #'self-insert-command c-mode-base-map)
-  (bind-key "*" #'self-insert-command c-mode-base-map)
-  (bind-key ";" #'self-insert-command c-mode-base-map)
-  (bind-key "," #'self-insert-command c-mode-base-map)
-  (bind-key ":" #'self-insert-command c-mode-base-map)
-  (bind-key "(" #'self-insert-command c-mode-base-map)
-  (bind-key ")" #'self-insert-command c-mode-base-map)
-  (bind-key "
-
-" #'self-insert-command c++-mode-map)
-  (bind-key ">" #'self-insert-command c++-mode-map)
-
-  (add-to-list 'c-style-alist
-               '("edg"
-                 (indent-tabs-mode           . nil)
-                 (c-basic-offset             . 2)
-                 (c-comment-only-line-offset . (0 . 0))
-                 (c-hanging-braces-alist
-                  . ((substatement-open before after)
-                     (arglist-cont-nonempty)))
-                 (c-offsets-alist
-                  . ((statement-block-intro . +)
-                     (knr-argdecl-intro      . 5)
-                     (substatement-open      . 0)
-                     (substatement-label     . 0)
-                     (label                  . 0)
-                     (case-label             . +)
-                     (statement-case-open    . 0)
-                     (statement-cont         . +)
-                     (arglist-intro          . +)
-                     (arglist-close          . +)
-                     (inline-open            . 0)
-                     (brace-list-open        . 0)
-                     (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
-                               c-lineup-gnu-DEFUN-intro-cont))))
-                 (c-special-indent-hook      . c-gnu-impose-minimum)
-                 (c-block-comment-prefix     . "")))
-
-  (add-to-list 'c-style-alist
-               '("ledger"
-                 (indent-tabs-mode           . nil)
-                 (c-basic-offset             . 2)
-                 (c-comment-only-line-offset . (0 . 0))
-                 (c-hanging-braces-alist
-                  . ((substatement-open before after)
-                     (arglist-cont-nonempty)))
-                 (c-offsets-alist
-                  . ((statement-block-intro . +)
-                     (knr-argdecl-intro      . 5)
-                     (substatement-open      . 0)
-                     (substatement-label     . 0)
-                     (label                  . 0)
-                     (case-label             . 0)
-                     (statement-case-open    . 0)
-                     (statement-cont         . +)
-                     (arglist-intro          . +)
-                     (arglist-close          . +)
-                     (inline-open            . 0)
-                     (brace-list-open        . 0)
-                     (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
-                               c-lineup-gnu-DEFUN-intro-cont))))
-                 (c-special-indent-hook      . c-gnu-impose-minimum)
-                 (c-block-comment-prefix     . "")))
-
-  (add-to-list 'c-style-alist
-               '("clang"
-                 (indent-tabs-mode           . nil)
-                 (c-basic-offset             . 2)
-                 (c-comment-only-line-offset . (0 . 0))
-                 (c-hanging-braces-alist
-                  . ((substatement-open before after)
-                     (arglist-cont-nonempty)))
-                 (c-offsets-alist
-                  . ((statement-block-intro . +)
-                     (knr-argdecl-intro      . 5)
-                     (substatement-open      . 0)
-                     (substatement-label     . 0)
-                     (label                  . 0)
-                     (case-label             . 0)
-                     (statement-case-open    . 0)
-                     (statement-cont         . +)
-                     (arglist-intro          . +)
-                     (arglist-close          . +)
-                     (inline-open            . 0)
-                     (brace-list-open        . 0)
-                     (topmost-intro-cont
-                      . (first c-lineup-topmost-intro-cont
-                               c-lineup-gnu-DEFUN-intro-cont))))
-                 (c-special-indent-hook      . c-gnu-impose-minimum)
-                 (c-block-comment-prefix     . ""))))
-
-;; ;;; PACKAGE CONFIGURATIONS
-
 (use-package abbrev
   :defer 10
   :diminish
@@ -435,6 +231,7 @@
 
 
 (use-package ace-window
+  :defer
   :load-path "site-lisp/ace-window"
   :bind* ("<C-return>" . ace-window))
 
@@ -444,38 +241,8 @@
   :config
   (setq ag-reuse-window 't))
 
-(use-package agda2-mode
-  :disabled t
-  :mode "\\ . agda\\'"
-  :load-path "site-lisp/agda/src/data/emacs-mode"
-  :defines agda2-mode-map
-  :preface
-  (defun agda2-insert-helper-function (&optional prefix)
-    (interactive "P")
-    (let ((func-def (with-current-buffer "*Agda information*"
-                      (buffer-string))))
-      (save-excursion
-        (forward-paragraph)
-        (let ((name (car (split-string func-def " "))))
-          (insert "  where\n    " func-def "    " name " x = ?\n")))))
-
-  :init
-  (use-package agda-input)
-  :config
-  (bind-key "C-c C-i" #'agda2-insert-helper-function agda2-mode-map)
-
-  (defun char-mapping (key char)
-    (bind-key key `(lambda () (interactive) (insert ,char))))
-
-  (char-mapping "A-G" "Γ")
-  (char-mapping "A-l" "λ x → ")
-  (char-mapping "A-:" " ∷ ")
-  (char-mapping "A-r" " → ")
-  (char-mapping "A-~" " ≅ ")
-  (char-mapping "A-=" " ≡ "))
-
 (use-package aggressive-indent
-  :defer 5
+  :defer 20
   :load-path "site-lisp/aggressive-indent-mode"
   :diminish
   :hook (emacs-lisp-mode . aggressive-indent-mode))
@@ -499,18 +266,6 @@
     (interactive "r")
     (align-regexp start end
                   "\\(\\s-*\\)\\s-" 1 0 t)))
-
-(use-package ascii
-  :disabled t
-  :bind ("C-c e A" . ascii-toggle)
-  :commands ascii-on
-  :functions ascii-off
-  :preface
-  (defun ascii-toggle ()
-    (interactive)
-    (if ascii-display
-        (ascii-off)
-      (ascii-on))))
 
 (use-package auto-yasnippet
   :defer 30
@@ -553,39 +308,6 @@
   :config
   (setq backup-each-save-filter-function 'backup-each-save-filter
         backup-enable-predicate 'my-dont-backup-files-p))
-
-(use-package browse-kill-ring
-  :commands browse-kill-ring)
-
-(use-package bug-reference-github
-  :disabled t
-  :load-path "site-lisp/bug-reference-github"
-  :defer 10
-  :config
-  (bug-reference-github-set-url-format))
-
-(use-package bytecomp-simplify
-  :disabled t
-  :defer 15)
-
-(use-package c-includes
-  :disabled t
-  :commands c-includes)
-
-(use-package cl-info
-  :disabled t)
-
-(use-package cmake-mode
-  :disabled t
-  :mode (("CMakeLists . txt" . cmake-mode)
-         ("\\         . cmake\\'"    . cmake-mode)))
-
-(use-package color-moccur
-  :commands (isearch-moccur isearch-all isearch-moccur-all)
-  :bind (("M-s O" . moccur)
-         :map isearch-mode-map
-         ("M-o"   . isearch-moccur)
-         ("M-O"   . isearch-moccur-all)))
 
 (use-package company
   :load-path "site-lisp/company-mode"
@@ -648,92 +370,9 @@
             (backward-char 1)
             (if (looking-at "->") t nil))))))
 
-  ;; (define-key company-mode-map [tab]
-  ;;   '(menu-item "maybe-company-expand" nil
-  ;;               :filter (lambda (&optional _)
-  ;;                         (when (check-expansion)
-  ;;                           #'company-complete-common))))
-
-  (eval-after-load "coq"
-    '(progn
-       (defun company-mode/backend-with-yas (backend)
-         (if (and (listp backend) (member 'company-yasnippet backend))
-             backend
-           (append (if (consp backend) backend (list backend))
-                   '(:with company-yasnippet))))
-       (setq company-backends
-             (mapcar #'company-mode/backend-with-yas company-backends))))
-
   (global-company-mode 1))
 
-(use-package company-web
-  :after (company web-mode)
-  :load-path "site-lisp/company-web"
-  :config
-  (use-package web-completion-data
-    :after (company web-mode)
-    :load-path "site-lisp/web-completion-data" )
-
-  (use-package company-web-html
-    :after (company web-mode)
-    :load-path "site-lisp/company-web")
-
-  (use-package company-web-slim
-    :after (company web-mode)
-    :load-path "site-lisp/company-web")
-
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-web-html)
-  (add-to-list 'company-backends 'company-web-jade)
-  (add-to-list 'company-backends 'company-web-slim))
-
-(use-package company-php
-  :after (company web-mode php-mode)
-  :load-path "site-lisp/ac-php"
-  :config
-  (ac-php-core-eldoc-setup)
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-ac-php-backend))
-
-(use-package company-jedi
-  :after (company python)
-  :load-path "site-lisp/emacs-company-jedi"
-  :config
-  (setq jedi:environment-virtualenv (list (expand-file-name "~/.emacs.d/.python-environments/")))
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (setq jedi:complete-on-dot t)
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-jedi)
-
-  (dolist (hook '(python-mode-hook))
-    (add-hook hook
-              #'(lambda ()
-                  (local-set-key (kbd "M-p")
-                                 #'company-jedi)))))
-
-(use-package company-tern
-  :after (company js2-mode tern)
-  :load-path "site-lisp/company-tern"
-  :config
-  (setq company-tern-property-marker nil)
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-tern)
-  (define-key tern-mode-keymap (kbd "M-.") nil)
-  (define-key tern-mode-keymap (kbd "M-,") nil))
-
-(use-package company-math
-  :after (company tex-site)
-  :load-path "site-lisp/company-math"
-  :preface
-  (use-package math-symbol-lists
-    :load-path "site-lisp/math-symbol-lists"
-    :defer t)
-  :config
-  (make-local-variable 'company-backends)
-  (add-to-list 'company-backends 'company-math-symbols-unicode))
-
 (use-package company-auctex
-  :disabled t
   :after (company tex-site)
   :load-path "site-lisp/company-auctex"
   :config
@@ -745,47 +384,6 @@
   :config
   (company-quickhelp-mode))
 
-(use-package compile
-  :disabled t
-  :bind (("C-c c" . compile)
-         ("M-O"   . show-compilation))
-  :preface
-  (defun show-compilation ()
-    (interactive)
-    (let ((compile-buf
-           (catch 'found
-             (dolist(buf (buffer-list))
-               (if (string-match "\\*compilation\\*" (buffer-name buf))
-                   (throw 'found buf))))))
-      (if compile-buf
-          (switch-to-buffer-other-window compile-buf)
-        (call-interactively 'compile))))
-
-  (defun compilation-ansi-color-process-output ()
-    (ansi-color-process-output nil)
-    (set (make-local-variable 'comint-last-output-start)
-         (point-marker)))
-
-  :config
-  (add-hook 'compilation-filter-hook #'compilation-ansi-color-process-output))
-
-
-(use-package crosshairs
-  :bind ("M-o c" . crosshairs-mode)
-  :config
-  (use-package col-highlight
-    :config
-
-    (use-package vline)))
-
-(use-package css-mode
-  :disabled t
-  :mode "\\.css\\'")
-
-(use-package csv-mode
-  :disabled t
-  :mode "\\ . use\\'")
-
 (use-package cursor-chg
   :defer 5
   :config
@@ -793,43 +391,10 @@
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 
-(use-package cus-edit
-  :disabled t
-  :load-path "lisp/initsplit"
-  :defer 5
-  :config
-  (use-package initsplit))
-
-(use-package dash-at-point
-  :load-path "site-lisp/dash-at-point"
-  :bind ("C-c D" . dash-at-point)
-  :config
-  (add-to-list 'dash-at-point-mode-alist '(haskell-mode . "haskell")))
-
-(use-package dbwebb
-  :load-path "site-lisp/dbwebb"
-  :bind (("C-c d b v" . dbwebb-validate)
-         ("C-c d b i" . dbwebb-inspect)
-         ("C-c d b u" . dbwebb-update)
-         ))
-
-(use-package debbugs-gnu
-  :disabled t
-  :load-path "elpa/packages/debbugs"
-  :commands (debbugs-gnu debbugs-gnu-search))
-
-(use-package dedicated
-  :disabled t
-  :bind ("C- . D" . dedicated-mode))
-
 (use-package diff-mode
   :commands diff-mode
   :config
   (use-package diff-mode-))
-
-(use-package diffview
-  :disabled t
-  :commands (diffview-current diffview-region diffview-message))
 
 (use-package dired
   :bind (("C-x D" . dired)
@@ -964,37 +529,8 @@
                "\\)")))
         (funcall dired-omit-regexp-orig)))))
 
-(use-package dired-toggle
-  :bind ("C-c ~" . dired-toggle)
-  :preface
-  (defun my-dired-toggle-mode-hook ()
-    (interactive)
-    (visual-line-mode 1)
-    (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
-    (setq-local word-wrap nil))
-  :hook (dired-toggle-mode . my-dired-toggle-mode-hook))
-
 (use-package dired-x
   :after dired)
-
-(use-package docker
-  :disabled t
-  :defer 15
-  :diminish docker-mode
-  :load-path "site-lisp/docker-el/"
-  :preface
-  :config
-  (docker-global-mode)
-  (use-package docker-images)
-  (use-package docker-containers)
-  (use-package docker-volumes)
-  (use-package docker-networks)
-  (use-package docker-machine))
-
-(use-package dockerfile-mode
-  :disabled t
-  :mode (" . *Dockerfile.*" . dockerfile-mode)
-  :load-path "site-lisp/dockerfile-mode/")
 
 (use-package dot-gnus
   :disabled t
@@ -1022,115 +558,8 @@
   )
 
 
-(use-package doxymacs
-  :disabled t
-  :load-path "site-lisp/doxymacs/lisp/")
-
-(use-package edebug
-  :defer t
-  :preface
-  (defvar modi/fns-in-edebug nil
-    "List of functions for which `edebug' is instrumented . ")
-
-  (defconst modi/fns-regexp
-    (concat "(\\s-*"
-            "\\(defun\\|defmacro\\)\\s-+"
-            "\\(?1:\\(\\w\\|\\s_\\)+\\)\\_>") ; word or symbol char
-    "Regexp to find defun or defmacro definition . ")
-
-  (defun modi/toggle-edebug-defun ()
-    (interactive)
-    (let (fn)
-      (save-excursion
-        (search-backward-regexp modi/fns-regexp)
-        (setq fn (match-string 1))
-        (mark-sexp)
-        (narrow-to-region (point) (mark))
-        (if (member fn modi/fns-in-edebug)
-            ;; If the function is already being edebugged, uninstrument it
-            (progn
-              (setq modi/fns-in-edebug (delete fn modi/fns-in-edebug))
-              (eval-region (point) (mark))
-              (setq-default eval-expression-print-length 12)
-              (setq-default eval-expression-print-level  4)
-              (message "Edebug disabled: %s" fn))
-          ;; If the function is not being edebugged, instrument it
-          (progn
-            (add-to-list 'modi/fns-in-edebug fn)
-            (setq-default eval-expression-print-length nil)
-            (setq-default eval-expression-print-level  nil)
-            (edebug-defun)
-            (message "Edebug: %s" fn)))
-        (widen)))))
-
-(use-package ediff
-  :disabled t
-  :config
-  (use-package ediff-keep)
-  (bind-keys :prefix-map ctl-period-equals-map
-             :prefix "C- . ="
-             ("b"        . ediff-buffers)
-             ("B"        . ediff-buffers3)
-             ("c"        . compare-windows)
-             ("="        . ediff-files)
-             ("f"        . ediff-files)
-             ("F"        . ediff-files3)
-             ("r"        . ediff-revision)
-             ("p"        . ediff-patch-file)
-             ("P"        . ediff-patch-buffer)
-             ("l"        . ediff-regions-linewise)
-             ("w"        . ediff-regions-wordwise)))
-
-(use-package edit-env
-  :disabled t
-  :commands edit-env)
-
 (use-package edit-var
   :bind ("C-c e v" . edit-variable))
-
-(use-package eshell
-  :disabled t
-  :commands (eshell eshell-command)
-  :preface
-  (defvar eshell-isearch-map
-    (let ((map (copy-keymap isearch-mode-map)))
-      (define-key map [(control ?m)] 'eshell-isearch-return)
-      (define-key map [return]       'eshell-isearch-return)
-      (define-key map [(control ?r)] 'eshell-isearch-repeat-backward)
-      (define-key map [(control ?s)] 'eshell-isearch-repeat-forward)
-      (define-key map [(control ?g)] 'eshell-isearch-abort)
-      (define-key map [backspace]    'eshell-isearch-delete-char)
-      (define-key map [delete]       'eshell-isearch-delete-char)
-      map)
-    "Keymap used in isearch in Eshell . ")
-
-  (defun eshell-initialize ()
-    (defun eshell-spawn-external-command (beg end)
-      "Parse and expand any history references in current input . "
-      (save-excursion
-        (goto-char end)
-        (when (looking-back "&!" beg)
-          (delete-region (match-beginning 0) (match-end 0))
-          (goto-char beg)
-          (insert "spawn "))))
-
-    (add-hook 'eshell-expand-input-functions 'eshell-spawn-external-command)
-
-    (defun ss (server)
-      (interactive "sServer: ")
-      (call-process "spawn" nil nil nil "ss" server))
-
-    (use-package em-unix
-      :defer t
-      :config
-      (unintern 'eshell/su nil)
-      (unintern 'eshell/sudo nil)))
-
-  :init
-  (add-hook 'eshell-first-time-mode-hook 'eshell-initialize)
-
-  (use-package esh-toggle
-    :bind ("C-x C-z" . eshell-toggle)))
 
 (use-package exec-path-from-shell
   :demand t
@@ -1138,55 +567,19 @@
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize)))
 
-(use-package etags
-  :disabled t
-  :bind ("M-T" . tags-search))
-
-(use-package eval-expr
-  :load-path "site-lisp/eval-expr"
-  :bind ("M-:" . eval-expr)
-  :preface
-  (defun my-elisp-indent-or-complete (&optional arg)
-    (interactive "p")
-    (call-interactively 'lisp-indent-line)
-    (unless (or (looking-back "^\\s-*")
-                (bolp)
-                (not (looking-back "[-A-Za-z0-9_*+/=<>!?]+")))
-      (call-interactively 'lisp-complete-symbol)))
-  :config
-  (setq eval-expr-print-function 'pp
-        eval-expr-print-level 20
-        eval-expr-print-length 100)
-
-  (defun eval-expr-minibuffer-setup ()
-    (set-syntax-table emacs-lisp-mode-syntax-table)
-    (paredit-mode)
-    (local-set-key (kbd "<tab>") #'my-elisp-indent-or-complete)))
-
-(use-package eww
-  :disabled t
-  :bind ("A-M-g" . eww))
-
 (use-package expand-region
   :load-path "site-lisp/expand-region-el"
   :commands er/expand-region
   :bind (("M-+" . er/expand-region)
          ("M--" . er/contract-region)))
 
-(use-package fancy-narrow
-  :disabled t
-  :load-path "site-lisp/fancy-narrow"
-  :diminish fancy-narrow-mode
-  ;;:commands (fancy-narrow-to-region fancy-widen)
-  :config (fancy-narrow-mode))
-
 (use-package flycheck
   :load-path "site-lisp/flycheck"
   :commands (flycheck-mode
              flycheck-next-error
              flycheck-previous-error)
-  ;; :bind (("M-n" . flycheck-next-error)
-  ;;        ("M-p" . flycheck-previous-error))
+  :bind (("M-n" . flycheck-next-error)
+         ("M-p" . flycheck-previous-error))
   :config
   (defalias 'flycheck-show-error-at-point-soon 'flycheck-show-error-at-point))
 
@@ -1204,46 +597,6 @@
   :config
   (unbind-key "C-. " flyspell-mode-map))
 
-(use-package fzf
-  :defer 20
-  :load-path "site-lisp/fzf"
-  :init
-  (defun fzf-file ()
-    "Starts a fzf session at the root of the curreng hg."
-    (interactive)
-    (fzf/start (buffer-name)))
-  :bind ("M-s f" . fzf))
-
-(use-package gist
-  :disabled t
-  :load-path "site-lisp/gist"
-  :bind ("C-c G" . my-gist-region-or-buffer)
-  :preface
-  (defun my-gist-region-or-buffer ()
-    (interactive)
-    (deactivate-mark)
-    (with-temp-buffer
-      (if buffer-file-name
-          (call-process "gist" nil t nil "-f" buffer-file-name "-P")
-        (call-process "gist" nil t nil "-P"))
-      (kill-ring-save (point-min) (1- (point-max)))
-      (message (buffer-substring (point-min) (1- (point-max)))))))
-
-(use-package git-link
-  :disabled t
-  :bind ("C- . G" . git-link)
-  :commands (git-link git-link-commit git-link-homepage)
-  :load-path "site-lisp/git-link")
-
-(use-package git-timemachine
-  :disabled t
-  :load-path "site-lisp/git-timemachine"
-  :commands git-timemachine)
-
-(use-package graphviz-dot-mode
-  :disabled t
-  :mode "\\ . dot\\'")
-
 (use-package grep
   :bind (("M-s d" . find-grep-dired)
          ("M-s n" . find-name-dired)
@@ -1251,29 +604,6 @@
          ("M-s G" . grep))
   :config
   (grep-apply-setting 'grep-command "grep -nH "))
-
-(use-package gud
-  :disabled t
-  :commands gud-gdb
-  :bind ("C- . g" . show-debugger)
-  :init
-  (defun show-debugger ()
-    (interactive)
-    (let ((gud-buf
-           (catch 'found
-             (dolist (buf (buffer-list))
-               (if (string-match "\\*gud-" (buffer-name buf))
-                   (throw 'found buf))))))
-      (if gud-buf
-          (switch-to-buffer-other-window gud-buf)
-        (call-interactively 'gud-gdb))))
-  :config
-  (progn
-    (bind-key "<f9>" #'gud-cont)
-    (bind-key "<f10>" #'gud-next)
-    (bind-key "<f11>" #'gud-step)
-    (bind-key "S-<f11>" #'gud-finish)))
-
 
 (use-package haskell-mode-autoloads
   :load-path "site-lisp/haskell-mode"
@@ -1398,7 +728,7 @@
 
 (use-package helm
   :load-path "site-lisp/helm"
-  :defer 5
+  :defer 10
   :bind (:map helm-map
               ("<tab>" . helm-execute-persistent-action)
               ("C-i" . helm-execute-persistent-action)
@@ -1415,11 +745,6 @@
   :after helm
   :load-path "site-lisp/helm-ag"
   :commands (helm-ag helm-ag-this-file))
-
-(use-package helm-dash
-  :after helm
-  :load-path "site-lisp/helm-dash"
-  :commands helm-dash)
 
 (use-package helm-descbinds
   :load-path "site-lisp/helm-descbinds"
@@ -1443,28 +768,7 @@
    #'(lambda ()
        (goto-char (point-min))
        (while (re-search-forward "file:///nix/store" nil t)
-         (replace-match "http://127 . 0.0.1:8687/file//nix/store" t t)))))
-
-
-(use-package helm-navi
-  :disabled t
-  :load-path "site-lisp/helm-navi"
-  :after (helm navi)
-  :commands helm-navi)
-
-(use-package helm-swoop
-  :load-path "site-lisp/helm-swoop"
-  :bind (("M-s M-s" . helm-swoop )
-         ("M-s S"   . helm-swoop-without-pre-input)
-         ("M-s s"   . helm-swoop-from-isearch)))
-
-(use-package hi-lock
-  :bind (("M-o l" . highlight-lines-matching-regexp)
-         ("M-o r" . highlight-regexp)
-         ("M-o w" . highlight-phrase)))
-
-(use-package hilit-chg
-  :bind ("M-o C" . highlight-changes-mode))
+         (replace-match "http://127.0.0.1:8687/file//nix/store" t t)))))
 
 (use-package hippie-exp
   :bind (("M-/" . dabbrev-expand)
@@ -1489,15 +793,7 @@
           try-complete-lisp-symbol-partially
           try-complete-lisp-symbol))
 
-  (bind-key "M-i" #'my-ido-hippie-expand)
-
-  )
-
-(use-package hl-line
-  :commands hl-line-mode
-  :bind (("M-o h" . hl-line-mode))
-  :config
-  (use-package hl-line+))
+  (bind-key "M-i" #'my-ido-hippie-expand))
 
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
@@ -1506,101 +802,6 @@
             #'(lambda ()
                 (ibuffer-switch-to-saved-filter-groups "default"))))
 
-(use-package ido
-  :disabled t
-  :defer
-  :commands ido-switch-buffer
-  :bind ("C-x b" . ido-switch-buffer)
-  :config
-  (setq ido-enable-flex-matching t)
-  (setq ido-everywhere t)
-  (setq ido-create-new-buffer 'always) ; don't confirm to create new buffers
-  (setq ido-vertical-define-keys 'C-n-and-C-p-only)
-  (setq ido-enable-flex-matching t)
-  (setq ido-enable-prefix t)
-  (ido-mode 1)
-
-  (use-package flx-ido
-    :defer
-    :load-path "site-lisp/flx"
-    :config
-    (flx-ido-mode 1)
-    (setq ido-enable-flex-matching t)
-    (setq ido-use-faces t)))
-
-(use-package iedit
-  :disabled t
-  :load-path "site-lisp/iedit")
-
-(use-package ielm
-  :disabled t
-  :bind ("C-c :" . ielm)
-  :config
-  (defun my-ielm-return ()
-    (interactive)
-    (let ((end-of-sexp (save-excursion
-                         (goto-char (point-max))
-                         (skip-chars-backward " \t\n\r")
-                         (point))))
-      (if (>= (point) end-of-sexp)
-          (progn
-            (goto-char (point-max))
-            (skip-chars-backward " \t\n\r")
-            (delete-region (point) (point-max))
-            (call-interactively #'ielm-return))
-        (call-interactively #'paredit-newline))))
-
-  (add-hook 'ielm-mode-hook
-            (function
-             (lambda ()
-               (bind-key "<return>" #'my-ielm-return ielm-map)))
-            t))
-
-(use-package iflipb
-  :disabled t
-  :load-path "site-lisp/iflipb"
-  :commands (iflipb-next-buffer iflipb-previous-buffer)
-  :preface
-  (defvar my-iflipb-auto-off-timeout-sec 2)
-  (defvar my-iflipb-auto-off-timer-canceler-internal nil)
-  (defvar my-iflipb-ing-internal nil)
-
-  (defun my-iflipb-auto-off ()
-    (message nil)
-    (setq my-iflipb-auto-off-timer-canceler-internal nil
-          my-iflipb-ing-internal nil))
-
-  (defun my-iflipb-next-buffer (arg)
-    (interactive "P")
-    (iflipb-next-buffer arg)
-    (if my-iflipb-auto-off-timer-canceler-internal
-        (cancel-timer my-iflipb-auto-off-timer-canceler-internal))
-    (run-with-idle-timer my-iflipb-auto-off-timeout-sec 0 'my-iflipb-auto-off)
-    (setq my-iflipb-ing-internal t))
-
-  (defun my-iflipb-previous-buffer ()
-    (interactive)
-    (iflipb-previous-buffer)
-    (if my-iflipb-auto-off-timer-canceler-internal
-        (cancel-timer my-iflipb-auto-off-timer-canceler-internal))
-    (run-with-idle-timer my-iflipb-auto-off-timeout-sec 0 'my-iflipb-auto-off)
-    (setq my-iflipb-ing-internal t))
-
-  :config
-  (setq iflipb-always-ignore-buffers
-        "\\`\\( \\|diary\\|ipa\\|\\.newsrc-dribble\\'\\)"
-        iflipb-wrap-around t)
-
-  (defun iflipb-first-iflipb-buffer-switch-command ()
-    (not (and (or (eq last-command 'my-iflipb-next-buffer)
-                  (eq last-command 'my-iflipb-previous-buffer))
-              my-iflipb-ing-internal))))
-
-(use-package image-file
-  :defer 5
-  :config
-  (auto-image-file-mode 1))
-
 (use-package indent
   :commands indent-according-to-mode)
 
@@ -1608,10 +809,6 @@
   :bind (("C-c <" . indent-shift-left)
          ("C-c >" . indent-shift-right))
   :load-path "site-lisp/indent-shift")
-
-(use-package indirect
-  :disabled t
-  :bind ("C-c C" . indirect-region))
 
 (use-package info
   :bind ("C-h C-i" . info-lookup-symbol)
@@ -1623,18 +820,8 @@
     (if (> (length (window-list)) 1)
         (delete-window))))
 
-(use-package info+
-  ;; (shell-command "rm -f site-lisp/info+.el*")
-  :disabled t)
-
 (use-package info-look
   :commands info-lookup-add-help)
-
-(use-package interaction-log
-  ;; (shell-command "rm -fr site-lisp/interaction-log")
-  ;; (shell-command "git remote rm ext/interaction-log")
-  :disabled t
-  :load-path "site-lisp/interaction-log")
 
 (use-package isearch
   :no-require t
@@ -1658,157 +845,6 @@
     (other-window 1)
     (call-interactively 'isearch-forward)))
 
-(use-package ivy
-  :disabled t
-  :load-path "site-lisp/swiper"
-  :defer 5
-  ;; :diminish ivy-mode
-  ;; :bind (
-  ;;        ("C-x b"   . ivy-switch-buffer)
-  ;;        ("C-x B"   . ivy-switch-buffer-other-window)
-  ;;        ("M-H"     . ivy-resume))
-  ;; :bind (:map ivy-minibuffer-map
-  ;;             ("C-r" . ivy-previous-line-or-history)
-  ;;             ("M-r" . ivy-reverse-i-search))
-  :custom
-  (ivy-dynamic-exhibit-delay-ms 200)
-  (ivy-height 10)
-  (ivy-initial-inputs-alist nil t)
-  (ivy-magic-tilde nil)
-  (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
-  (ivy-sort-matches-functions-alist '((t)))
-  (ivy-use-virtual-buffers t)
-  (ivy-wrap t)
-  :preface
-  (defun ivy-done-or-delete-char ()
-    (interactive)
-    (call-interactively
-     (if (eolp)
-         #'ivy-done
-       #'ivy-delete-char)))
-
-  (defun ivy-alt-done-or-space ()
-    (interactive)
-    (call-interactively
-     (if (= ivy--length 1)
-         #'ivy-alt-done
-       #'self-insert-command)))
-
-  (defun ivy-switch-buffer-kill ()
-    (interactive)
-    (debug)
-    (let ((bn (ivy-state-current ivy-last)))
-      (when (get-buffer bn)
-        (kill-buffer bn))
-      (unless (buffer-live-p (ivy-state-buffer ivy-last))
-        (setf (ivy-state-buffer ivy-last)
-              (with-ivy-window (current-buffer))))
-      (setq ivy--all-candidates (delete bn ivy--all-candidates))
-      (ivy--exhibit)))
-
-  ;; This is the value of `magit-completing-read-function', so that we see
-  ;; Magit's own sorting choices.
-  (defun my-ivy-completing-read (&rest args)
-    (let ((ivy-sort-functions-alist '((t . nil))))
-      (apply 'ivy-completing-read args)))
-
-  :config
-  (ivy-mode 1)
-  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
-
-(use-package counsel
-  :disabled t
-  :after ivy
-  :demand t
-  :commands (counsel-M-x)
-  :diminish
-  :custom (counsel-find-file-ignore-regexp
-           (concat "\\(\\`\\.[^.]\\|"
-                   (regexp-opt completion-ignored-extensions)
-                   "\\'\\)"))
-  :bind (("C-x C-f" . counsel-find-file)
-         ("C-c e l" . counsel-find-library)
-         ("C-c e q" . counsel-set-variable)
-         ("C-h e l" . counsel-find-library)
-         ("C-h e u" . counsel-unicode-char)
-         ("C-h f"   . counsel-describe-function)
-         ("C-x r b" . counsel-bookmark)
-         ("M-x"     . counsel-M-x)
-         ;; ("M-y"     . counsel-yank-pop)
-
-         ("M-s f" . counsel-file-jump)
-         ("M-s j" . counsel-dired-jump))
-  :commands counsel-minibuffer-history
-  :init
-  (bind-key "M-r" #'counsel-minibuffer-history minibuffer-local-map)
-  :config
-  (add-to-list 'ivy-sort-matches-functions-alist
-               '(counsel-find-file . ivys--sort-files-by-date)))
-
-(use-package js2-mode
-  :defer 10
-  :load-path "site-lisp/js2-mode"
-  :mode "\\.js\\'"
-  :interpreter "node"
-  :init
-  (setq-default js2-global-externs '("module"
-                                     "require"
-                                     "setTimeout"
-                                     "clearTimeout"
-                                     "setInterval"
-                                     "clearInterval"
-                                     "location"
-                                     "__dirname"
-                                     "console"
-                                     "JSON"
-                                     "window"
-                                     "process"))
-  :config
-  (define-key js2-mode-map (kbd "M-.") nil)
-  (setq indent-tabs-mode nil)
-  (tern-mode 1)
-  (flycheck-mode 1)
-
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(javascript-jshint)))
-
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (setq flycheck-eslintrc "~/.eslintrc.json")
-  (prettify-symbols-mode)
-  (company-mode 1)
-  (smartparens-mode 1)
-  (require 'whitespace)
-
-
-  (bind-key "M-n" #'flycheck-next-error js2-mode-map)
-  (bind-key "M-p" #'flycheck-previous-error js2-mode-map)
-
-  (use-package js2-refactor
-    :load-path "site-lisp/js2-refactor"
-    :diminish
-    :config
-    (add-hook 'js2-mode-hook #'js2-refactor-mode))
-
-  (use-package xref-js2
-    :load-path "site-lisp/xref-js2"
-    :config
-    (add-hook 'js2-mode-hook #'js2-refactor-mode)
-    (add-hook 'js2-mode-hook (lambda ()
-                               (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t))))
-
-  )
-
-(use-package json-mode
-  :load-path ("site-lisp/json-mode"
-              "site-lisp/json-reformat"
-              "site-lisp/json-snatcher")
-  :mode "\\.json\\'"
-  :config
-  (use-package json-reformat)
-  (use-package json-snatcher))
-
-
 (use-package redshank
   :load-path "site-lisp/redshank"
   :diminish
@@ -1820,12 +856,9 @@
   :commands (elisp-slime-nav-mode
              elisp-slime-nav-find-elisp-thing-at-point))
 
-
 (use-package eldoc
   :diminish
   :hook ((c-mode-common emacs-lisp-mode) . eldoc-mode))
-
-
 
 (use-package cldoc
   :commands (cldoc-mode turn-on-cldoc-mode)
@@ -1920,7 +953,10 @@
        ("(\\(ert-deftest\\)\\>[         '(]*\\(setf[    ]+\\sw+\\|\\sw+\\)?"
         (1 font-lock-keyword-face)
         (2 font-lock-function-name-face
-           nil t))))))
+           nil t)))))
+
+  (when (eq major-mode 'js2-mode)
+    (flycheckmode nil)))
 
 (use-package lispy
   :load-path "site-lisp/lispy"
@@ -1931,17 +967,6 @@
               ("C-1"     . lispy-describe-inline)
               ("C-2"     . lispy-arglist-inline)
               ("C-c C-j" . lispy-goto)))
-
-(use-package loccur
-  :load-path "site-lisp/loccur"
-  :defer 10
-  :commands loccur)
-
-(use-package lua-mode
-  :disabled t
-  :load-path "site-lisp/lua-mode"
-  :mode "\\.lua\\'"
-  :interpreter ("lua" . lua-mode))
 
 (use-package lusty-explorer
   :defer 5
@@ -2048,11 +1073,6 @@ already present."
           (sort filtered 'string<)
         (lusty-sort-by-fuzzy-score filtered file-portion)))))
 
-(use-package macrostep
-  :disabled t
-  :load-path "site-lisp/macrostep"
-  :bind ("C-c e m" . macrostep-expand))
-
 (use-package magit
   :load-path ("site-lisp/magit/lisp"
               "lib/with-editor")
@@ -2119,8 +1139,7 @@ already present."
   (unbind-key "M-w" magit-mode-map)
   (unbind-key "<C-return>" magit-file-section-map)
 
-  ;; (bind-key "M-H" #'magit-show-level-2-all magit-mode-map)
-  ;; (bind-key "M-S" #'magit-show-level-4-all magit-mode-map)
+  
   (bind-key "U" #'magit-unstage-all magit-mode-map)
   (add-hook 'magit-log-edit-mode-hook
             #'(lambda ()
@@ -2135,62 +1154,7 @@ already present."
   :load-path "site-lisp/magit-popup"
   :defer t)
 
-(use-package markdown-mode
-  :load-path "site-lisp/markdown-mode"
-  :mode (("\\`README\\.md\\'" . gfm-mode)
-         ("\\.md\\'"          . markdown-mode)
-         ("\\.markdown\\'"    . markdown-mode))
-  :config
-  (use-package markdown-preview-mode
-    :load-path "site-lisp/markdown-preview-mode"
-    :config
-    (setq markdown-preview-stylesheets (list "~/Downloads/github.css"))
-    ))
 
-(use-package mode-line-bell
-  :disabled t
-  :load-path "site-lisp/mode-line-bell"
-  :defer 5
-  :config
-  (mode-line-bell-mode))
-
-(use-package multi-term
-  :disabled t
-  :bind (("C-. t" . multi-term-next)
-         ("C-. T" . multi-term))
-  :init
-  (defun screen ()
-    (interactive)
-    (let (term-buffer)
-      ;; Set buffer.
-      (setq term-buffer
-            (let ((multi-term-program (executable-find "screen"))
-                  (multi-term-program-switches "-DR"))
-              (multi-term-get-buffer)))
-      (set-buffer term-buffer)
-      ;; Internal handle for `multi-term' buffer.
-      (multi-term-internal)
-      ;; Switch buffer
-      (switch-to-buffer term-buffer)))
-
-  :config
-  (defalias 'my-term-send-raw-at-prompt 'term-send-raw)
-
-  (defun my-term-end-of-buffer ()
-    (interactive)
-    (call-interactively #'end-of-buffer)
-    (if (and (eobp) (bolp))
-        (delete-char -1)))
-
-  (require 'term)
-
-  (defadvice term-process-pager (after term-process-rebind-keys activate)
-    (define-key term-pager-break-map  "\177" 'term-pager-back-page)))
-
-(use-package multifiles
-  :disabled t
-  :bind ("C-!" . mf/mirror-region-in-multifile)
-  :load-path "site-lisp/multifiles-el")
 
 (use-package mc-extras
   :after multiple-cursors
@@ -2266,12 +1230,6 @@ already present."
     (interactive)
     (activate-mark)))
 
-(use-package nyan-mode
-  :disabled t
-  :load-path "site-lisp/nyan-mode"
-  :config
-  (nyan-mode 1))
-
 (use-package phi-search
   :load-path "site-lisp/phi-search"
   :defer 5)
@@ -2317,32 +1275,6 @@ already present."
   :defer 5
   :config
   (paren-activate))
-
-(use-package php-mode
-  :defer 10
-  :load-path "site-lisp/php-mode"
-  :config
-  (use-package php-ext
-    :load-path "site-lisp/php-mode/skeleton")
-
-  (add-hook 'php-mode-hook 'smartparens-mode)
-  (add-hook 'php-mode-hook 'flycheck-mode)
-  (add-hook 'php-mode-hook 'whitespace-mode)
-  (add-hook 'php-mode-hook 'company-mode)
-
-  ;;(add-hook 'auto-save-hook 'indent-buffer)
-  ;;(add-hook 'before-save-hook 'indent-buffer)
-
-  ;;(add-hook 'auto-save-hook 'whitespace-cleanup)
-  ;;(add-hook 'before-save-hook 'whitespace-cleanup)
-  (setq indent-tabs-mode nil)
-  (setq tab-width 0)
-
-  (eval-after-load 'flycheck
-    '(flycheck-add-mode 'php-phpcs 'php-mode))
-
-  (eval-after-load 'flycheck
-    '(flycheck-add-mode 'php-phpmd 'php-mode)))
 
 (use-package personal
   :after crux
@@ -2433,159 +1365,15 @@ already present."
 
   (bind-keys ("S-<return>" . open-line-below)))
 
-(use-package prettier-js
-  :load-path "site-lisp/prettier-emacs"
-  :diminish prettier-js-mode
-  :after js2-mode
-  :hook ((js2-mode ) . prettier-js-mode)
-  :config
-  (setq prettier-js-args '("--trailing-comma" "all"
-                           "--bracket-spacing" "false"
-                           "--tab-width" "4")))
-
-(use-package projectile
-  :disabled t
-  :load-path "site-lisp/projectile"
-  :defer 30
-  :bind-keymap ("C-c p" . projectile-command-map)
-  :diminish
-  :config
-  (use-package helm-projectile
-    :load-path "site-lisp/helm-projectile"
-    :config
-    (helm-projectile-on)
-    )
-  (setq projectile-indexing-method 'native)
-  (setq projectile-completion-method 'helm)
-  (projectile-global-mode 1))
-
-(use-package processing-mode
-  :disabled t
-  ;; hfn (2018-09-29): fix processing-location
-  :load-path "site-lisp/processing2-emacs"
-  :config
-  (setq processing-location "/usr/local/bin/processing-java")
-  (setq processing-application-dir "/Applications/Processing.app")
-  (setq processing-sketchbook-dir "~/Documents/Processing"))
-
-(use-package py-autopep8
-  :load-path "site-lisp/py-autopep8"
-  :after python
-  :bind ("C-c P" . python-autopep8)
-  :preface
-  (defcustom python-autopep8-path (executable-find "autopep8")
-    "autopep8 executable path."
-    :group 'python
-    :type 'string)
-  :config
-  (defun python-autopep8 ()
-    (interactive)
-    (interactive)
-    (when (eq major-mode 'python-mode)
-      (shell-command
-       (format "%s --in-place --aggressive --aggressive %s" python-autopep8-path
-               (shell-quote-argument (buffer-file-name))))
-      (revert-buffer t t t))))
-
 (use-package python
   :defer t
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python3" . python-mode)
-  :bind (:map inferior-python-mode-map
-              ("M-k" . comint-clear-buffer))
-  :preface
-  (defface paren-face
-    '((((class color) (background dark))
-       (:foreground "grey50"))
-      (((class color) (background light))
-       (:foreground "grey55")))
-    "Face used to dim parentheses.")
-
-  (defvar python-prettify-symbols-alist
-    '(("::"     . ?∷)
-      ("forall" . ?∀)
-      ("exists" . ?∃)
-      ("->"     . ?→)
-      ("<-"     . ?←)
-      ("=>"     . ?⇒)
-      ("~>"     . ?⇝)
-      ("<~"     . ?⇜)
-      ("<>"     . ?⨂)
-      ("msum"   . ?⨁)
-      ;; ("not"    . ?¬)
-      ("&&"     . ?∧)
-      ("and"    . ?∧)
-      ("||"     . ?∨)
-      ("or"     . ?∨)
-      ("!="     . ?≠)
-      ("<="     . ?≤)
-      (">="     . ?≥)
-      ("<<<"    . ?⋘)
-      (">>>"    . ?⋙)
-      ("lambda" . ?λ)
-      ("sqrt"   . ?√)
-      ("pi"     . ?π)
-      ("sum"    . ?∑)
-      ;; ("int" .      #x2124)
-      ;; ("float" .    #x211d)
-      ;; ("str" .      #x1d54a)
-      ;; ("True" .     #x1d54b)
-      ;; ("False" .    #x1d53d)
-
-      ("`in`"             . ?∈)
-      ("`not in`"          . ?∉)
-      ("`member`"           . ?∈)
-      ("`notMember`"        . ?∉)
-      ("`union`"            . ?∪)
-      ("`intersection`"     . ?∩)
-      ("`isSubsetOf`"       . ?⊆)
-      ("`isProperSubsetOf`" . ?⊂)
-      ("undefined"          . ?⊥)))
-
-  (defun wrap-print ()
-    (interactive)
-    (wrap-region-with-fun "print"))
   :config
-  (bind-key "M-P"  #'wrap-region-with-fun)
-  (bind-key "M-p"  #'wrap-print)
-  (setq-local prettify-symbols-alist python-prettify-symbols-alist)
-
-  ;;   (defvar universal-coding-system-env-list '("PYTHONIOENCODING")
-  ;;     "List of environment variables \\[universal-coding-system-argument] should set")
-
-  ;;   (defadvice universal-coding-system-argument (around provide-env-handler activate)
-  ;;     "Augments \\[universal-coding-system-argument] so it also sets environment variables
-
-  ;; Naively sets all environment variables specified in
-  ;; `universal-coding-system-env-list' to the literal string
-  ;; representation of the argument `coding-system'.
-
-  ;; No guarantees are made that the environment variables set by this advice support
-  ;; the same coding systems as Emacs."
-  ;;     (let ((process-environment (copy-alist process-environment)))
-  ;;       (dolist (extra-env universal-coding-system-env-list)
-  ;;         (setenv extra-env (symbol-name (ad-get-arg 0))))
-  ;;       ad-do-it))
-
-
   (setq python-python-command "/usr/local/bin/python3")
   ;;(setq python-shell-interpreter "python3")
   (setq py-python-command "python3")
 
-
-  (info-lookup-add-help
-   :mode 'python-mode
-   :regexp "[a-zA-Z_0-9.]+"
-   :doc-spec
-   '(("(python)Python Module Index" )
-     ("(python)Index"
-      (lambda
-        (item)
-        (cond
-         ((string-match
-           "\\([A-Za-z0-9_]+\\)() (in module \\([A-Za-z0-9_.]+\\))" item)
-          (format "%s.%s" (match-string 2 item)
-                  (match-string 1 item))))))))
 
   (setq indicate-empty-lines nil)
   (set (make-local-variable 'parens-require-spaces) nil)
@@ -2595,8 +1383,6 @@ already present."
   (set-variable 'py-indent-offset 4)
   (set-variable 'python-indent-guess-indent-offset nil)
 
-  (prettify-symbols-mode)
-  (company-mode 1)
   (smartparens-mode 1)
   (whitespace-mode 1)
   (setenv "LANG" "UTF-8")
@@ -2606,9 +1392,6 @@ already present."
   (setq python-indent-offset 4)
   (setq tab-width 4)
   (set-variable 'py-indent-offset 4)
-
-  ;; (eval-after-load 'flycheck
-  ;;   '(flycheck-add-mode 'python-pylint 'python-mode))
 
   (flycheck-mode 1)
 
@@ -2657,49 +1440,6 @@ already present."
   :load-path "site-lisp/restart-emacs"
   :commands restart-emacs)
 
-(use-package restclient
-  :disabled t
-  :load-path "site-lisp/restclient"
-  :mode ("\\.rest\\'" . restclient-mode))
-
-(use-package ruby-mode
-  :disabled t
-  :load-path "site-lisp/ruby-mode"
-  :mode ("\\.rb\\'" . ruby-mode)
-  :interpreter ("ruby" . ruby-mode)
-  :functions inf-ruby-keys
-  :config
-  (use-package yari
-    :load-path "site-lisp/yari-with-buttons"
-    :init
-    (progn
-      (defvar yari-helm-source-ri-pages
-        '((name . "RI documentation")
-          (candidates . (lambda () (yari-ruby-obarray)))
-          (action  ("Show with Yari" . yari))
-          (candidate-number-limit . 300)
-          (requires-pattern . 2)
-          "Source for completing RI documentation."))
-
-      (defun helm-yari (&optional rehash)
-        (interactive (list current-prefix-arg))
-        (when current-prefix-arg (yari-ruby-obarray rehash))
-        (helm 'yari-helm-source-ri-pages (yari-symbol-at-point)))))
-
-  (defun my-ruby-smart-return ()
-    (interactive)
-    (when (memq (char-after) '(?\| ?\" ?\'))
-      (forward-char))
-    (call-interactively 'newline-and-indent))
-
-  (defun my-ruby-mode-hook ()
-    (require 'inf-ruby)
-    (inf-ruby-keys)
-    (bind-key "<return>" #'my-ruby-smart-return ruby-mode-map)
-    (bind-key "C-h C-i" #'helm-yari ruby-mode-map))
-
-  (add-hook 'ruby-mode-hook 'my-ruby-mode-hook))
-
 (use-package selected
   :load-path "site-lisp/selected"
   :defer 5
@@ -2716,52 +1456,6 @@ already present."
               ("u"       . upcase-region))
   :config
   (selected-global-mode 1))
-
-(use-package session
-  :disabled t
-  :if (not noninteractive)
-  :load-path "site-lisp/session"
-  :preface
-  (defun remove-session-use-package-from-settings ()
-    (when (string= (file-name-nondirectory (buffer-file-name)) "settings.el")
-      (save-excursion
-        (goto-char (point-min))
-        (when (re-search-forward "^ '(session-use-package " nil t)
-          (delete-region (line-beginning-position)
-                         (1+ (line-end-position)))))))
-
-  ;; expanded folded secitons as required
-  (defun le::maybe-reveal ()
-    (when (and (or (memq major-mode  '(org-mode outline-mode))
-                   (and (boundp 'outline-minor-mode)
-                        outline-minor-mode))
-               (outline-invisible-p))
-      (if (eq major-mode 'org-mode)
-          (org-reveal)
-        (outline-show-subtree))))
-
-  (defvar server-process nil)
-
-  (defun save-information ()
-    (with-temp-message "Saving Emacs information..."
-      (recentf-cleanup)
-
-      (loop for func in kill-emacs-hook
-            unless (memq func '(exit-gnus-on-exit server-force-stop))
-            do (funcall func))
-
-      (unless (or noninteractive
-                  running-alternate-emacs
-                  running-development-emacs
-                  (and server-process
-                       (eq 'listen (process-status server-process))))
-        (server-start))))
-
-  :config
-  (add-hook 'before-save-hook 'remove-session-use-package-from-settings)
-  (add-hook 'session-after-jump-to-last-change-hook 'le::maybe-reveal)
-  (run-with-idle-timer 60 t 'save-information)
-  (add-hook 'after-init-hook 'session-initialize t))
 
 (use-package sh-script
   :defer t
@@ -2780,43 +1474,10 @@ already present."
 (use-package sh-toggle
   :bind ("C-. C-z" . shell-toggle))
 
-(use-package shackle
-  :disabled t
-  :defer 5
-  :load-path "site-lisp/shackle"
-  :commands shackle-mode
-  :config
-  (shackle-mode 1))
-
 (use-package shrink-whitespace
   :load-path "site-lisp/shrink-whitespace"
   :commands shrink-whitespace
   :bind ("C-c SPC" . shrink-whitespace))
-
-(use-package slime
-  :disabled t
-  :load-path "site-lisp/slime"
-  :commands slime
-  :init
-  (setq inferior-lisp-program "/Users/hfn/.nix-profile/bin/sbcl"
-        slime-contribs '(slime-fancy)))
-
-(use-package smart-mode-line
-  :load-path "site-lisp/smart-mode-line"
-  :defer 30
-  :config
-  (setq mode-line-format (delq 'mode-line-position mode-line-format))
-  (sml/setup)
-  (sml/apply-theme 'light)
-  (add-to-list 'sml/replacer-regexp-list '("^~/src/" ":src:") t)
-  (delete '("^~/\\.emacs\\.d/" ":ED:") sml/replacer-regexp-list)
-  (add-to-list 'sml/replacer-regexp-list '("^~/dbwebb-kurser/" ":dbwebb:"))
-  (add-to-list 'sml/replacer-regexp-list '("^~/\\.emacs\\.d/" ":dot-emacs:"))
-  (add-hook 'display-time-hook 'sml/propertize-time-string))
-
-(use-package smart-tabs-mode
-  :commands smart-tabs-mode
-  :load-path "site-lisp/smarttabs")
 
 (use-package smartparens
   :load-path "site-lisp/smartparens"
@@ -2862,66 +1523,8 @@ already present."
   :load-path "site-lisp/sort-words"
   :commands sort-words)
 
-(use-package springboard
-  ;; (shell-command "rm -fr lisp/springboard")
-  ;; (shell-command "git remote rm ext/springboard")
-  :disabled t
-  :load-path "lisp/springboard")
-
-(use-package stopwatch
-  :disabled t
-  :bind ("<f8>" . stopwatch))
-
-(use-package string-inflection
-  :defer 10
-  :load-path "site-lisp/string-inflection"
-  :bind ("C-c C-u" . string-inflection-java-style-cycle))
-
-(use-package swap-regions
-  :load-path "site-lisp/swap-regions"
-  :commands swap-regions)
-
-(use-package swiper
-  :disabled t
-  :after ivy
-  :load-path "site-lisp/swiper"
-  ;; :bind ("C-s" . swiper)
-  ;; :bind (:map swiper-map
-  ;;             ("M-y" . yank)
-  ;;             ("M-%" . swiper-query-replace)
-  ;;             ("C-." . swiper-avy)
-  ;;             ;; ("M-c" . swiper-mc)
-  ;;             ("M-c" . haba/swiper-mc-fixed))
-  ;; :bind (:map isearch-mode-map
-  ;;             ("C-o" . swiper-from-isearch))
-  :config
-  (defun haba/swiper-mc-fixed ()
-    (interactive)
-    (setq swiper--current-window-start nil)
-    (swiper-mc)))
-
-(use-package tablegen-mode
-  :mode ("\\.td\\'" . tablegen-mode))
-
-(use-package tern
-  :load-path "lib/tern/emacs"
-  :diminish
-  :commands (tern-mode)
-  :init
-  (add-hook 'js2-minor-mode-hook 'tern-mode)
-  (add-hook 'js2-mode-hook 'tern-mode)
-  (add-hook 'web-mode-hook
-            (lambda ()
-              (when (string-equal "jsx" (file-name-extension buffer-file-name))
-                (tern-mode-enable))))
-
-  (flycheck-mode)
-  (eval-after-load 'flycheck
-    '(flycheck-add-mode 'javascript-jshint 'js2-mode))
-  )
-
 (use-package tex-site
-  :defer 10
+  :defer 5
   :load-path "site-lisp/auctex"
   :defines (latex-help-cmd-alist latex-help-file)
   :mode ("\\.tex\\'" . LaTeX-mode)
@@ -3032,38 +1635,6 @@ The values are saved in `latex-help-cmd-alist' for speed."
               (nth 1 entry)
             5))))))
 
-(use-package tiny
-  :defer 10
-  :load-path "site-lisp/tiny"
-  :bind ("C-. N" . tiny-expand))
-
-(use-package transpose-mark
-  :defer t
-  :commands (transpose-mark
-             transpose-mark-line
-             transpose-mark-region)
-  :load-path "site-lisp/transpose-mark")
-
-(use-package vdiff
-  :disabled t
-  :commands (vdiff-files
-             vdiff-files3
-             vdiff-buffers
-             vdiff-buffers3)
-  :load-path "site-lisp/emacs-vdiff")
-
-(use-package vimish-fold
-  :defer 10
-  :commands vimish-fold
-  :bind (("C-c v" . vimish-fold)
-         ("C-c x" . vimish-fold-delete)
-         ("C-+" . vimish-fold-toggle)
-         ("C--" . vimish-fold-unfold))
-  :load-path "site-lisp/vimish-fold"
-  :config
-  (set-face-background 'vimish-fold-overlay "#f8f8ff")
-  (set-face-foreground 'vimish-fold-overlay "gray")  )
-
 (use-package visual-regexp
   :load-path "site-lisp/visual-regexp"
   :commands (vr/replace
@@ -3074,118 +1645,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
   (use-package visual-regexp-steroids
     :load-path "site-lisp/visual-regexp-steroids"))
 
-(use-package emmet-mode
-  :defer 10
-  :load-path "site-lisp/emmet-mode"
-  :diminish emmet-mode
-  :hook ((web-mode-hook) . emmet-mode)
-  :config
-  (emmet-mode)
-  (unbind-key "C-<return>" emmet-mode-keymap))
 
-(use-package multi-web-mode
-  :disabled t
-  :defer 5
-  :load-path "site-lisp/multi-web-mode"
-  :mode (("\\.html\\'" . web-mode)
-         ("\\.css\\'"  . web-mode)
-         ("\\.php\\'"  . web-mode))
-  :after (php-mode web-mode)
-  :diminish
-  :config
-  (setq mweb-default-major-mode 'web-mode)
-  (setq mweb-tags '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-                    (js-mode "<script +\\(type=\"text/javascript\"\\|language=\"javascript\"\\)[^>]*>" "</script>")
-                    (css-mode "<style +type=\"text/css\"[^>]*>" "</style>")))
-  (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5"))
-  (multi-web-global-mode 1))
-
-(use-package web-mode
-  :defer
-  :load-path "site-lisp/web-mode"
-  :mode (("\\.html\\'" . web-mode)
-         ("\\.css\\'"  . web-mode)
-         ("\\.php\\'"  . web-mode))
-  :init
-  (defvar web-prettify-symbols-alist
-    '(("::"     . ?∷)
-      ("forall" . ?∀)
-      ("exists" . ?∃)
-      ("->"     . ?→)
-      ("<-"     . ?←)
-      ("=>"     . ?⇒)
-      ("~>"     . ?⇝)
-      ("<~"     . ?⇜)
-      ("<>"     . ?⨂)
-      ("msum"   . ?⨁)
-      ;; ("not"    . ?¬)
-      ("&&"     . ?∧)
-      ("and"    . ?∧)
-      ("||"     . ?∨)
-      ("or"     . ?∨)
-      ("!="     . ?≠)
-      ("<="     . ?≤)
-      (">="     . ?≥)
-      ("<<<"    . ?⋘)
-      (">>>"    . ?⋙)
-      ("lambda" . ?λ)
-      ("sqrt"   . ?√)
-      ("pi"     . ?π)
-      ("sum"    . ?∑)
-      ;; ("int" .      #x2124)
-      ;; ("float" .    #x211d)
-      ;; ("str" .      #x1d54a)
-      ;; ("True" .     #x1d54b)
-      ;; ("False" .    #x1d53d)
-
-      ("`in`"             . ?∈)
-      ("`not in`"          . ?∉)
-      ("`member`"           . ?∈)
-      ("`notMember`"        . ?∉)
-      ("`union`"            . ?∪)
-      ("`intersection`"     . ?∩)
-      ("`isSubsetOf`"       . ?⊆)
-      ("`isProperSubsetOf`" . ?⊂)
-      ("undefined"          . ?⊥)))
-
-  :config
-  (setq-local prettify-symbols-alist python-prettify-symbols-alist)
-  (prettify-symbols-mode 1)
-  (add-hook 'web-mode-hook 'smartparens-mode)
-  (add-hook 'web-mode-hook 'flycheck-mode)
-  (add-hook 'web-mode-hook 'whitespace-mode)
-  (add-hook 'web-mode-hook 'company-mode)
-
-
-  (add-hook 'before-save-hook 'indent-buffer)
-  (add-hook 'before-save-hook 'whitespace-cleanup)
-
-  (eval-after-load 'flycheck
-    '(flycheck-add-mode 'html-tidy 'web-mode))
-
-  (defvar web-mode-initialized nil)
-
-  (defun my-web-mode-hook ()
-    (unless web-mode-initialized
-      (setq web-mode-initialized t)
-      (setq web-mode-engines-alist '(("php" . "\\.html\\'")))
-      (setq indicate-empty-lines t)
-      (make-local-variable 'web-mode-code-indent-offset)
-      (make-local-variable 'web-mode-markup-indent-offset)
-      (make-local-variable 'web-mode-css-indent-offset)
-      (setq web-mode-code-indent-offset 4)
-      (setq web-mode-css-indent-offset 4)
-      (setq web-mode-markup-indent-offset 4)
-      (unbind-key "C-c TAB" web-mode-map))
-    (add-hook 'web-mode-hook 'my-web-mode-hook)))
-
-(use-package which-key
-  :load-path "site-lisp/which-key"
-  :diminish which-key-mode
-  :defer 10
-  :config
-  (which-key-mode)
-  (setq which-key-idle-delay 2.0))
 
 (use-package whitespace
   :diminish (global-whitespace-mode
@@ -3253,50 +1713,6 @@ The values are saved in `latex-help-cmd-alist' for speed."
         whitespace-silent t
         whitespace-style '(face trailing lines space-before-tab empty)))
 
-(use-package winner
-  :disabled t
-  :if (not noninteractive)
-  :defer 5
-  :bind (("M-N" . winner-redo)
-         ("M-P" . winner-undo))
-  :config
-  (winner-mode 1))
-
-(use-package zoom-window
-  :defer 10
-  :load-path "site-lisp/emacs-zoom-window"
-  :config
-  (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
-  (custom-set-variables
-   '(zoom-window-mode-line-color "Red")))
-
-(use-package workgroups
-  :disabled t
-  :load-path "site-lisp/workgroups"
-  :diminish (workgroups-mode)
-  :bind-keymap ("C-\\" . wg-map)
-  :demand t
-  :config
-  (workgroups-mode 1)
-
-  (let ((workgroups-file (expand-file-name "workgroups" user-data-directory)))
-    (if (file-readable-p workgroups-file)
-        (wg-load workgroups-file)))
-
-  (bind-key "C-\\" #'wg-switch-to-previous-workgroup wg-map)
-  (bind-key "\\" #'toggle-input-method wg-map))
-
-(use-package xray
-  :disabled t
-  :commands (xray-symbol xray-position xray-buffer xray-window
-                         xray-frame xray-marker xray-overlay xray-screen
-                         xray-faces xray-hooks xray-features))
-
-(use-package yaml-mode
-  :disabled t
-  :load-path "site-lisp/yaml-mode"
-  :mode ("\\.ya?ml\\'" . yaml-mode))
-
 (use-package yasnippet
   :load-path "site-lisp/yasnippet"
   :defer 30
@@ -3317,7 +1733,6 @@ The values are saved in `latex-help-cmd-alist' for speed."
   :config
   (yas-load-directory (emacs-path "snippets"))
   (yas-global-mode 1))
-
 
 
 (use-package whole-line-or-region
@@ -3341,6 +1756,7 @@ The values are saved in `latex-help-cmd-alist' for speed."
 
 (defconst emacs-min-font
   "-*-DejaVu Sans Mono-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
+  
   ;; "-*-Hack-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"
   )
 
